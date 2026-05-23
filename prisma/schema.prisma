@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  SHELTER_STAFF
+  RESCUER
+  ADOPTER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  phone     String   @unique
+  address   String
+  gender    Gender
+  avatar    String
+  role      Role
+  isActive  Boolean  @default(true)
+  email     String   @unique
+  password  String
+  shelterId String?  
+  shelter   Shelter? @relation(fields: [shelterId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([shelterId])
+  @@index([isActive])
+}
+
+model Shelter {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String
+  logo        String?
+
+  // Contact & Location
+  address     String
+  city        String
+  province    String
+  phone       String   @unique
+  email       String   @unique
+
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  users       User[]   
+  @@index([city])
+  @@index([province])
+  @@index([isActive])
+}
