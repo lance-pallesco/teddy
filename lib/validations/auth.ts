@@ -26,3 +26,10 @@ export const registerSchema = z
 
 export type RegisterInput = z.output<typeof registerSchema>
 export type RegisterFormInput = z.input<typeof registerSchema>
+
+export const loginSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+})
+
+export type LoginInput = z.output<typeof loginSchema>
