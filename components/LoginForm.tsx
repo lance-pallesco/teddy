@@ -1,8 +1,20 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+
+import { loginUser } from "@/app/(auth)/actions/login"
 import { cn } from "@/lib/utils"
+import { loginSchema, type LoginInput } from "@/lib/validations/auth"
 import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -15,8 +27,41 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
+
+  function onSubmit(values: LoginInput) {
+    startTransition(async () => {
+      const response = await loginUser(values)
+
+      if (!response.success) {
+        toast.error(response.message)
+        return
+      }
+
+      toast.success("Login successful")
+      router.push("/dashboard")
+    })
+  }
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={handleSubmit(onSubmit)}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <Image
@@ -37,9 +82,12 @@ export function LoginForm({
             id="email"
             type="email"
             placeholder="johndoe@example.com"
-            required
+            autoComplete="email"
+            aria-invalid={!!errors.email}
             className="bg-background"
+            {...register("email")}
           />
+          <FieldError errors={[errors.email]} />
         </Field>
         <Field>
           <div className="flex items-center">
@@ -51,15 +99,32 @@ export function LoginForm({
               Forgot your password?
             </Link>
           </div>
-          <Input
-            id="password"
-            type="password"
-            required
-            className="bg-background"
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              aria-invalid={!!errors.password}
+              className="bg-background pr-10"
+              {...register("password")}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute top-1/2 right-1 size-7 -translate-y-1/2"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              onClick={() => setShowPassword((value) => !value)}
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </Button>
+          </div>
+          <FieldError errors={[errors.password]} />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Logging in..." : "Login"}
+          </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
