@@ -1,5 +1,3 @@
-import "server-only"
-
 import type { Role } from "@prisma/client"
 import { jwtVerify, SignJWT } from "jose"
 
