@@ -19,7 +19,6 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
       icon: "Building2",
       items: [
         { title: "All Shelters", url: "/shelters" },
-        { title: "Create Shelter", url: "/shelters/create" },
         { title: "Shelter Staff", url: "/shelters/staff" },
       ],
     },
@@ -121,6 +120,10 @@ export function getAllowedDashboardPaths(role: DashboardRole) {
     for (const child of item.items ?? []) {
       paths.add(child.url)
     }
+  }
+
+  if (role === "ADMIN") {
+    paths.add("/shelters/new")
   }
 
   return paths
