@@ -129,10 +129,18 @@ export function getAllowedDashboardPaths(role: DashboardRole) {
   return paths
 }
 
+const dashboardDynamicPathPatterns: Partial<Record<DashboardRole, RegExp[]>> = {
+  ADMIN: [/^\/shelters\/[^/]+\/edit$/, /^\/shelters\/[^/]+$/],
+}
+
 export function canAccessDashboardPath(role: DashboardRole, pathname: string) {
   if (pathname === "/unauthorized") {
     return true
   }
 
-  return getAllowedDashboardPaths(role).has(pathname)
+  if (getAllowedDashboardPaths(role).has(pathname)) {
+    return true
+  }
+
+  return dashboardDynamicPathPatterns[role]?.some((pattern) => pattern.test(pathname)) ?? false
 }

@@ -12,22 +12,14 @@ import { updateShelterAction } from "@/app/(dashboard)/shelters/actions/update-s
 import { ShelterFormFields } from "@/components/shelters/shelter-form-fields"
 import { Button } from "@/components/ui/button"
 import type { ShelterFormRecord } from "@/lib/services/shelter.service"
-import { createShelterSchema, type ShelterFormInput } from "@/lib/validations/shelter"
-
-function toFormValues(shelter?: ShelterFormRecord): ShelterFormInput {
-  return {
-    name: shelter?.name ?? "",
-    description: shelter?.description ?? "",
-    address: shelter?.address ?? "",
-    barangay: shelter?.barangay ?? "",
-    city: shelter?.city ?? "",
-    province: shelter?.province ?? "",
-    postalCode: shelter?.postalCode ?? "",
-    phone: shelter?.phone ?? "",
-    email: shelter?.email ?? "",
-    logo: shelter?.logo ?? "",
-  }
-}
+import { shelterToFormValues } from "@/lib/shelters/form-mappers"
+import {
+  createShelterSchema,
+  emptyShelterFormValues,
+  updateShelterSchema,
+  type CreateShelterFormInput,
+  type UpdateShelterFormInput,
+} from "@/lib/validations/shelter"
 
 type ShelterFormProps =
   | { mode: "create" }
@@ -38,21 +30,25 @@ export function ShelterForm(props: ShelterFormProps) {
   const [isPending, startTransition] = useTransition()
   const isEdit = props.mode === "edit"
 
+  const form = useForm<CreateShelterFormInput | UpdateShelterFormInput>({
+    resolver: zodResolver(isEdit ? updateShelterSchema : createShelterSchema),
+    defaultValues: isEdit
+      ? shelterToFormValues(props.initialData)
+      : emptyShelterFormValues,
+  })
+
   const {
     register,
     handleSubmit,
     setValue,
     control,
     formState: { errors },
-  } = useForm<ShelterFormInput>({
-    resolver: zodResolver(createShelterSchema),
-    defaultValues: toFormValues(isEdit ? props.initialData : undefined),
-  })
+  } = form
 
-  function onSubmit(values: ShelterFormInput) {
+  function onSubmit(values: CreateShelterFormInput | UpdateShelterFormInput) {
     startTransition(async () => {
       const response = isEdit
-        ? await updateShelterAction({ id: props.initialData.id, ...values })
+        ? await updateShelterAction(values)
         : await createShelterAction(values)
 
       if (!response.success) {

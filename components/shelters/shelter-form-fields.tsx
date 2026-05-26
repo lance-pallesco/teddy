@@ -17,13 +17,16 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import type { ShelterFormInput } from "@/lib/validations/shelter"
+import type {
+  CreateShelterFormInput,
+  UpdateShelterFormInput,
+} from "@/lib/validations/shelter"
 
 type ShelterFormFieldsProps = {
-  register: UseFormRegister<ShelterFormInput>
-  control: Control<ShelterFormInput>
-  errors: FieldErrors<ShelterFormInput>
-  setValue: UseFormSetValue<ShelterFormInput>
+  register: UseFormRegister<CreateShelterFormInput | UpdateShelterFormInput>
+  control: Control<CreateShelterFormInput | UpdateShelterFormInput>
+  errors: FieldErrors<CreateShelterFormInput | UpdateShelterFormInput>
+  setValue: UseFormSetValue<CreateShelterFormInput | UpdateShelterFormInput>
   disabled?: boolean
 }
 
@@ -48,7 +51,7 @@ export function ShelterFormFields({
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="name">Shelter Name</FieldLabel>
-            <Input id="name" aria-invalid={!!errors.name} disabled={disabled} {...register("name")} />
+            <Input id="name" aria-invalid={!!errors.name} {...register("name")} />
             <FieldError errors={[errors.name]} />
           </Field>
           <Field>
@@ -166,7 +169,7 @@ export function ShelterFormFields({
             </Field>
           </div>
           <Field>
-            <FieldLabel>Logo Upload</FieldLabel>
+            <FieldLabel>Logo</FieldLabel>
             <ShelterLogoUpload
               value={logo}
               disabled={disabled}

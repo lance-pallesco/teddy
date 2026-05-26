@@ -1,5 +1,5 @@
-import Image from "next/image"
 import Link from "next/link"
+import Image from "next/image"
 import { PlusIcon } from "lucide-react"
 
 import { ShelterTableActions } from "@/components/shelters/shelter-table-actions"
@@ -61,7 +61,14 @@ export default async function SheltersPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-medium">{shelter.name}</td>
+                    <td className="px-4 py-3 font-medium">
+                      <Link
+                        href={`/shelters/${shelter.id}`}
+                        className="hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {shelter.name}
+                      </Link>
+                    </td>
                     <td className="px-4 py-3">{shelter.city}</td>
                     <td className="px-4 py-3">{shelter.province}</td>
                     <td className="px-4 py-3">
@@ -79,6 +86,9 @@ export default async function SheltersPage() {
                         day: "numeric",
                         year: "numeric",
                       }).format(shelter.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <ShelterTableActions shelterId={shelter.id} />
                     </td>
                   </tr>
                 ))

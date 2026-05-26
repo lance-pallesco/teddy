@@ -11,7 +11,8 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    // Schedule initial value update to avoid synchronous setState warnings.
+    setTimeout(onChange, 0)
     return () => mql.removeEventListener("change", onChange)
   }, [])
 

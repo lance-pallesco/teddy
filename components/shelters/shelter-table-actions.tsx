@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
@@ -16,32 +17,36 @@ type ShelterTableActionsProps = {
 
 export function ShelterTableActions({ shelterId }: ShelterTableActionsProps) {
   return (
-    <div className="flex items-center gap-1">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/shelters/${shelterId}/edit`} aria-label={`Edit shelter ${shelterId}`}>
-              <PencilIcon />
-            </Link>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Edit shelter</TooltipContent>
-      </Tooltip>
+    <TooltipProvider>
+      <div className="flex items-center justify-end gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon-sm" asChild>
+              <Link href={`/shelters/${shelterId}/edit`}>
+                <PencilIcon />
+                <span className="sr-only">Edit shelter</span>
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit shelter</TooltipContent>
+        </Tooltip>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            disabled
-            aria-label="Delete shelter (coming soon)"
-          >
-            <Trash2Icon />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Delete (coming soon)</TooltipContent>
-      </Tooltip>
-    </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              disabled
+              aria-disabled
+            >
+              <Trash2Icon />
+              <span className="sr-only">Delete shelter</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Delete (coming soon)</TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   )
 }

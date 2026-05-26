@@ -29,6 +29,7 @@ export type ShelterFormRecord = {
   postalCode: string | null
   phone: string
   email: string
+  isActive: boolean
 }
 
 export class DuplicateShelterError extends Error {
@@ -81,6 +82,7 @@ const shelterFormSelect = {
   postalCode: true,
   phone: true,
   email: true,
+  isActive: true,
 } as const
 
 const shelterListSelect = {

@@ -54,7 +54,19 @@ export const updateShelterSchema = shelterFieldsSchema.extend({
 
 export type ShelterFieldsInput = z.output<typeof shelterFieldsSchema>
 export type CreateShelterInput = ShelterFieldsInput
-export type CreateShelterFormInput = z.input<typeof createShelterSchema>
 export type UpdateShelterInput = z.output<typeof updateShelterSchema>
+export type CreateShelterFormInput = z.input<typeof createShelterSchema>
 export type UpdateShelterFormInput = z.input<typeof updateShelterSchema>
-export type ShelterFormInput = CreateShelterFormInput
+
+export const emptyShelterFormValues: CreateShelterFormInput = {
+  name: "",
+  description: "",
+  address: "",
+  barangay: "",
+  city: "",
+  province: "",
+  postalCode: "",
+  phone: "",
+  email: "",
+  logo: "",
+}
