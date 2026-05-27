@@ -1,5 +1,7 @@
+import Link from "next/link"
 import { UsersIcon } from "lucide-react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -9,9 +11,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import type { ShelterStaffListItem } from "@/lib/services/user.service"
 
-export function ShelterStaffTable() {
-  const emptyStaff = true
+type ShelterStaffTableProps = {
+  shelterId?: string
+  staffMembers: ShelterStaffListItem[]
+  showShelterColumn?: boolean
+}
+
+export function ShelterStaffTable({
+  shelterId,
+  staffMembers,
+  showShelterColumn = false,
+}: ShelterStaffTableProps) {
+  const emptyStaff = staffMembers.length === 0
 
   return (
     <div className="space-y-4">
@@ -22,8 +35,10 @@ export function ShelterStaffTable() {
         </div>
 
         <div className="flex gap-2">
-          <Button type="button" variant="outline" disabled>
-            Add Staff
+          <Button asChild variant="outline">
+            <Link href={shelterId ? `/shelters/${shelterId}/staff/new` : "/shelters/staff/new"}>
+              Add Staff
+            </Link>
           </Button>
           <Button type="button" disabled variant="outline">
             Invite Staff
@@ -37,29 +52,69 @@ export function ShelterStaffTable() {
             <TableHead>Avatar</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Last Login</TableHead>
+            {showShelterColumn ? <TableHead>Shelter</TableHead> : null}
+            <TableHead>Phone</TableHead>
+            <TableHead>Created</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {emptyStaff ? (
             <TableRow>
-              <TableCell colSpan={7}>
+              <TableCell colSpan={showShelterColumn ? 7 : 6}>
                 <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
                   <p className="font-medium">No staff members assigned yet.</p>
                   <p className="text-sm text-muted-foreground">
-                    This table is ready for future Shelter Staff management.
+                    Add a staff account to start shelter operations.
                   </p>
                 </div>
               </TableCell>
             </TableRow>
-          ) : null}
+          ) : (
+            staffMembers.map((staff) => (
+              <TableRow key={staff.id}>
+                <TableCell>
+                  <div className="flex size-9 items-center justify-center rounded-full border bg-muted text-xs font-semibold text-muted-foreground">
+                    {`${staff.firstName[0] ?? ""}${staff.lastName[0] ?? ""}`.toUpperCase()}
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium">
+                  {staff.firstName} {staff.lastName}
+                </TableCell>
+                <TableCell>{staff.email}</TableCell>
+                {showShelterColumn ? (
+                  <TableCell>
+                    {staff.shelterId ? (
+                      <Link
+                        href={`/shelters/${staff.shelterId}`}
+                        className="hover:underline hover:underline-offset-4"
+                      >
+                        {staff.shelterName ?? "Unknown Shelter"}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">Unassigned</span>
+                    )}
+                  </TableCell>
+                ) : null}
+                <TableCell>{staff.phone}</TableCell>
+                <TableCell>
+                  {new Intl.DateTimeFormat("en", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }).format(staff.createdAt)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={staff.isActive ? "success" : "warning"}>
+                    {staff.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>
   )
 }
-

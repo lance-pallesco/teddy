@@ -10,6 +10,7 @@ export type DashboardNavItem = {
   }[]
 }
 
+/** Sidebar navigation only — not used for route authorization. */
 export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
   ADMIN: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
@@ -31,7 +32,12 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
         { title: "Deactivated Accounts", url: "/users/deactivated" },
       ],
     },
-    { title: "Pet Listings", url: "/pets", icon: "PawPrint", items: [{ title: "All Pets", url: "/pets" }] },
+    {
+      title: "Pet Listings",
+      url: "/pets",
+      icon: "PawPrint",
+      items: [{ title: "All Pets", url: "/pets" }],
+    },
     { title: "Applications", url: "/applications", icon: "ClipboardList" },
     { title: "Analytics & Reports", url: "/analytics", icon: "ChartNoAxesColumn" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
@@ -112,35 +118,22 @@ export function isDashboardRole(role: string): role is DashboardRole {
   return role in dashboardNavigation
 }
 
-export function getAllowedDashboardPaths(role: DashboardRole) {
-  const paths = new Set<string>()
+/**
+ * Whether a nav item (or child) should appear active for the current pathname.
+ * UI-only — not used for authorization.
+ */
+export function isNavItemActive(pathname: string, url: string): boolean {
+  const normalizedPath = pathname.length > 1 && pathname.endsWith("/")
+    ? pathname.slice(0, -1)
+    : pathname
 
-  for (const item of dashboardNavigation[role]) {
-    paths.add(item.url)
-    for (const child of item.items ?? []) {
-      paths.add(child.url)
-    }
-  }
-
-  if (role === "ADMIN") {
-    paths.add("/shelters/new")
-  }
-
-  return paths
-}
-
-const dashboardDynamicPathPatterns: Partial<Record<DashboardRole, RegExp[]>> = {
-  ADMIN: [/^\/shelters\/[^/]+\/edit$/, /^\/shelters\/[^/]+$/],
-}
-
-export function canAccessDashboardPath(role: DashboardRole, pathname: string) {
-  if (pathname === "/unauthorized") {
+  if (normalizedPath === url) {
     return true
   }
 
-  if (getAllowedDashboardPaths(role).has(pathname)) {
-    return true
+  if (url === "/dashboard") {
+    return false
   }
 
-  return dashboardDynamicPathPatterns[role]?.some((pattern) => pattern.test(pathname)) ?? false
+  return normalizedPath.startsWith(`${url}/`)
 }

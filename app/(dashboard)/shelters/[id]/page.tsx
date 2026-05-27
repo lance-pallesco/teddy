@@ -3,9 +3,11 @@ import { notFound } from "next/navigation"
 import { ShelterTabs } from "@/components/shelters/shelter-tabs"
 import { ShelterInfoCard } from "@/components/shelters/shelter-info-card"
 import { ShelterStatsRow } from "@/components/shelters/shelter-stats-row"
+import { ShelterStatusActions } from "@/components/shelters/shelter-status-actions"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { getShelterById } from "@/lib/services/shelter.service"
+import { listShelterStaff } from "@/lib/services/user.service"
 import { requireRole } from "@/lib/auth/require-role"
 
 type ShelterDetailPageProps = {
@@ -24,11 +26,13 @@ export default async function ShelterDetailPage({
     notFound()
   }
 
+  const staffMembers = await listShelterStaff({ shelterId: id })
+
   const mockStats = {
     totalPets: 0,
     totalApplications: 0,
     totalAdoptions: 0,
-    shelterStaffCount: 0,
+    shelterStaffCount: staffMembers.length,
   }
 
   return (
@@ -43,10 +47,13 @@ export default async function ShelterDetailPage({
           </p>
         </div>
 
-        <Button asChild variant="outline">
-          {/* edit is handled by the already-existing edit route */}
-          <a href={`/shelters/${shelter.id}/edit`}>Edit shelter</a>
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <Button asChild variant="outline">
+            {/* edit is handled by the already-existing edit route */}
+            <a href={`/shelters/${shelter.id}/edit`}>Edit shelter</a>
+          </Button>
+          <ShelterStatusActions shelterId={shelter.id} isActive={shelter.isActive} />
+        </div>
       </div>
 
       <ShelterInfoCard shelter={shelter} />
@@ -60,7 +67,7 @@ export default async function ShelterDetailPage({
           </div>
         </div>
         <Separator className="my-4" />
-        <ShelterTabs shelter={shelter} />
+        <ShelterTabs shelter={shelter} staffMembers={staffMembers} />
       </div>
     </div>
   )

@@ -9,12 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { ShelterFormRecord } from "@/lib/services/shelter.service"
 import { ShelterStaffTable } from "@/components/shelters/shelter-staff-table"
 import { ShelterPetsGrid } from "@/components/shelters/shelter-pets-grid"
+import type { ShelterStaffListItem } from "@/lib/services/user.service"
 
 type ShelterTabsProps = {
   shelter: ShelterFormRecord
+  staffMembers: ShelterStaffListItem[]
 }
 
-export function ShelterTabs({ shelter }: ShelterTabsProps) {
+export function ShelterTabs({ shelter, staffMembers }: ShelterTabsProps) {
   const tabDefault = useMemo(() => "overview", [])
 
   return (
@@ -63,7 +65,7 @@ export function ShelterTabs({ shelter }: ShelterTabsProps) {
       </TabsContent>
 
       <TabsContent value="staff">
-        <ShelterStaffTable />
+        <ShelterStaffTable shelterId={shelter.id} staffMembers={staffMembers} />
       </TabsContent>
 
       <TabsContent value="pets">

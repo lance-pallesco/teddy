@@ -1,6 +1,9 @@
 import { CreateShelterForm } from "@/components/shelters/create-shelter-form"
+import { requireRole } from "@/lib/auth/require-role"
 
-export default function NewShelterPage() {
+export default async function NewShelterPage() {
+  await requireRole(["ADMIN"])
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
       <div>

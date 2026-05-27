@@ -1,10 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { AUTH_COOKIE_NAME, verifyAuthToken } from "@/lib/auth/jwt"
-import {
-  canAccessDashboardPath,
-  isDashboardRole,
-} from "@/lib/navigation/dashboard-nav"
+import { canAccessDashboardPath } from "@/lib/auth/dashboard-access"
+import { isDashboardRole } from "@/lib/navigation/dashboard-nav"
 
 const LOGIN_PATH = "/login"
 const UNAUTHORIZED_PATH = "/unauthorized"

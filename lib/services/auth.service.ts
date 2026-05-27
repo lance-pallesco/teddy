@@ -76,6 +76,9 @@ export async function authenticateUser(
     return { status: "inactive" }
   }
 
+  // TODO(MVP): when shelter operations are enabled for SHELTER_STAFF, also block
+  // authentication if their assigned shelter is inactive.
+
   const passwordMatches = await bcrypt.compare(input.password, user.password)
 
   if (!passwordMatches) {

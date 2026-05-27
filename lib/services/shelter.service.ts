@@ -46,6 +46,13 @@ export class ShelterNotFoundError extends Error {
   }
 }
 
+export class ShelterInactiveError extends Error {
+  constructor() {
+    super("Shelter is inactive")
+    this.name = "ShelterInactiveError"
+  }
+}
+
 function emptyToNull(value?: string) {
   return value?.trim() ? value.trim() : null
 }
@@ -127,6 +134,61 @@ export async function getShelterById(id: string): Promise<ShelterFormRecord | nu
   })
 
   return shelter
+}
+
+export async function getShelterNameById(id: string): Promise<string | null> {
+  const shelter = await prisma.shelter.findUnique({
+    where: { id },
+    select: { name: true },
+  })
+
+  return shelter?.name ?? null
+}
+
+export async function isShelterActive(id: string): Promise<boolean> {
+  const shelter = await prisma.shelter.findUnique({
+    where: { id },
+    select: { isActive: true },
+  })
+
+  return shelter?.isActive ?? false
+}
+
+export type ActiveShelterOption = {
+  id: string
+  name: string
+}
+
+export async function listActiveShelterOptions(): Promise<ActiveShelterOption[]> {
+  return prisma.shelter.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  })
+}
+
+export async function toggleShelterStatus(id: string) {
+  const shelter = await prisma.shelter.findUnique({
+    where: { id },
+    select: { id: true, isActive: true },
+  })
+
+  if (!shelter) {
+    throw new ShelterNotFoundError()
+  }
+
+  const nextIsActive = !shelter.isActive
+
+  // TODO(MVP): When public pet browsing is implemented, ensure deactivated shelters
+  // are excluded from public listings and detail pages.
+  // TODO(MVP): When SHELTER_STAFF auth/ops are implemented, block staff login and
+  // staff operations for deactivated shelters.
+
+  return prisma.shelter.update({
+    where: { id },
+    data: { isActive: nextIsActive },
+    select: { id: true, isActive: true },
+  })
 }
 
 export async function createShelter(input: CreateShelterInput) {

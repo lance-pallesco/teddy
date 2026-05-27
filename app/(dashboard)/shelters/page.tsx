@@ -76,7 +76,13 @@ export default async function SheltersPage() {
                       <div className="text-xs text-muted-foreground">{shelter.email}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700">
+                      <span
+                        className={
+                          shelter.isActive
+                            ? "rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700"
+                            : "rounded-full bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700"
+                        }
+                      >
                         {shelter.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
