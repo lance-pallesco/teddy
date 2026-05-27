@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { UsersIcon } from "lucide-react"
+import { PlusIcon, UsersIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -35,14 +35,15 @@ export function ShelterStaffTable({
         </div>
 
         <div className="flex gap-2">
-          <Button asChild variant="outline">
+          <Button asChild>
             <Link href={shelterId ? `/shelters/${shelterId}/staff/new` : "/shelters/staff/new"}>
+              <PlusIcon />
               Add Staff
             </Link>
           </Button>
-          <Button type="button" disabled variant="outline">
+          {/* <Button type="button" disabled variant="outline">
             Invite Staff
-          </Button>
+          </Button> */}
         </div>
       </div>
 

@@ -31,7 +31,7 @@ export function ShelterTableActions({ shelterId }: ShelterTableActionsProps) {
           <TooltipContent>Edit shelter</TooltipContent>
         </Tooltip>
 
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               type="button"
@@ -45,7 +45,7 @@ export function ShelterTableActions({ shelterId }: ShelterTableActionsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent>Delete (coming soon)</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
       </div>
     </TooltipProvider>
   )
