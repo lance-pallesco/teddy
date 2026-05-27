@@ -1,5 +1,116 @@
-import { PlaceholderPage } from "@/components/dashboard/placeholder-page"
+import Link from "next/link"
+import Image from "next/image"
+import { PlusIcon } from "lucide-react"
 
-export default function SheltersPage() {
-  return <PlaceholderPage title="All Shelters" />
+import { ShelterTableActions } from "@/components/shelters/shelter-table-actions"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { listShelters } from "@/lib/services/shelter.service"
+
+export default async function SheltersPage() {
+  const shelters = await listShelters()
+
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Shelter Management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage shelter records and prepare them for future staff assignment.
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/shelters/new">
+            <PlusIcon />
+            Add Shelter
+          </Link>
+        </Button>
+      </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead></TableHead>
+              <TableHead>Shelter Name</TableHead>
+              <TableHead>City</TableHead>
+              <TableHead>Province</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created At</TableHead>
+              <TableHead className="text-right"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {shelters.length ? (
+              shelters.map((shelter) => (
+                <TableRow key={shelter.id}>
+                  <TableCell>
+                    {shelter.logo ? (
+                      <div className="relative size-10 overflow-hidden rounded-md border">
+                        <Image
+                          src={shelter.logo}
+                          alt={`${shelter.name} logo`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex size-10 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
+                        NA
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/shelters/${shelter.id}`}
+                      className="hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      {shelter.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{shelter.city}</TableCell>
+                  <TableCell>{shelter.province}</TableCell>
+                  <TableCell>
+                    <div>{shelter.phone}</div>
+                    <div className="text-xs text-muted-foreground">{shelter.email}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={shelter.isActive ? "success" : "warning"}>
+                      {shelter.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {new Intl.DateTimeFormat("en", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }).format(shelter.createdAt)}
+                  </TableCell>
+                  <TableCell>
+                    <ShelterTableActions shelterId={shelter.id} />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={8} className="py-12 text-center">
+                  <p className="font-medium">No shelters yet</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Create your first shelter to start building the network.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+    </div>
+  )
 }

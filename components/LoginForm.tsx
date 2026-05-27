@@ -71,7 +71,7 @@ export function LoginForm({
             height={120}
             priority
           />
-          <h1 className="text-5xl font-bold">Teddy🐾</h1>
+          <h1 className="text-5xl font-bold">Teddy</h1>
           <p className="text-sm text-balance text-muted-foreground">
             Your partner in giving pets a second chance.
           </p>

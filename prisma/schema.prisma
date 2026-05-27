@@ -59,8 +59,10 @@ model Shelter {
 
   // Contact & Location
   address     String
+  barangay    String?
   city        String
   province    String
+  postalCode  String?
   phone       String   @unique
   email       String   @unique
 

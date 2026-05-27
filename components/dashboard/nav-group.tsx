@@ -31,6 +31,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import type { DashboardNavItem } from "@/lib/navigation/dashboard-nav"
+import { isNavItemActive } from "@/lib/navigation/dashboard-nav"
 
 const icons = {
   Building2: Building2Icon,
@@ -44,12 +45,24 @@ const icons = {
   Users: UsersIcon,
 }
 
-function isActivePath(pathname: string, url: string) {
-  return pathname === url
-}
-
 export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
   const pathname = usePathname()
+  const activeChildByParent = new Map<string, string>()
+
+  for (const item of items) {
+    if (!item.items?.length) {
+      continue
+    }
+
+    const matchingChildren = item.items
+      .map((child) => child.url)
+      .filter((url) => isNavItemActive(pathname, url))
+      .sort((a, b) => b.length - a.length)
+
+    if (matchingChildren.length > 0) {
+      activeChildByParent.set(item.title, matchingChildren[0])
+    }
+  }
 
   return (
     <SidebarGroup>
@@ -57,9 +70,10 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
       <SidebarMenu>
         {items.map((item) => {
           const Icon = icons[item.icon as keyof typeof icons] ?? LayoutDashboardIcon
+          const activeChildUrl = activeChildByParent.get(item.title)
           const isActive =
-            isActivePath(pathname, item.url) ||
-            item.items?.some((child) => isActivePath(pathname, child.url))
+            isNavItemActive(pathname, item.url) ||
+            Boolean(activeChildUrl)
 
           if (!item.items?.length) {
             return (
@@ -95,7 +109,7 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
                       <SidebarMenuSubItem key={child.title}>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={isActivePath(pathname, child.url)}
+                          isActive={activeChildUrl === child.url}
                         >
                           <Link href={child.url}>
                             <span>{child.title}</span>
