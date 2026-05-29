@@ -9,7 +9,7 @@ const LOCK_DURATION_MS = 15 * 60 * 1000
 export type AuthenticatedUser = {
   id: string
   firstName: string
-  role: "ADMIN" | "SHELTER_STAFF" | "RESCUER" | "ADOPTER"
+  role: "ADMIN" | "SHELTER_STAFF" | "PET_OWNER" | "ADOPTER"
   shelterId: string | null
 }
 

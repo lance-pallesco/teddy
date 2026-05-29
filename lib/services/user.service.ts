@@ -62,8 +62,8 @@ function toGender(value: string): Gender {
 }
 
 export async function createUser(input: RegisterInput & { passwordHash: string }): Promise<PublicUser> {
-  const role: Extract<Role, "ADOPTER" | "RESCUER"> =
-    input.role === "RESCUER" ? "RESCUER" : "ADOPTER"
+  const role: Extract<Role, "ADOPTER" | "PET_OWNER"> =
+    input.role === "PET_OWNER" ? "PET_OWNER" : "ADOPTER"
 
   const [emailUser, phoneUser] = await Promise.all([
     prisma.user.findUnique({
@@ -96,6 +96,7 @@ export async function createUser(input: RegisterInput & { passwordHash: string }
       select: userSelect,
     })
   } catch (error) {
+    console.log("CREATE USER ERROR:", error)
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"

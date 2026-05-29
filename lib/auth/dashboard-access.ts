@@ -32,7 +32,7 @@ const dashboardRouteAccess: Record<DashboardRole, RouteAccessRule> = {
     paths: ["/dashboard", "/profile", "/unauthorized"],
     prefixes: ["/shelter", "/pets", "/applications", "/medical"],
   },
-  RESCUER: {
+  PET_OWNER: {
     paths: ["/dashboard", "/profile", "/unauthorized"],
     prefixes: ["/pets", "/applications", "/medical"],
   },
