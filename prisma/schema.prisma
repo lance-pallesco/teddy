@@ -15,7 +15,7 @@ datasource db {
 enum Role {
   ADMIN
   SHELTER_STAFF
-  RESCUER
+  PET_OWNER
   ADOPTER
 }
 
@@ -23,6 +23,35 @@ enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+enum PetSpecies {
+  DOG
+  CAT
+  RABBIT
+  BIRD
+  OTHER
+}
+
+enum PetSize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+enum PetStatus {
+  AVAILABLE
+  PENDING
+  ADOPTED
+  RESERVED
+  MEDICAL_HOLD
+  ARCHIVED
+}
+
+enum PetGender {
+  MALE
+  FEMALE
 }
 
 model User {
@@ -45,6 +74,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  pets      Pet[]   @relation("PostedPets")
+  adoptedPets Pet[] @relation("AdoptedPets")
   @@index([role])
   @@index([shelterId])
   @@index([isActive])
@@ -71,7 +102,66 @@ model Shelter {
   updatedAt   DateTime @updatedAt
   
   users       User[]   
+  pets        Pet[]
   @@index([city])
   @@index([province])
   @@index([isActive])
+}
+
+model Pet {
+  id            String   @id @default(uuid())
+  name          String
+  description   String
+  species       PetSpecies
+  breed         String?
+  gender        PetGender?
+  size          PetSize
+
+  birthDate     DateTime?
+  isAgeEstimated Boolean  @default(false)
+  color         String?
+  weightKg      Float?
+  tags          String[] // e.g.  ["Playful", "Gentle", "Calm", "Energetic", "Friendly", "Shy", "Aggressive", "Independent", "Affectionate", "Social"]
+  petImages     PetImage[]
+
+  isVaccinated Boolean  @default(false)
+  isNeutered   Boolean  @default(false)
+  isHouseTrained Boolean  @default(false)
+  goodWithKids Boolean  @default(false)
+  goodWithDogs Boolean  @default(false)
+  goodWithCats Boolean  @default(false)
+  
+  specialNeeds      Boolean  @default(false)
+  specialNeedsNote  String?
+
+  shelterId     String?
+  shelter       Shelter? @relation(fields: [shelterId], references: [id])
+  postedById    String?
+  postedBy      User?   @relation("PostedPets", fields: [postedById], references: [id])
+
+  adoptedById    String?
+  adoptedBy      User?   @relation("AdoptedPets", fields: [adoptedById], references: [id])
+  adoptedAt   DateTime?
+
+  status      PetStatus @default(AVAILABLE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([species])
+  @@index([size])
+  @@index([gender])
+  @@index([status])
+  @@index([shelterId])
+}
+
+model PetImage {
+  id        String   @id @default(uuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  url       String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([petId])
 }

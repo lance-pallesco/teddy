@@ -53,7 +53,7 @@ export function ShelterStaffTable({
             <TableHead>Avatar</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            {showShelterColumn ? <TableHead>Shelter</TableHead> : null}
+            {showShelterColumn ? <TableHead>Shelter Assigned</TableHead> : null}
             <TableHead>Phone</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Status</TableHead>

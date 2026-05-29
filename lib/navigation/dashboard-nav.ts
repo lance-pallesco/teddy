@@ -1,4 +1,4 @@
-export type DashboardRole = "ADMIN" | "SHELTER_STAFF" | "RESCUER" | "ADOPTER"
+export type DashboardRole = "ADMIN" | "SHELTER_STAFF" | "PET_OWNER" | "ADOPTER"
 
 export type DashboardNavItem = {
   title: string
@@ -45,15 +45,15 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
   SHELTER_STAFF: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
     {
-      title: "My Pets",
+      title: "Pets",
       url: "/pets",
       icon: "PawPrint",
       items: [
-        { title: "All Pets", url: "/pets" },
+        { title: "Shelter Pets", url: "/pets" },
         { title: "Add New Pet", url: "/pets/new" },
       ],
     },
-    { title: "Adoption Applications", url: "/applications", icon: "ClipboardList" },
+    { title: "Adoption Requests", url: "/applications", icon: "FileHeart" },
     {
       title: "My Shelter",
       url: "/shelter/profile",
@@ -63,18 +63,18 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
         { title: "Shelter Staff", url: "/shelter/staff" },
       ],
     },
-    { title: "Medical Records", url: "/medical/records", icon: "FileHeart" },
+    { title: "Medical Records", url: "/medical/records", icon: "ClipboardList" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
   ],
-  RESCUER: [
+  PET_OWNER: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
     {
-      title: "My Pets",
-      url: "/pets/my",
+      title: "Pets",
+      url: "/pets",
       icon: "PawPrint",
       items: [
-        { title: "My Pet Listings", url: "/pets/my" },
-        { title: "Add New Pet", url: "/pets/new" },
+        { title: "My Pets", url: "/pets" },
+        { title: "Post a Pet", url: "/pets/new" },
       ],
     },
     {

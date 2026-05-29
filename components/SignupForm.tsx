@@ -113,7 +113,7 @@ export function SignupForm({
           <FieldLabel htmlFor="role">Role</FieldLabel>
           <Select
             value={selectedRole ?? "ADOPTER"}
-            onValueChange={(value: "ADOPTER" | "RESCUER") =>
+            onValueChange={(value: "ADOPTER" | "PET_OWNER") =>
               setValue("role", value, { shouldDirty: true, shouldValidate: true })
             }
           >
@@ -122,7 +122,7 @@ export function SignupForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ADOPTER">Adopter</SelectItem>
-              <SelectItem value="RESCUER">Rescuer</SelectItem>
+              <SelectItem value="PET_OWNER">Pet Owner</SelectItem>
             </SelectContent>
           </Select>
           <FieldError errors={[errors.role]} />

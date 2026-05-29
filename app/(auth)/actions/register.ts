@@ -38,6 +38,7 @@ export async function registerUser(input: unknown): Promise<RegisterResponse> {
       data: user,
     }
   } catch (error) {
+    console.error("REGISTER ERROR:", error)
     if (error instanceof DuplicateUserError) {
       return {
         success: false,
