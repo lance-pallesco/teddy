@@ -6,7 +6,9 @@ import { ShelterStatsRow } from "@/components/shelters/shelter-stats-row"
 import { ShelterStatusActions } from "@/components/shelters/shelter-status-actions"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { ShelterPetsGrid } from "@/components/shelters/shelter-pets-grid"
 import { getShelterById } from "@/lib/services/shelter.service"
+import { getShelterPets } from "@/lib/services/pet.service"
 import { listShelterStaff } from "@/lib/services/user.service"
 import { requireRole } from "@/lib/auth/require-role"
 
@@ -27,9 +29,10 @@ export default async function ShelterDetailPage({
   }
 
   const staffMembers = await listShelterStaff({ shelterId: id })
+  const shelterPets = await getShelterPets(id, 1, 1)
 
   const mockStats = {
-    totalPets: 0,
+    totalPets: shelterPets.total,
     totalApplications: 0,
     totalAdoptions: 0,
     shelterStaffCount: staffMembers.length,
@@ -67,7 +70,11 @@ export default async function ShelterDetailPage({
           </div>
         </div>
         <Separator className="my-4" />
-        <ShelterTabs shelter={shelter} staffMembers={staffMembers} />
+        <ShelterTabs
+          shelter={shelter}
+          staffMembers={staffMembers}
+          petsPanel={<ShelterPetsGrid shelterId={id} />}
+        />
       </div>
     </div>
   )

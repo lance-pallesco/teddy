@@ -141,7 +141,7 @@ model Pet {
 
   adoptedById    String?
   adoptedBy      User?   @relation("AdoptedPets", fields: [adoptedById], references: [id])
-  adoptedAt   DateTime?
+  adoptedAt      DateTime?
 
   status      PetStatus @default(AVAILABLE)
   createdAt   DateTime @default(now())
