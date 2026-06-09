@@ -84,9 +84,14 @@ export const petCareStepSchema = petCareStepObjectSchema.superRefine((data, ctx)
   }
 })
 
+export const petPhotoFormSchema = z.object({
+  imageId: z.string().uuid().optional(),
+  url: petImageUrlSchema,
+})
+
 export const petMediaStepSchema = z.object({
-  imageUrls: z
-    .array(petImageUrlSchema)
+  photos: z
+    .array(petPhotoFormSchema)
     .min(1, "Add at least one photo")
     .max(MAX_PET_IMAGES, `Maximum ${MAX_PET_IMAGES} images`),
   description: z
@@ -114,29 +119,49 @@ function yesNoToBoolean(value: z.infer<typeof yesNoSchema>): boolean {
   return value === "YES"
 }
 
-export const createPetSchema = petFormSchema.transform((data) => ({
-  name: data.name,
-  species: data.species,
-  breed: data.breed,
-  age: data.age,
-  ageUnit: data.ageUnit,
-  gender: data.gender,
-  size: data.size,
-  color: data.color,
-  weightKg: data.weightKg,
-  tags: data.tags,
-  goodWithKids: yesNoToBoolean(data.goodWithKids),
-  goodWithDogs: yesNoToBoolean(data.goodWithDogs),
-  goodWithCats: yesNoToBoolean(data.goodWithCats),
-  isHouseTrained: yesNoToBoolean(data.isHouseTrained),
-  specialNeeds: yesNoToBoolean(data.specialNeeds),
-  specialNeedsNote: data.specialNeedsNote,
-  imageUrls: data.imageUrls,
-  description: data.description,
-}))
+function transformPetFormFields(data: z.infer<typeof petFormSchema>) {
+  return {
+    name: data.name,
+    species: data.species,
+    breed: data.breed,
+    age: data.age,
+    ageUnit: data.ageUnit,
+    gender: data.gender,
+    size: data.size,
+    color: data.color,
+    weightKg: data.weightKg,
+    tags: data.tags,
+    goodWithKids: yesNoToBoolean(data.goodWithKids),
+    goodWithDogs: yesNoToBoolean(data.goodWithDogs),
+    goodWithCats: yesNoToBoolean(data.goodWithCats),
+    isHouseTrained: yesNoToBoolean(data.isHouseTrained),
+    specialNeeds: yesNoToBoolean(data.specialNeeds),
+    specialNeedsNote: data.specialNeedsNote,
+    photos: data.photos.map((photo) => ({
+      imageId: photo.imageId,
+      url: photo.url,
+    })),
+    imageUrls: data.photos.map((photo) => photo.url),
+    description: data.description,
+  }
+}
+
+export const createPetSchema = petFormSchema.transform(transformPetFormFields)
+
+export const updatePetSchema = petFormSchema
+  .extend({
+    petId: z.string().uuid("Invalid pet id"),
+  })
+  .transform((data) => ({
+    petId: data.petId,
+    ...transformPetFormFields(data),
+  }))
 
 export type CreatePetInput = z.output<typeof createPetSchema>
-export type CreatePetFormInput = z.input<typeof petFormSchema>
+export type UpdatePetInput = z.output<typeof updatePetSchema>
+export type PetFormInput = z.input<typeof petFormSchema>
+/** @deprecated Use PetFormInput */
+export type CreatePetFormInput = PetFormInput
 
 export const emptyCreatePetFormValues: CreatePetFormInput = {
   name: "",
@@ -155,7 +180,7 @@ export const emptyCreatePetFormValues: CreatePetFormInput = {
   isHouseTrained: "NO",
   specialNeeds: "NO",
   specialNeedsNote: "",
-  imageUrls: [],
+  photos: [],
   description: "",
 }
 

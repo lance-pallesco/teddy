@@ -8,9 +8,9 @@ import {
 } from "react-hook-form"
 
 import { PET_FORM_STEPS, type PetFormStepId } from "@/lib/constants/pet"
-import type { CreatePetFormInput } from "@/lib/validations/pet"
+import type { PetFormInput } from "@/lib/validations/pet"
 
-const STEP_FIELD_NAMES: Record<PetFormStepId, FieldPath<CreatePetFormInput>[]> = {
+const STEP_FIELD_NAMES: Record<PetFormStepId, FieldPath<PetFormInput>[]> = {
   details: [
     "name",
     "species",
@@ -31,10 +31,13 @@ const STEP_FIELD_NAMES: Record<PetFormStepId, FieldPath<CreatePetFormInput>[]> =
     "specialNeeds",
     "specialNeedsNote",
   ],
-  media: ["imageUrls", "description"],
+  media: ["photos", "description"],
 }
 
+type PetFormMode = "create" | "edit"
+
 type PetFormContextValue = {
+  mode: PetFormMode
   currentStepIndex: number
   currentStep: (typeof PET_FORM_STEPS)[number]
   totalSteps: number
@@ -48,17 +51,23 @@ type PetFormContextValue = {
 const PetFormContext = createContext<PetFormContextValue | null>(null)
 
 type PetFormProviderProps = {
-  form: UseFormReturn<CreatePetFormInput>
+  form: UseFormReturn<PetFormInput>
+  mode?: PetFormMode
   children: ReactNode
 }
 
-export function PetFormProvider({ form, children }: PetFormProviderProps) {
+export function PetFormProvider({
+  form,
+  mode = "create",
+  children,
+}: PetFormProviderProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const currentStep = PET_FORM_STEPS[currentStepIndex]
   const totalSteps = PET_FORM_STEPS.length
 
   const value = useMemo<PetFormContextValue>(
     () => ({
+      mode,
       currentStepIndex,
       currentStep,
       totalSteps,
@@ -84,7 +93,7 @@ export function PetFormProvider({ form, children }: PetFormProviderProps) {
         return true
       },
     }),
-    [currentStep, currentStepIndex, form, totalSteps]
+    [currentStep, currentStepIndex, form, mode, totalSteps]
   )
 
   return (

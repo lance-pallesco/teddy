@@ -23,7 +23,7 @@ export default async function EditShelterPage({ params }: EditShelterPageProps) 
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Edit Shelter</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Update {shelter.name}&apos;s profile, contact details, and logo.
+          Update {shelter.name}'s profile, contact details, and logo.
         </p>
       </div>
       <EditShelterForm shelter={shelter} />

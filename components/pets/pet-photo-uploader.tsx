@@ -21,6 +21,7 @@ import { validateImageFile } from "@/lib/uploads/validate-image-file"
 
 export type PetPhotoItem = {
   id: string
+  imageId?: string
   url: string
   previewUrl?: string
   isUploading?: boolean
@@ -127,6 +128,17 @@ export function PetPhotoUploader({ value, onChange, disabled }: PetPhotoUploader
     const next = [...value]
     const [moved] = next.splice(index, 1)
     next.splice(targetIndex, 0, moved)
+    onChange(next)
+  }
+
+  function setPrimary(index: number) {
+    if (index <= 0 || index >= value.length) {
+      return
+    }
+
+    const next = [...value]
+    const [item] = next.splice(index, 1)
+    next.unshift(item)
     onChange(next)
   }
 
@@ -249,6 +261,18 @@ export function PetPhotoUploader({ value, onChange, disabled }: PetPhotoUploader
                     )}
                   </div>
                   <div className="flex items-center gap-1">
+                    {!isPrimary && !item.isUploading && item.url ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        disabled={disabled}
+                        onClick={() => setPrimary(index)}
+                        aria-label="Set as primary photo"
+                      >
+                        <StarIcon />
+                      </Button>
+                    ) : null}
                     <Button
                       type="button"
                       variant="ghost"

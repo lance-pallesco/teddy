@@ -93,10 +93,10 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
     {
       title: "Browse Pets",
-      url: "/pets/browse",
+      url: "/pets",
       icon: "Search",
       items: [
-        { title: "All Available Pets", url: "/pets/browse" },
+        { title: "Available Pets", url: "/pets" },
         { title: "Find My Match", url: "/pets/match" },
       ],
     },

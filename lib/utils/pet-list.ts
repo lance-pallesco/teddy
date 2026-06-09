@@ -9,11 +9,14 @@ import {
 
 export type PetListSearchParams = Record<string, string | string[] | undefined>
 
+export type PetListTab = "active" | "archived"
+
 export type PetListFilters = {
   species?: PetSpecies
   size?: PetSize
   gender?: PetGender
   search?: string
+  tab?: PetListTab
 }
 
 export type ParsedPetListQuery = {
@@ -52,12 +55,15 @@ export function parsePetListQuery(
   const size = parseEnumParam(firstParam(searchParams.size), PET_SIZE_VALUES)
   const gender = parseEnumParam(firstParam(searchParams.gender), PET_GENDER_VALUES)
   const search = firstParam(searchParams.q)?.trim() || undefined
+  const tabParam = firstParam(searchParams.tab)
+  const tab: PetListTab | undefined =
+    tabParam === "archived" ? "archived" : tabParam === "active" ? "active" : undefined
 
   const rawPage = Number.parseInt(firstParam(searchParams.page) ?? "1", 10)
   const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
 
   return {
-    filters: { species, size, gender, search },
+    filters: { species, size, gender, search, tab },
     page,
     pageSize,
   }
@@ -84,6 +90,10 @@ export function buildPetListHref(
 
   if (filters.search) {
     params.set("q", filters.search)
+  }
+
+  if (filters.tab === "archived") {
+    params.set("tab", "archived")
   }
 
   if (page > 1) {

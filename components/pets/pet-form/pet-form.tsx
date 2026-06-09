@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createPetAction } from "@/app/(dashboard)/pets/actions/create-pet"
+import { updatePetAction } from "@/app/(dashboard)/pets/actions/pet.actions"
 import { PetFormNavigation } from "@/components/pets/pet-form/pet-form-navigation"
 import {
   PetFormProvider,
@@ -22,7 +23,8 @@ import {
   createPetSchema,
   emptyCreatePetFormValues,
   petFormSchema,
-  type CreatePetFormInput,
+  updatePetSchema,
+  type PetFormInput,
 } from "@/lib/validations/pet"
 
 const STEP_COMPONENTS: Record<
@@ -34,6 +36,17 @@ const STEP_COMPONENTS: Record<
   media: MediaStep,
 }
 
+type PetFormMode = "create" | "edit"
+
+type PetFormProps =
+  | { mode?: "create" }
+  | {
+      mode: "edit"
+      petId: string
+      defaultValues: PetFormInput
+      cancelHref: string
+    }
+
 function PetFormSteps({ disabled }: { disabled?: boolean }) {
   const { currentStep } = usePetFormContext()
   const StepComponent = STEP_COMPONENTS[currentStep.id]
@@ -42,13 +55,18 @@ function PetFormSteps({ disabled }: { disabled?: boolean }) {
 }
 
 function PetFormFooter({
+  mode,
+  cancelHref,
   disabled,
   onSubmit,
 }: {
+  mode: PetFormMode
+  cancelHref: string
   disabled?: boolean
   onSubmit: () => Promise<void>
 }) {
   const { isFirstStep, isLastStep, goBack, goNext } = usePetFormContext()
+  const isEdit = mode === "edit"
 
   return (
     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -59,14 +77,20 @@ function PetFormFooter({
           </Button>
         ) : (
           <Button type="button" variant="outline" size="lg" asChild disabled={disabled}>
-            <Link href="/pets">Cancel</Link>
+            <Link href={cancelHref}>Cancel</Link>
           </Button>
         )}
       </div>
 
       {isLastStep ? (
         <Button type="button" size="lg" disabled={disabled} onClick={() => void onSubmit()}>
-          {disabled ? "Creating..." : "Create pet"}
+          {disabled
+            ? isEdit
+              ? "Saving..."
+              : "Creating..."
+            : isEdit
+              ? "Save changes"
+              : "Create pet"}
         </Button>
       ) : (
         <Button type="button" size="lg" disabled={disabled} onClick={() => void goNext()}>
@@ -77,17 +101,25 @@ function PetFormFooter({
   )
 }
 
-function PetFormContent() {
+function PetFormContent(props: PetFormProps) {
+  const isEdit = props.mode === "edit"
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const form = useForm<CreatePetFormInput>({
+
+  const form = useForm<PetFormInput>({
     resolver: zodResolver(petFormSchema),
-    defaultValues: emptyCreatePetFormValues,
+    defaultValues: isEdit ? props.defaultValues : emptyCreatePetFormValues,
     mode: "onBlur",
   })
 
+  const cancelHref = isEdit ? props.cancelHref : "/pets"
+  const successHref = isEdit ? `/pets/${props.petId}` : "/pets"
+
   async function handleSubmit() {
-    const parsed = createPetSchema.safeParse(form.getValues())
+    const values = isEdit ? { ...form.getValues(), petId: props.petId } : form.getValues()
+    const parsed = isEdit
+      ? updatePetSchema.safeParse(values)
+      : createPetSchema.safeParse(values)
 
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0]
@@ -97,7 +129,9 @@ function PetFormContent() {
     }
 
     startTransition(async () => {
-      const response = await createPetAction(form.getValues())
+      const response = isEdit
+        ? await updatePetAction(values)
+        : await createPetAction(form.getValues())
 
       if (!response.success) {
         toast.error(response.message)
@@ -105,22 +139,27 @@ function PetFormContent() {
       }
 
       toast.success(response.message)
-      router.push("/pets")
+      router.push(successHref)
       router.refresh()
     })
   }
 
   return (
-    <PetFormProvider form={form}>
+    <PetFormProvider form={form} mode={isEdit ? "edit" : "create"}>
       <div className="flex w-full flex-col gap-6">
         <PetFormNavigation disabled={isPending} />
         <PetFormSteps disabled={isPending} />
-        <PetFormFooter disabled={isPending} onSubmit={handleSubmit} />
+        <PetFormFooter
+          mode={isEdit ? "edit" : "create"}
+          cancelHref={cancelHref}
+          disabled={isPending}
+          onSubmit={handleSubmit}
+        />
       </div>
     </PetFormProvider>
   )
 }
 
-export function PetForm() {
-  return <PetFormContent />
+export function PetForm(props: PetFormProps = { mode: "create" }) {
+  return <PetFormContent {...props} />
 }

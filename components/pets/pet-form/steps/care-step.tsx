@@ -10,7 +10,6 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field"
-import { PET_FORM_TEXTAREA_CLASS } from "@/lib/constants/pet"
 import { cn } from "@/lib/utils"
 import type { PetYesNoValue } from "@/lib/constants/pet"
 import type { CreatePetFormInput } from "@/lib/validations/pet"
@@ -122,7 +121,6 @@ export function CareStep({ disabled }: CareStepProps) {
                 rows={5}
                 disabled={disabled || specialNeeds !== "YES"}
                 aria-invalid={!!errors.specialNeedsNote}
-                className={PET_FORM_TEXTAREA_CLASS}
                 {...register("specialNeedsNote")}
               />
               <FieldError errors={[errors.specialNeedsNote]} />

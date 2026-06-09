@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
 
 import { PetPhotoUploader, type PetPhotoItem } from "@/components/pets/pet-photo-uploader"
+import { usePetFormContext } from "@/components/pets/pet-form/pet-form-provider"
 import { PetFormSection } from "@/components/pets/pet-form/pet-form-section"
 import {
   Field,
@@ -11,49 +12,61 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field"
-import { PET_FORM_TEXTAREA_CLASS } from "@/lib/constants/pet"
 import { buildDefaultPetDescription } from "@/lib/utils/pet-description"
-import type { CreatePetFormInput } from "@/lib/validations/pet"
+import type { PetFormInput } from "@/lib/validations/pet"
 
 type MediaStepProps = {
   disabled?: boolean
 }
 
-function urlsToPhotoItems(urls: string[]): PetPhotoItem[] {
-  return urls.map((url) => ({ id: url, url }))
+function photosToPhotoItems(
+  photos: NonNullable<PetFormInput["photos"]>
+): PetPhotoItem[] {
+  return photos.map((photo) => ({
+    id: photo.imageId ?? photo.url,
+    imageId: photo.imageId,
+    url: photo.url,
+  }))
 }
 
-function yesNoToBoolean(value: CreatePetFormInput["goodWithKids"]): boolean {
+function yesNoToBoolean(value: PetFormInput["goodWithKids"]): boolean {
   return value === "YES"
 }
 
 export function MediaStep({ disabled }: MediaStepProps) {
+  const { mode } = usePetFormContext()
   const {
     register,
     setValue,
     control,
     getValues,
     formState: { errors, dirtyFields },
-  } = useFormContext<CreatePetFormInput>()
+  } = useFormContext<PetFormInput>()
 
-  const imageUrls = useWatch({ control, name: "imageUrls" }) ?? []
+  const photos = useWatch({ control, name: "photos" }) ?? []
   const values = useWatch({ control })
 
   const [photoItems, setPhotoItems] = useState<PetPhotoItem[]>(() =>
-    urlsToPhotoItems(imageUrls)
+    photosToPhotoItems(photos)
   )
 
-  const uploadedUrls = useMemo(
-    () => photoItems.filter((item) => item.url && !item.isUploading).map((item) => item.url),
+  const syncedPhotos = useMemo(
+    () =>
+      photoItems
+        .filter((item) => item.url && !item.isUploading)
+        .map((item) => ({
+          imageId: item.imageId,
+          url: item.url,
+        })),
     [photoItems]
   )
 
   useEffect(() => {
-    setValue("imageUrls", uploadedUrls, { shouldDirty: true, shouldValidate: true })
-  }, [setValue, uploadedUrls])
+    setValue("photos", syncedPhotos, { shouldDirty: true, shouldValidate: true })
+  }, [setValue, syncedPhotos])
 
   useEffect(() => {
-    if (dirtyFields.description) {
+    if (mode === "edit" || dirtyFields.description) {
       return
     }
 
@@ -88,13 +101,16 @@ export function MediaStep({ disabled }: MediaStepProps) {
       }),
       { shouldDirty: false, shouldValidate: true }
     )
-  }, [dirtyFields.description, getValues, setValue, values])
+  }, [dirtyFields.description, getValues, mode, setValue, values])
 
   const isUploading = photoItems.some((item) => item.isUploading)
 
   return (
     <div className="flex flex-col gap-6">
-      <PetFormSection title="Photos" description="The first photo is used as the primary listing image.">
+      <PetFormSection
+        title="Photos"
+        description="The first photo is used as the primary listing image. Reorder or set primary below."
+      >
         <Field>
           <FieldLabel>Pet photos</FieldLabel>
           <PetPhotoUploader
@@ -103,7 +119,7 @@ export function MediaStep({ disabled }: MediaStepProps) {
             onChange={setPhotoItems}
           />
           <FieldDescription>At least one photo is required.</FieldDescription>
-          <FieldError errors={[errors.imageUrls]} />
+          <FieldError errors={[errors.photos]} />
         </Field>
       </PetFormSection>
 
@@ -118,7 +134,6 @@ export function MediaStep({ disabled }: MediaStepProps) {
             rows={8}
             disabled={disabled}
             aria-invalid={!!errors.description}
-            className={PET_FORM_TEXTAREA_CLASS}
             {...register("description")}
           />
           <FieldError errors={[errors.description]} />

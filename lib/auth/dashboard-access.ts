@@ -38,7 +38,7 @@ const dashboardRouteAccess: Record<DashboardRole, RouteAccessRule> = {
   },
   ADOPTER: {
     paths: ["/dashboard", "/profile", "/unauthorized"],
-    prefixes: ["/applications", "/pets/browse", "/pets/match"],
+    prefixes: ["/applications", "/pets", "/pets/match"],
   },
 }
 
@@ -54,11 +54,30 @@ function matchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`)
 }
 
+const PET_DETAIL_PATH = /^\/pets\/[^/]+$/
+
+function isAdopterPetDetailPath(pathname: string): boolean {
+  if (
+    pathname === "/pets/new" ||
+    pathname.startsWith("/pets/browse") ||
+    pathname.startsWith("/pets/match")
+  ) {
+    return false
+  }
+
+  return PET_DETAIL_PATH.test(pathname)
+}
+
 export function canAccessDashboardPath(
   role: DashboardRole,
   pathname: string
 ): boolean {
   const normalized = normalizeDashboardPathname(pathname)
+
+  if (role === "ADOPTER" && isAdopterPetDetailPath(normalized)) {
+    return true
+  }
+
   const rules = dashboardRouteAccess[role]
 
   if (rules.paths?.includes(normalized)) {

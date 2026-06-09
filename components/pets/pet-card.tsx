@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BadgeCheckIcon, MapPinIcon, PawPrintIcon, ScanSearchIcon } from "lucide-react"
+import { BadgeCheckIcon, MapPinIcon, PawPrintIcon, ScanSearchIcon, User2, UserCheck, Users, UsersIcon } from "lucide-react"
 
 import { PetStatusBadge } from "@/components/pets/pet-status-badge"
 import { Button } from "@/components/ui/button"
@@ -61,7 +61,7 @@ export function PetCard({ pet, className }: PetCardProps) {
             <div className="flex items-center gap-1.5 text-sm">
               {pet.attribution.isShelter && pet.attribution.isVerified ? (
                 <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
-              ) : null}
+              ) : <User2 className="size-3.5 shrink-0" aria-hidden />}
               <span className="truncate font-medium text-foreground">
                 {pet.attribution.label}
               </span>
