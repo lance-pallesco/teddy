@@ -6,9 +6,12 @@ import { ShelterStatsRow } from "@/components/shelters/shelter-stats-row"
 import { ShelterStatusActions } from "@/components/shelters/shelter-status-actions"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { ShelterPetsGrid } from "@/components/shelters/shelter-pets-grid"
 import { getShelterById } from "@/lib/services/shelter.service"
+import { getShelterPets } from "@/lib/services/pet.service"
 import { listShelterStaff } from "@/lib/services/user.service"
 import { requireRole } from "@/lib/auth/require-role"
+import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
 
 type ShelterDetailPageProps = {
   params: Promise<{ id: string }>
@@ -27,9 +30,10 @@ export default async function ShelterDetailPage({
   }
 
   const staffMembers = await listShelterStaff({ shelterId: id })
+  const shelterPets = await getShelterPets(id, 1, 1)
 
   const mockStats = {
-    totalPets: 0,
+    totalPets: shelterPets.total,
     totalApplications: 0,
     totalAdoptions: 0,
     shelterStaffCount: staffMembers.length,
@@ -37,6 +41,7 @@ export default async function ShelterDetailPage({
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+      <SetBreadcrumbLabel segment={id} label={shelter.name} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -67,7 +72,11 @@ export default async function ShelterDetailPage({
           </div>
         </div>
         <Separator className="my-4" />
-        <ShelterTabs shelter={shelter} staffMembers={staffMembers} />
+        <ShelterTabs
+          shelter={shelter}
+          staffMembers={staffMembers}
+          petsPanel={<ShelterPetsGrid shelterId={id} />}
+        />
       </div>
     </div>
   )

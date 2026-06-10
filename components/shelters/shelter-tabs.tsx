@@ -8,15 +8,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { ShelterFormRecord } from "@/lib/services/shelter.service"
 import { ShelterStaffTable } from "@/components/shelters/shelter-staff-table"
-import { ShelterPetsGrid } from "@/components/shelters/shelter-pets-grid"
 import type { ShelterStaffListItem } from "@/lib/services/user.service"
 
 type ShelterTabsProps = {
   shelter: ShelterFormRecord
   staffMembers: ShelterStaffListItem[]
+  petsPanel: React.ReactNode
 }
 
-export function ShelterTabs({ shelter, staffMembers }: ShelterTabsProps) {
+export function ShelterTabs({ shelter, staffMembers, petsPanel }: ShelterTabsProps) {
   const tabDefault = useMemo(() => "overview", [])
 
   return (
@@ -68,9 +68,7 @@ export function ShelterTabs({ shelter, staffMembers }: ShelterTabsProps) {
         <ShelterStaffTable shelterId={shelter.id} staffMembers={staffMembers} />
       </TabsContent>
 
-      <TabsContent value="pets">
-        <ShelterPetsGrid />
-      </TabsContent>
+      <TabsContent value="pets">{petsPanel}</TabsContent>
     </Tabs>
   )
 }

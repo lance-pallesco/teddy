@@ -18,3 +18,6 @@ export const IMAGE_TYPE_TO_EXTENSION: Record<AllowedImageType, string> = {
 
 export const SHELTER_LOGO_UPLOAD_DIR = "public/uploads/shelters"
 export const SHELTER_LOGO_PUBLIC_PREFIX = "/uploads/shelters"
+
+export const PET_IMAGE_UPLOAD_DIR = "public/uploads/pets"
+export const PET_IMAGE_PUBLIC_PREFIX = "/uploads/pets"

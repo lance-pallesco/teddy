@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sidebar"
 import { getCurrentUser } from "@/lib/auth/session"
 import { isDashboardRole } from "@/lib/navigation/dashboard-nav"
+import { BreadcrumbProvider } from "@/components/dashboard/breadcrumb-context"
 
 export default async function DashboardLayout({
   children,
@@ -15,7 +16,6 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const user = await getCurrentUser()
-
   if (!user) {
     redirect("/login")
   }
@@ -26,19 +26,21 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <DashboardSidebar
-        role={user.role}
-        user={{
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          avatar: user.avatar,
-          role: user.role,
-        }}
-      />
-      <SidebarInset>
-        <DashboardHeader />
-        {children}
-      </SidebarInset>
+      <BreadcrumbProvider>
+        <DashboardSidebar
+          role={user.role}
+          user={{
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            avatar: user.avatar,
+            role: user.role,
+          }}
+        />
+        <SidebarInset>
+          <DashboardHeader />
+          {children}
+        </SidebarInset>
+      </BreadcrumbProvider>
     </SidebarProvider>
   )
 }
