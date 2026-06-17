@@ -1,39 +1,76 @@
 "use client"
 
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createPetAction } from "@/app/(dashboard)/pets/actions/create-pet"
 import { updatePetAction } from "@/app/(dashboard)/pets/actions/pet.actions"
-import { PetFormNavigation } from "@/components/pets/pet-form/pet-form-navigation"
-import {
-  PetFormProvider,
-  usePetFormContext,
-} from "@/components/pets/pet-form/pet-form-provider"
-import { CareStep } from "@/components/pets/pet-form/steps/care-step"
+import { PetFormProvider } from "@/components/pets/pet-form/pet-form-provider"
 import { DetailsStep } from "@/components/pets/pet-form/steps/details-step"
+import { CareStep } from "@/components/pets/pet-form/steps/care-step"
 import { MediaStep } from "@/components/pets/pet-form/steps/media-step"
-import { Button } from "@/components/ui/button"
-import type { PetFormStepId } from "@/lib/constants/pet"
+import { WizardShell } from "@/components/shared/wizard/WizardShell"
+import type { WizardStep } from "@/components/shared/wizard/types"
 import {
   createPetSchema,
   emptyCreatePetFormValues,
   petFormSchema,
   updatePetSchema,
   type PetFormInput,
+  petDetailsStepSchema,
+  petCareStepSchema,
+  petMediaStepSchema,
 } from "@/lib/validations/pet"
 
-const STEP_COMPONENTS: Record<
-  PetFormStepId,
-  React.ComponentType<{ disabled?: boolean }>
-> = {
-  details: DetailsStep,
-  care: CareStep,
-  media: MediaStep,
+const PET_WIZARD_STEPS: WizardStep[] = [
+  {
+    id: 1,
+    title: "Pet details",
+    description: "Name, species, size, and appearance",
+    component: DetailsStep,
+    schema: petDetailsStepSchema,
+  },
+  {
+    id: 2,
+    title: "Behavior & care",
+    description: "Temperament, compatibility, and special needs",
+    component: CareStep,
+    schema: petCareStepSchema,
+  },
+  {
+    id: 3,
+    title: "Photos & listing",
+    description: "Images and public description",
+    component: MediaStep,
+    schema: petMediaStepSchema,
+  },
+]
+
+const PET_STEP_FIELD_NAMES: Record<number, (keyof PetFormInput)[]> = {
+  1: [
+    "name",
+    "species",
+    "breed",
+    "age",
+    "ageUnit",
+    "gender",
+    "size",
+    "color",
+    "weightKg",
+  ],
+  2: [
+    "tags",
+    "goodWithKids",
+    "goodWithDogs",
+    "goodWithCats",
+    "isHouseTrained",
+    "specialNeeds",
+    "specialNeedsNote",
+  ],
+  3: ["photos", "description"],
 }
 
 type PetFormMode = "create" | "edit"
@@ -47,64 +84,11 @@ type PetFormProps =
       cancelHref: string
     }
 
-function PetFormSteps({ disabled }: { disabled?: boolean }) {
-  const { currentStep } = usePetFormContext()
-  const StepComponent = STEP_COMPONENTS[currentStep.id]
-
-  return <StepComponent disabled={disabled} />
-}
-
-function PetFormFooter({
-  mode,
-  cancelHref,
-  disabled,
-  onSubmit,
-}: {
-  mode: PetFormMode
-  cancelHref: string
-  disabled?: boolean
-  onSubmit: () => Promise<void>
-}) {
-  const { isFirstStep, isLastStep, goBack, goNext } = usePetFormContext()
-  const isEdit = mode === "edit"
-
-  return (
-    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex gap-2">
-        {!isFirstStep ? (
-          <Button type="button" variant="outline" size="lg" disabled={disabled} onClick={goBack}>
-            Back
-          </Button>
-        ) : (
-          <Button type="button" variant="outline" size="lg" asChild disabled={disabled}>
-            <Link href={cancelHref}>Cancel</Link>
-          </Button>
-        )}
-      </div>
-
-      {isLastStep ? (
-        <Button type="button" size="lg" disabled={disabled} onClick={() => void onSubmit()}>
-          {disabled
-            ? isEdit
-              ? "Saving..."
-              : "Creating..."
-            : isEdit
-              ? "Save changes"
-              : "Create pet"}
-        </Button>
-      ) : (
-        <Button type="button" size="lg" disabled={disabled} onClick={() => void goNext()}>
-          Continue
-        </Button>
-      )}
-    </div>
-  )
-}
-
 function PetFormContent(props: PetFormProps) {
   const isEdit = props.mode === "edit"
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [currentStep, setCurrentStep] = useState(1)
 
   const form = useForm<PetFormInput>({
     resolver: zodResolver(petFormSchema),
@@ -144,18 +128,38 @@ function PetFormContent(props: PetFormProps) {
     })
   }
 
+  const handleNext = async () => {
+    // Validate fields for current step
+    const fields = PET_STEP_FIELD_NAMES[currentStep]
+    if (fields) {
+      const isValid = await form.trigger(fields, { shouldFocus: true })
+      if (!isValid) {
+        toast.error("Please complete all required fields on this step.")
+        return
+      }
+    }
+
+    if (currentStep === 3) {
+      await handleSubmit()
+    } else {
+      setCurrentStep((prev) => prev + 1)
+    }
+  }
+
+  const ActiveStepComponent = PET_WIZARD_STEPS[currentStep - 1]?.component ?? DetailsStep
+
   return (
     <PetFormProvider form={form} mode={isEdit ? "edit" : "create"}>
-      <div className="flex w-full flex-col gap-6">
-        <PetFormNavigation disabled={isPending} />
-        <PetFormSteps disabled={isPending} />
-        <PetFormFooter
-          mode={isEdit ? "edit" : "create"}
-          cancelHref={cancelHref}
-          disabled={isPending}
-          onSubmit={handleSubmit}
-        />
-      </div>
+      <WizardShell
+        steps={PET_WIZARD_STEPS}
+        currentStep={currentStep}
+        onStepChange={setCurrentStep}
+        onSubmit={handleSubmit}
+        isSubmitting={isPending}
+        onNext={handleNext}
+      >
+        <ActiveStepComponent disabled={isPending} />
+      </WizardShell>
     </PetFormProvider>
   )
 }

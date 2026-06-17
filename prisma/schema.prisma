@@ -291,7 +291,7 @@ model AdoptionApplication {
   pet                   Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   applicantId           String
   applicant             User     @relation("Applicant", fields: [applicantId], references: [id])
-  currentStep           Int      @default(2) // 1: Verify Details, 2: Living Environment, 3: Household & Lifestyle, 4: Pet Experience & Current Pets, 5: Adoption Motivation & Commitment
+  currentStep           Int      @default(1) // 1: Verify Details, 2: Living Environment, 3: Household & Lifestyle, 4: Pet Experience & Current Pets, 5: Adoption Motivation & Commitment
   // Shape : { housingType: string, ownershipStatus: string, landlordAllowsPets: boolean, propertySize: string, isPetFriendly: boolean }
   livingEnvironment     Json? 
   // Shape: { numberOfAdults: number, numberOfChildren: number, childrenAges?: string, householdHasAllergies: boolean, allergyDetails?: string, hoursAloneDaily: number, careWhenAway: string, petPrimaryLocation: string, petSleepLocation: string, petSleepLocationDetails?: string, primaryCaregiver: string, primaryCaregiverDetails?: string}
@@ -303,15 +303,16 @@ model AdoptionApplication {
   // Shape: { certifyTruthful: boolean, certifyResponsible: boolean, certifyComplyWithLaws: boolean, certifyNoAbuseNeglect: boolean, certifyNoAbandonment: boolean, agreeToHomeVisit: boolean, agreeAt: string (ISO) }
   agreements            Json?
   documents             ApplicationDocument[]
+  signatureUrl          String?
   reviewNotes           String? @db.Text
   rejectionReason       String?
   reviewedById          String?
   reviewedBy            User?   @relation("ReviewedApplications", fields: [reviewedById], references: [id])
   reviewedAt            DateTime? 
-  status        AdoptionStatus @default(DRAFT)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status                AdoptionStatus @default(DRAFT)
+  submittedAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
   
   @@index([petId])
   @@index([applicantId])
