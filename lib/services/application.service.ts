@@ -194,3 +194,300 @@ export async function deleteApplicationDraft(applicationId: string, applicantId:
     where: { id: applicationId },
   })
 }
+
+// ---------------------------------------------------------------------------
+// Applications listing
+// ---------------------------------------------------------------------------
+
+import type { ApplicationTab } from "@/lib/utils/application-list"
+import type { Role } from "@prisma/client"
+
+const ACTIVE_STATUSES: AdoptionStatus[] = ["PENDING", "UNDER_REVIEW"]
+const COMPLETED_STATUSES: AdoptionStatus[] = ["APPROVED", "REJECTED", "WITHDRAWN"]
+
+type ApplicantApplicationItem = {
+  id: string
+  status: AdoptionStatus
+  submittedAt: Date | null
+  createdAt: Date
+  pet: {
+    id: string
+    name: string
+    primaryImageUrl: string | null
+    postedBy: { firstName: string; lastName: string } | null
+    shelter: { name: string } | null
+  }
+}
+
+export type ApplicantApplicationListResult = {
+  applications: ApplicantApplicationItem[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+export async function getApplicationsByApplicant(
+  applicantId: string,
+  tab: ApplicationTab = "all",
+  page: number = 1,
+  limit: number = 10
+): Promise<ApplicantApplicationListResult> {
+  const statusFilter: AdoptionStatus[] | undefined =
+    tab === "active"
+      ? ACTIVE_STATUSES
+      : tab === "completed"
+        ? COMPLETED_STATUSES
+        : undefined
+
+  const where = {
+    applicantId,
+    status: statusFilter
+      ? { in: statusFilter }
+      : { not: "DRAFT" as AdoptionStatus },
+  }
+
+  const skip = (page - 1) * limit
+
+  const [total, records] = await Promise.all([
+    prisma.adoptionApplication.count({ where }),
+    prisma.adoptionApplication.findMany({
+      where,
+      select: {
+        id: true,
+        status: true,
+        submittedAt: true,
+        createdAt: true,
+        pet: {
+          select: {
+            id: true,
+            name: true,
+            petImages: {
+              where: { isPrimary: true },
+              take: 1,
+              select: { url: true },
+            },
+            postedBy: {
+              select: { firstName: true, lastName: true },
+            },
+            shelter: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: limit,
+    }),
+  ])
+
+  const totalPages = Math.max(1, Math.ceil(total / limit))
+
+  return {
+    applications: records.map((r) => ({
+      id: r.id,
+      status: r.status,
+      submittedAt: r.submittedAt,
+      createdAt: r.createdAt,
+      pet: {
+        id: r.pet.id,
+        name: r.pet.name,
+        primaryImageUrl: r.pet.petImages[0]?.url ?? null,
+        postedBy: r.pet.postedBy,
+        shelter: r.pet.shelter,
+      },
+    })),
+    total,
+    page,
+    pageSize: limit,
+    totalPages,
+  }
+}
+
+// -- Incoming applications for SHELTER_STAFF / PET_OWNER --
+
+type PetOwnerSession = {
+  userId: string
+  role: Role
+  shelterId: string | null
+}
+
+type PetOwnerFilters = {
+  status?: AdoptionStatus
+  petId?: string
+}
+
+type IncomingApplicationItem = {
+  id: string
+  status: AdoptionStatus
+  submittedAt: Date | null
+  createdAt: Date
+  applicant: { firstName: string; lastName: string; avatar: string }
+  pet: {
+    id: string
+    name: string
+    primaryImageUrl: string | null
+    postedBy: { firstName: string; lastName: string } | null
+    shelter: { name: string } | null
+  }
+}
+
+export type IncomingApplicationListResult = {
+  applications: IncomingApplicationItem[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+export async function getApplicationsByPetOwner(
+  session: PetOwnerSession,
+  filters: PetOwnerFilters = {},
+  page: number = 1,
+  limit: number = 10
+): Promise<IncomingApplicationListResult> {
+  const petOwnershipWhere =
+    session.role === "SHELTER_STAFF" && session.shelterId
+      ? { pet: { shelterId: session.shelterId } }
+      : session.role === "ADMIN"
+        ? {}
+        : { pet: { postedById: session.userId } }
+
+  const where: Record<string, unknown> = {
+    ...petOwnershipWhere,
+    status: filters.status
+      ? filters.status
+      : { not: "DRAFT" as AdoptionStatus },
+  }
+
+  if (filters.petId) {
+    where.petId = filters.petId
+  }
+
+  const skip = (page - 1) * limit
+
+  const [total, records] = await Promise.all([
+    prisma.adoptionApplication.count({ where }),
+    prisma.adoptionApplication.findMany({
+      where,
+      select: {
+        id: true,
+        status: true,
+        submittedAt: true,
+        createdAt: true,
+        applicant: {
+          select: { firstName: true, lastName: true, avatar: true },
+        },
+        pet: {
+          select: {
+            id: true,
+            name: true,
+            petImages: {
+              where: { isPrimary: true },
+              take: 1,
+              select: { url: true },
+            },
+            postedBy: {
+              select: { firstName: true, lastName: true },
+            },
+            shelter: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: limit,
+    }),
+  ])
+
+  const totalPages = Math.max(1, Math.ceil(total / limit))
+
+  return {
+    applications: records.map((r) => ({
+      id: r.id,
+      status: r.status,
+      submittedAt: r.submittedAt,
+      createdAt: r.createdAt,
+      applicant: r.applicant,
+      pet: {
+        id: r.pet.id,
+        name: r.pet.name,
+        primaryImageUrl: r.pet.petImages[0]?.url ?? null,
+        postedBy: r.pet.postedBy,
+        shelter: r.pet.shelter,
+      },
+    })),
+    total,
+    page,
+    pageSize: limit,
+    totalPages,
+  }
+}
+
+// -- Pet dropdown helper for filters --
+
+export async function getPetsByOwner(
+  session: PetOwnerSession
+): Promise<{ id: string; name: string }[]> {
+  const where =
+    session.role === "SHELTER_STAFF" && session.shelterId
+      ? { shelterId: session.shelterId }
+      : session.role === "ADMIN"
+        ? {}
+        : { postedById: session.userId }
+
+  return prisma.pet.findMany({
+    where,
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  })
+}
+
+// -- Full application detail for /applications/[id] --
+
+export async function getApplicationDetail(id: string) {
+  return prisma.adoptionApplication.findUnique({
+    where: { id },
+    include: {
+      applicant: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          address: true,
+          avatar: true,
+          occupation: true,
+          dateOfBirth: true,
+        },
+      },
+      pet: {
+        include: {
+          petImages: {
+            orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
+          },
+          shelter: true,
+          postedBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      documents: true,
+      reviewedBy: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+  })
+}
+
