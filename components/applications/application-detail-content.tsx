@@ -1,5 +1,10 @@
+"use client"
+
+import { useState, useTransition } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import {
   ArrowLeftIcon,
   BotIcon,
@@ -23,6 +28,18 @@ import { ApplicationTimeline } from "@/components/applications/application-timel
 import { ApplicationFormSections } from "@/components/applications/application-form-sections"
 import { PET_SPECIES_LABELS, PET_GENDER_LABELS } from "@/lib/constants/pet"
 import type { PetSpecies, PetGender } from "@prisma/client"
+import { withdrawApplicationAction } from "@/app/(dashboard)/applications/actions/application.action"
+import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // ---------- Types ----------
 
@@ -96,6 +113,10 @@ export function ApplicationDetailContent({
   application,
   userRole,
 }: ApplicationDetailContentProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [showWithdrawConfirm, setShowWithdrawConfirm] = useState(false)
+
   const { pet, applicant } = application
   const isAdopter = userRole === "ADOPTER"
   const isReviewer = ["SHELTER_STAFF", "PET_OWNER", "ADMIN"].includes(userRole)
@@ -112,15 +133,31 @@ export function ApplicationDetailContent({
       ? `${pet.postedBy.firstName} ${pet.postedBy.lastName}`
       : "Private Poster"
 
+  function handleWithdrawConfirm() {
+    startTransition(async () => {
+      const response = await withdrawApplicationAction(application.id)
+      if (response.success) {
+        toast.success("Application withdrawn successfully")
+        setShowWithdrawConfirm(false)
+        router.push("/applications")
+        router.refresh()
+      } else {
+        toast.error(response.error ?? "Failed to withdraw application.")
+      }
+    })
+  }
+
   return (
     <div className="flex w-full flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="mx-auto w-full max-w-7xl">
+      <SetBreadcrumbLabel segment={application.id} label={pet.name} />
+
+      <div className="mx-auto w-full max-w-7xl space-y-6">
         {/* Back + Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost" size="sm">
               <Link href="/applications">
-                <ArrowLeftIcon className="size-4" />
+                <ArrowLeftIcon className="size-4 mr-1" />
                 Back
               </Link>
             </Button>
@@ -140,18 +177,23 @@ export function ApplicationDetailContent({
           </div>
         </div>
 
+        {/* Horizontal Timeline at the top (with basic border/container for polish) */}
+        <div className="rounded-lg border bg-card p-5">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Application Progress
+          </h3>
+          <ApplicationTimeline
+            applicationStatus={application.status}
+            createdAt={application.createdAt}
+            submittedAt={application.submittedAt}
+            reviewedAt={application.reviewedAt}
+          />
+        </div>
+
         {/* Two-column layout */}
-        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_380px] items-start">
           {/* Left column — Main content */}
           <div className="space-y-6">
-            {/* Timeline */}
-            <ApplicationTimeline
-              applicationStatus={application.status}
-              createdAt={application.createdAt}
-              submittedAt={application.submittedAt}
-              reviewedAt={application.reviewedAt}
-            />
-
             {/* Review notes / rejection reason */}
             {application.rejectionReason ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
@@ -183,7 +225,7 @@ export function ApplicationDetailContent({
           </div>
 
           {/* Right column — Sidebar */}
-          <div className="space-y-5 lg:sticky lg:top-6 lg:self-start">
+          <div className="space-y-5 lg:sticky lg:top-6">
             {/* Pet Info Card */}
             <Card className="overflow-hidden border-primary/15 bg-muted/20">
               <CardHeader className="pb-3">
@@ -298,15 +340,16 @@ export function ApplicationDetailContent({
                     variant="destructive"
                     className="w-full"
                     size="sm"
-                    disabled={!canWithdraw}
+                    disabled={!canWithdraw || isPending}
                     title={
                       canWithdraw
                         ? "Withdraw this application"
                         : "You can only withdraw pending applications"
                     }
+                    onClick={() => setShowWithdrawConfirm(true)}
                   >
-                    <XCircleIcon className="size-4" />
-                    Withdraw Application
+                    <XCircleIcon className="size-4 mr-1" />
+                    {isPending ? "Withdrawing..." : "Withdraw Application"}
                   </Button>
                 ) : (
                   <>
@@ -329,6 +372,32 @@ export function ApplicationDetailContent({
           </div>
         </div>
       </div>
+
+      {/* Withdraw Application Confirmation Modal */}
+      <AlertDialog open={showWithdrawConfirm} onOpenChange={setShowWithdrawConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Withdraw Adoption Application?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to withdraw your adoption application for{" "}
+              <strong>{pet.name}</strong>? This action will cancel your request and remove it from your active list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault()
+                handleWithdrawConfirm()
+              }}
+              disabled={isPending}
+            >
+              {isPending ? "Withdrawing..." : "Yes, Withdraw"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

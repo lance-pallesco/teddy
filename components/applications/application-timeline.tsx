@@ -95,61 +95,64 @@ export function ApplicationTimeline({
   const steps = buildTimelineSteps(applicationStatus, createdAt, submittedAt, reviewedAt)
 
   return (
-    <div className="rounded-lg border bg-card p-5">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-        Application Progress
-      </h3>
-      <div className="relative space-y-0">
+    <div className="w-full py-2">
+      {/* Horizontal layout on medium/large screens, vertical layout on mobile */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-4">
         {steps.map((step, index) => {
           const isLast = index === steps.length - 1
 
           return (
-            <div key={step.label} className="relative flex gap-4">
-              {/* Vertical line */}
+            <div
+              key={step.label}
+              className="flex flex-1 flex-col md:flex-row md:items-center gap-4 w-full"
+            >
+              <div className="flex items-center gap-3">
+                {/* Icon */}
+                <div className="relative z-10 flex shrink-0 items-center justify-center rounded-full bg-background">
+                  {step.status === "completed" ? (
+                    <CheckCircle2Icon className="size-6 text-emerald-500" />
+                  ) : step.status === "current" ? (
+                    <CircleDotIcon className="size-6 text-amber-500 animate-pulse" />
+                  ) : step.status === "rejected" ? (
+                    <XCircleIcon className="size-6 text-destructive" />
+                  ) : (
+                    <CircleIcon className="size-6 text-muted-foreground/40" />
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="min-w-0">
+                  <p
+                    className={cn(
+                      "text-sm font-semibold whitespace-nowrap",
+                      step.status === "upcoming"
+                        ? "text-muted-foreground/60"
+                        : step.status === "rejected"
+                          ? "text-destructive"
+                          : "text-foreground"
+                    )}
+                  >
+                    {step.label}
+                  </p>
+                  {step.timestamp ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground whitespace-nowrap">
+                      {formatTimestamp(step.timestamp)}
+                    </p>
+                  ) : (
+                    <p className="mt-0.5 text-xs text-transparent select-none whitespace-nowrap">—</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Desktop connector line */}
               {!isLast && (
                 <div
                   className={cn(
-                    "absolute left-[11px] top-6 h-full w-0.5",
-                    step.status === "completed"
-                      ? "bg-emerald-500/40"
-                      : "bg-border"
+                    "hidden md:block h-0.5 flex-1 min-w-[20px]",
+                    step.status === "completed" ? "bg-emerald-500" : "bg-border"
                   )}
                 />
               )}
-
-              {/* Icon */}
-              <div className="relative z-10 flex shrink-0 items-start pt-0.5">
-                {step.status === "completed" ? (
-                  <CheckCircle2Icon className="size-6 text-emerald-500" />
-                ) : step.status === "current" ? (
-                  <CircleDotIcon className="size-6 text-amber-500" />
-                ) : step.status === "rejected" ? (
-                  <XCircleIcon className="size-6 text-destructive" />
-                ) : (
-                  <CircleIcon className="size-6 text-muted-foreground/40" />
-                )}
-              </div>
-
-              {/* Content */}
-              <div className={cn("pb-6", isLast && "pb-0")}>
-                <p
-                  className={cn(
-                    "text-sm font-medium",
-                    step.status === "upcoming"
-                      ? "text-muted-foreground/60"
-                      : step.status === "rejected"
-                        ? "text-destructive"
-                        : "text-foreground"
-                  )}
-                >
-                  {step.label}
-                </p>
-                {step.timestamp ? (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatTimestamp(step.timestamp)}
-                  </p>
-                ) : null}
-              </div>
             </div>
           )
         })}

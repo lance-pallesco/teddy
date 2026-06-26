@@ -60,6 +60,7 @@ export async function checkExistingApplication(petId: string, applicantId: strin
     where: {
       petId,
       applicantId,
+      deletedAt: null,
     },
     select: {
       id: true,
@@ -144,18 +145,8 @@ export async function submitApplication(applicationId: string, applicantId: stri
       throw new Error("Application has already been submitted.")
     }
 
-    // 2. Optimistic lock on Pet status (must be AVAILABLE)
-    try {
-      await tx.pet.update({
-        where: {
-          id: app.petId,
-          status: "AVAILABLE",
-        },
-        data: {
-          status: "PENDING",
-        },
-      })
-    } catch {
+    // 2. Verify Pet status is AVAILABLE
+    if (app.pet.status !== "AVAILABLE") {
       throw new PetNotAvailableError()
     }
 
@@ -242,6 +233,7 @@ export async function getApplicationsByApplicant(
 
   const where = {
     applicantId,
+    deletedAt: null,
     status: statusFilter
       ? { in: statusFilter }
       : { not: "DRAFT" as AdoptionStatus },
@@ -356,6 +348,7 @@ export async function getApplicationsByPetOwner(
 
   const where: Record<string, unknown> = {
     ...petOwnershipWhere,
+    deletedAt: null,
     status: filters.status
       ? filters.status
       : { not: "DRAFT" as AdoptionStatus },
@@ -449,8 +442,8 @@ export async function getPetsByOwner(
 // -- Full application detail for /applications/[id] --
 
 export async function getApplicationDetail(id: string) {
-  return prisma.adoptionApplication.findUnique({
-    where: { id },
+  return prisma.adoptionApplication.findFirst({
+    where: { id, deletedAt: null },
     include: {
       applicant: {
         select: {

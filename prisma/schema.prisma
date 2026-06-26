@@ -313,6 +313,7 @@ model AdoptionApplication {
   submittedAt           DateTime?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
   
   @@index([petId])
   @@index([applicantId])

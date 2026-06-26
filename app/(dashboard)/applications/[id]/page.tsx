@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth/session"
 import { getApplicationDetail } from "@/lib/services/application.service"
 import { ApplicationDetailContent } from "@/components/applications/application-detail-content"
+import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
 
 type ApplicationDetailPageProps = {
   params: Promise<{ id: string }>
@@ -49,9 +50,12 @@ export default async function ApplicationDetailPage({
   }
 
   return (
-    <ApplicationDetailContent
-      application={application}
-      userRole={role}
-    />
+    <>
+      <SetBreadcrumbLabel segment={id} label={application.pet.name} />
+      <ApplicationDetailContent
+        application={application}
+        userRole={role}
+      />
+    </>
   )
 }

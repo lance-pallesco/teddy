@@ -1,7 +1,10 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import type { AdoptionStatus, ApplicationDocumentType, GovernmentIDType } from "@prisma/client"
-import { DownloadIcon, FileTextIcon, PenLineIcon } from "lucide-react"
+import { DownloadIcon, FileTextIcon, EyeIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,6 +24,12 @@ import {
 } from "@/lib/constants/application.constants"
 import { PET_SPECIES_LABELS } from "@/lib/constants/pet"
 import type { PetSpecies } from "@prisma/client"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 // ---------- Helper ----------
 
@@ -98,16 +107,15 @@ export function ApplicationFormSections({ data }: ApplicationFormSectionsProps) 
     householdLifestyle: hl,
     petExperience: pe,
     adoptionCommitment: ac,
-    agreements: ag,
     documents,
-    signatureUrl,
   } = data
 
   const livingEnv = (le ?? {}) as Record<string, any>
   const household = (hl ?? {}) as Record<string, any>
   const experience = (pe ?? {}) as Record<string, any>
   const commitment = (ac ?? {}) as Record<string, any>
-  const agreements = (ag ?? {}) as Record<string, any>
+
+  const [previewDoc, setPreviewDoc] = useState<{ url: string; name: string } | null>(null)
 
   return (
     <div className="space-y-6 rounded-lg border bg-card p-5 text-sm">
@@ -229,11 +237,23 @@ export function ApplicationFormSections({ data }: ApplicationFormSectionsProps) 
                     <p className="text-xs text-muted-foreground">{doc.name}</p>
                   </div>
                 </div>
-                <Button asChild variant="ghost" size="sm">
-                  <a href={doc.url} target="_blank" rel="noopener noreferrer" download>
-                    <DownloadIcon className="size-4" />
-                  </a>
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => setPreviewDoc({ url: doc.url, name: doc.name })}
+                    title="Preview file"
+                  >
+                    <EyeIcon className="size-4 text-muted-foreground hover:text-foreground" />
+                  </Button>
+                  <Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <a href={doc.url} target="_blank" rel="noopener noreferrer" download title="Download file">
+                      <DownloadIcon className="size-4" />
+                    </a>
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -242,41 +262,31 @@ export function ApplicationFormSections({ data }: ApplicationFormSectionsProps) 
         )}
       </Section>
 
-      {/* 7. Agreements & Signature */}
-      <Section title="Agreements & Signature" number={7}>
-        <div className="space-y-2">
-          <dl className="grid gap-2 sm:grid-cols-2">
-            <Field label="Certify Truthful">{agreements.certifyTruthful ? "✓ Yes" : "✗ No"}</Field>
-            <Field label="No Abuse/Neglect">{agreements.certifyNoAbuseNeglect ? "✓ Yes" : "✗ No"}</Field>
-            <Field label="Home Visit">{agreements.agreeToHomeVisit ? "✓ Agreed" : "✗ No"}</Field>
-            <Field label="No Abandonment">{agreements.certifyNoAbandonment ? "✓ Yes" : "✗ No"}</Field>
-            <Field label="Comply with Laws">{agreements.certifyComplyWithLaws ? "✓ Yes" : "✗ No"}</Field>
-            <Field label="Responsible Care">{agreements.certifyResponsible ? "✓ Yes" : "✗ No"}</Field>
-          </dl>
-
-          {signatureUrl ? (
-            <div className="mt-3">
-              <p className="mb-1 text-xs font-semibold text-muted-foreground">Digital Signature</p>
-              <div className="relative inline-block rounded-md border bg-white p-2">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <PenLineIcon className="size-3.5" />
-                  <span>Signed</span>
-                </div>
-                <Image
-                  src={signatureUrl}
-                  alt="Applicant signature"
-                  width={240}
-                  height={80}
-                  className="mt-1"
-                  unoptimized={signatureUrl.startsWith("/uploads/")}
+      {/* Document Preview Modal */}
+      <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
+        <DialogContent className="max-w-3xl w-full p-6">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle>{previewDoc?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 flex items-center justify-center bg-muted/10 rounded-lg p-2 overflow-hidden border min-h-[400px]">
+            {previewDoc && (
+              previewDoc.url.toLowerCase().endsWith(".pdf") ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-[60vh] border-0 rounded-md"
                 />
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No signature provided.</p>
-          )}
-        </div>
-      </Section>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.name}
+                  className="max-w-full max-h-[60vh] object-contain rounded-md"
+                />
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

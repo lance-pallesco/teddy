@@ -404,3 +404,47 @@ export async function discardDraftAction(applicationId: string) {
     return { success: false, error: "Failed to discard application draft." }
   }
 }
+
+/**
+ * Withdraws a submitted (PENDING) application, setting status to WITHDRAWN and soft-deleting it.
+ */
+export async function withdrawApplicationAction(applicationId: string) {
+  // 1. Enforce Role
+  const user = await requireRole(["ADOPTER"])
+
+  try {
+    // 2. Fetch application and verify ownership and status
+    const app = await prisma.adoptionApplication.findUnique({
+      where: { id: applicationId },
+      select: { applicantId: true, status: true, petId: true },
+    })
+
+    if (!app) {
+      return { success: false, error: "Application not found." }
+    }
+
+    if (app.applicantId !== user.id) {
+      return { success: false, error: "Unauthorized access." }
+    }
+
+    if (app.status !== "PENDING" && app.status !== "DRAFT") {
+      return { success: false, error: "Only draft or pending applications can be withdrawn." }
+    }
+
+    // 3. Update application: status is WITHDRAWN, deletedAt is set
+    await prisma.adoptionApplication.update({
+      where: { id: applicationId },
+      data: {
+        status: "WITHDRAWN",
+        deletedAt: new Date(),
+      },
+    })
+
+    revalidatePath(`/applications/${applicationId}`)
+    revalidatePath("/applications")
+    return { success: true }
+  } catch (err) {
+    console.error("[withdrawApplicationAction]", err)
+    return { success: false, error: "Failed to withdraw application. Please try again." }
+  }
+}
