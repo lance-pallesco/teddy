@@ -3,6 +3,7 @@ import { z } from "zod"
 export const updateProfileSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required"),
   lastName: z.string().trim().min(1, "Last name is required"),
+  email: z.string().trim().email("Please enter a valid email address"),
   phone: z
     .string()
     .trim()
@@ -12,6 +13,8 @@ export const updateProfileSchema = z.object({
   }),
   address: z.string().trim().min(1, "Address is required"),
   avatar: z.string().optional(),
+  dateOfBirth: z.string().nullable().optional(),
+  occupation: z.string().trim().nullable().optional(),
 })
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>

@@ -39,6 +39,7 @@ export function Step4PetExperience({ petSpecies, disabled }: Step4PetExperienceP
     control,
     formState,
   } = useFormContext()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errors = formState.errors as any
 
   const { fields, append, remove } = useFieldArray({
@@ -47,11 +48,10 @@ export function Step4PetExperience({ petSpecies, disabled }: Step4PetExperienceP
   })
 
   const hasCurrentPets = useWatch({ control, name: "petExperience.hasCurrentPets" })
+  const currentPets = useWatch({ control, name: "petExperience.currentPets" })
   const currentPetsVaccinated = useWatch({ control, name: "petExperience.currentPetsVaccinated" })
   const ownedPetsPast5Years = useWatch({ control, name: "petExperience.ownedPetsPast5Years" })
-  const pastPetHistory = useWatch({ control, name: "petExperience.pastPetHistory" })
   const hasSurrenderedPets = useWatch({ control, name: "petExperience.hasSurrenderedPets" })
-  const surrenderPetsDetails = useWatch({ control, name: "petExperience.surrenderPetsDetails" })
   const experienceWithSpecies = useWatch({ control, name: "petExperience.experienceWithSpecies" })
   const heardAboutPetFrom = useWatch({ control, name: "petExperience.heardAboutPetFrom" })
 
@@ -140,7 +140,7 @@ export function Step4PetExperience({ petSpecies, disabled }: Step4PetExperienceP
                 <Field>
                   <FieldLabel>Species</FieldLabel>
                   <Select
-                    value={useWatch({ control, name: `petExperience.currentPets.${index}.species` })}
+                    value={currentPets?.[index]?.species}
                     onValueChange={(val) =>
                       setValue(`petExperience.currentPets.${index}.species`, val, {
                         shouldDirty: true,
@@ -190,7 +190,7 @@ export function Step4PetExperience({ petSpecies, disabled }: Step4PetExperienceP
                   <Field className="flex-1">
                     <FieldLabel>Sex</FieldLabel>
                     <Select
-                      value={useWatch({ control, name: `petExperience.currentPets.${index}.sex` })}
+                      value={currentPets?.[index]?.sex}
                       onValueChange={(val) =>
                         setValue(`petExperience.currentPets.${index}.sex`, val, {
                           shouldDirty: true,

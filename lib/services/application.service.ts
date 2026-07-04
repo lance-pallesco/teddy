@@ -1,7 +1,7 @@
 import "server-only"
 
 import { prisma } from "@/lib/prisma"
-import { AdoptionStatus, type AdoptionStep } from "@prisma/client"
+import { AdoptionStatus } from "@prisma/client"
 
 export class ApplicationNotFoundError extends Error {
   constructor(message = "Adoption application not found.") {
@@ -88,6 +88,7 @@ export async function createDraftApplication(petId: string, applicantId: string)
 export async function saveDraftStep(
   applicationId: string,
   step: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
 ) {
   const application = await prisma.adoptionApplication.findUnique({
@@ -100,6 +101,7 @@ export async function saveDraftStep(
   }
 
   // Map step number to column
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: Record<string, any> = {}
   if (step === 2) {
     updateData.livingEnvironment = data
@@ -474,6 +476,7 @@ export async function getApplicationDetail(id: string) {
         },
       },
       documents: true,
+      aiInsight: true,
       reviewedBy: {
         select: {
           firstName: true,

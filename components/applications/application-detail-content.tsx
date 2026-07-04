@@ -19,7 +19,7 @@ import {
   BriefcaseIcon,
   XCircleIcon,
 } from "lucide-react"
-import type { AdoptionStatus } from "@prisma/client"
+import type { AdoptionStatus, ApplicationDocumentType, GovernmentIDType } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,6 +28,8 @@ import { ApplicationTimeline } from "@/components/applications/application-timel
 import { ApplicationFormSections } from "@/components/applications/application-form-sections"
 import { PET_SPECIES_LABELS, PET_GENDER_LABELS } from "@/lib/constants/pet"
 import type { PetSpecies, PetGender } from "@prisma/client"
+import { AIInsightsPanel } from "@/components/applications/ai-insights-panel"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { withdrawApplicationAction } from "@/app/(dashboard)/applications/actions/application.action"
 import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
 import {
@@ -52,11 +54,18 @@ type ApplicationDetailData = {
   reviewNotes: string | null
   rejectionReason: string | null
   signatureUrl: string | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   livingEnvironment: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   householdLifestyle: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   petExperience: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adoptionCommitment: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agreements: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  aiInsight?: any
   applicant: {
     id: string
     firstName: string
@@ -91,8 +100,8 @@ type ApplicationDetailData = {
   }
   documents: {
     id: string
-    type: any
-    idType: any
+    type: ApplicationDocumentType
+    idType: GovernmentIDType
     name: string
     url: string
   }[]
@@ -116,6 +125,7 @@ export function ApplicationDetailContent({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showWithdrawConfirm, setShowWithdrawConfirm] = useState(false)
+  const [activeTab, setActiveTab] = useState("info")
 
   const { pet, applicant } = application
   const isAdopter = userRole === "ADOPTER"
@@ -209,19 +219,59 @@ export function ApplicationDetailContent({
               </div>
             ) : null}
 
-            {/* Form data sections */}
-            <ApplicationFormSections
-              data={{
-                applicant,
-                livingEnvironment: application.livingEnvironment,
-                householdLifestyle: application.householdLifestyle,
-                petExperience: application.petExperience,
-                adoptionCommitment: application.adoptionCommitment,
-                agreements: application.agreements,
-                signatureUrl: application.signatureUrl,
-                documents: application.documents,
-              }}
-            />
+            {/* Form data sections / Tabs */}
+            {isReviewer ? (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full justify-start border-b rounded-none h-12 bg-transparent p-0 mb-6 gap-6">
+                  <TabsTrigger
+                    value="info"
+                    className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
+                  >
+                    Application Info
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="ai"
+                    className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium flex items-center gap-1.5"
+                  >
+                    <BotIcon className="size-4 text-primary animate-pulse" />
+                    Teddy AI Review
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="info" className="mt-0 focus-visible:outline-none">
+                  <ApplicationFormSections
+                    data={{
+                      applicant,
+                      livingEnvironment: application.livingEnvironment,
+                      householdLifestyle: application.householdLifestyle,
+                      petExperience: application.petExperience,
+                      adoptionCommitment: application.adoptionCommitment,
+                      agreements: application.agreements,
+                      signatureUrl: application.signatureUrl,
+                      documents: application.documents,
+                    }}
+                  />
+                </TabsContent>
+                <TabsContent value="ai" className="mt-0 focus-visible:outline-none">
+                  <AIInsightsPanel
+                    applicationId={application.id}
+                    initialInsight={application.aiInsight}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <ApplicationFormSections
+                data={{
+                  applicant,
+                  livingEnvironment: application.livingEnvironment,
+                  householdLifestyle: application.householdLifestyle,
+                  petExperience: application.petExperience,
+                  adoptionCommitment: application.adoptionCommitment,
+                  agreements: application.agreements,
+                  signatureUrl: application.signatureUrl,
+                  documents: application.documents,
+                }}
+              />
+            )}
           </div>
 
           {/* Right column — Sidebar */}
@@ -243,6 +293,7 @@ export function ApplicationDetailContent({
                       className="object-cover"
                       sizes="380px"
                       unoptimized={primaryImage.startsWith("/uploads/")}
+                      priority
                     />
                   ) : (
                     <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
@@ -353,9 +404,16 @@ export function ApplicationDetailContent({
                   </Button>
                 ) : (
                   <>
-                    <Button variant="outline" className="w-full" size="sm" disabled>
-                      <BotIcon className="size-4" />
-                      Ask TeddyAI
+                    <Button
+                      variant="outline"
+                      className="w-full text-foreground/80 hover:text-foreground"
+                      size="sm"
+                      onClick={() => {
+                        setActiveTab("ai")
+                      }}
+                    >
+                      <BotIcon className="size-4 mr-1 text-primary animate-pulse" />
+                      Teddy AI Insights
                     </Button>
                     <Button variant="outline" className="w-full" size="sm" disabled>
                       <CalendarCheckIcon className="size-4" />

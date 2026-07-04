@@ -21,9 +21,7 @@ import {
 } from "@/components/ui/select"
 import {
   Field,
-  FieldDescription,
   FieldError,
-  FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { AvatarUpload } from "@/components/profile/avatar-upload"
@@ -40,17 +38,24 @@ export function ProfileForm({ user }: ProfileFormProps) {
     register,
     handleSubmit,
     control,
-    setValue,
     formState: { errors },
   } = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email,
       phone: user.phone,
       gender: user.gender,
       address: user.address,
       avatar: user.avatar || "",
+      dateOfBirth: user.dateOfBirth ? (() => {
+        const d = new Date(user.dateOfBirth)
+        const month = String(d.getMonth() + 1).padStart(2, "0")
+        const day = String(d.getDate()).padStart(2, "0")
+        return `${d.getFullYear()}-${month}-${day}`
+      })() : "",
+      occupation: user.occupation || "",
     },
   })
 
@@ -120,23 +125,18 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Email (Read-Only) */}
+          {/* Email Address */}
           <Field>
-            <FieldLabel htmlFor="email" className="flex items-center gap-1.5">
-              Email Address <Lock className="size-3.5 text-muted-foreground" />
-            </FieldLabel>
-            <div className="relative">
-              <Input
-                id="email"
-                type="email"
-                defaultValue={user.email}
-                disabled
-                className="bg-muted/40 pr-10 text-muted-foreground cursor-not-allowed border-muted-foreground/20"
-              />
-            </div>
-            <FieldDescription>
-              Email address cannot be changed.
-            </FieldDescription>
+            <FieldLabel htmlFor="email">Email Address</FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              placeholder="johndoe@example.com"
+              disabled={isPending}
+              aria-invalid={!!errors.email}
+              {...register("email")}
+            />
+            <FieldError errors={[errors.email]} />
           </Field>
 
           {/* Phone */}
@@ -178,6 +178,34 @@ export function ProfileForm({ user }: ProfileFormProps) {
               )}
             />
             <FieldError errors={[errors.gender]} />
+          </Field>
+
+          {/* Date of Birth */}
+          <Field>
+            <FieldLabel htmlFor="dateOfBirth">Date of Birth</FieldLabel>
+            <Input
+              id="dateOfBirth"
+              type="date"
+              disabled={isPending}
+              aria-invalid={!!errors.dateOfBirth}
+              {...register("dateOfBirth")}
+            />
+            <FieldError errors={[errors.dateOfBirth]} />
+          </Field>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Occupation */}
+          <Field>
+            <FieldLabel htmlFor="occupation">Occupation</FieldLabel>
+            <Input
+              id="occupation"
+              placeholder="e.g. Software Engineer, Teacher"
+              disabled={isPending}
+              aria-invalid={!!errors.occupation}
+              {...register("occupation")}
+            />
+            <FieldError errors={[errors.occupation]} />
           </Field>
 
           {/* Role (Read-Only) */}

@@ -28,20 +28,34 @@ export async function updateProfileAction(
     }
   }
 
-  const { firstName, lastName, phone, gender, address, avatar } = parsed.data
+  const { firstName, lastName, email, phone, gender, address, avatar, dateOfBirth, occupation } = parsed.data
 
   try {
     // Check if the phone is already taken by another user
-    const existingUser = await prisma.user.findFirst({
+    const existingPhone = await prisma.user.findFirst({
       where: {
         phone,
         id: { not: user.id },
       },
     })
-    if (existingUser) {
+    if (existingPhone) {
       return {
         success: false,
         message: "This phone number is already registered by another user.",
+      }
+    }
+
+    // Check if the email is already taken by another user
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email,
+        id: { not: user.id },
+      },
+    })
+    if (existingEmail) {
+      return {
+        success: false,
+        message: "This email address is already registered by another user.",
       }
     }
 
@@ -50,10 +64,13 @@ export async function updateProfileAction(
       data: {
         firstName,
         lastName,
+        email,
         phone,
         gender,
         address,
         avatar: avatar || "",
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        occupation: occupation ?? null,
       },
     })
 

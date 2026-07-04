@@ -314,6 +314,7 @@ model AdoptionApplication {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   deletedAt             DateTime?
+  aiInsight             ApplicationAIInsight?
   
   @@index([petId])
   @@index([applicantId])
@@ -331,4 +332,20 @@ model ApplicationDocument {
   updatedAt   DateTime @updatedAt
   
   @@index([applicationId])
+}
+
+model ApplicationAIInsight {
+  id                   String              @id @default(uuid())
+  applicationId        String              @unique
+  application          AdoptionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  model                String
+  promptVersion        String
+  summary              String              @db.Text
+  strengths            Json
+  semiFlags            Json
+  redFlags             Json
+  recommendedQuestions Json
+  suitabilityScore     Int
+  rawResponse          String              @db.Text
+  createdAt            DateTime            @default(now())
 }
