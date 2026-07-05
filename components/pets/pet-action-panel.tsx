@@ -75,10 +75,12 @@ export function PetActionPanel({
             <Button
               size="lg"
               className="w-full"
-              onClick={() => comingSoon("Apply to adopt")}
+              asChild
             >
-              <HeartIcon />
-              Apply to adopt
+              <Link href={`/pets/${pet.id}/apply`}>
+                <HeartIcon />
+                Apply to adopt
+              </Link>
             </Button>
           )
         ) : null}

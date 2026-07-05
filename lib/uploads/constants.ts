@@ -21,3 +21,6 @@ export const SHELTER_LOGO_PUBLIC_PREFIX = "/uploads/shelters"
 
 export const PET_IMAGE_UPLOAD_DIR = "public/uploads/pets"
 export const PET_IMAGE_PUBLIC_PREFIX = "/uploads/pets"
+
+export const AVATAR_UPLOAD_DIR = "public/uploads/avatars"
+export const AVATAR_PUBLIC_PREFIX = "/uploads/avatars"

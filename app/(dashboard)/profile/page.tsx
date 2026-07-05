@@ -1,16 +1,17 @@
 import { redirect } from "next/navigation"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getCurrentUser } from "@/lib/auth/session"
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
-}
+import { getUserProfile } from "@/lib/services/user.service"
+import { PageHeader } from "@/components/dashboard/page-header"
+import { ProfileForm } from "@/components/profile/profile-form"
+import { PasswordForm } from "@/components/profile/password-form"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 export default async function ProfilePage() {
   const user = await getCurrentUser()
@@ -19,54 +20,46 @@ export default async function ProfilePage() {
     redirect("/login")
   }
 
-  const name = `${user.firstName} ${user.lastName}`
+  const profile = await getUserProfile(user.id)
+
+  if (!profile) {
+    redirect("/login")
+  }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Profile Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Static account settings preview. Editing arrives in a later MVP.
-        </p>
+    <div className="flex-1 space-y-6 p-4 md:p-6 max-w-7xl mx-auto w-full">
+      <PageHeader
+        title="Profile Settings"
+        subtitle="Manage your personal details, avatar, and security preferences."
+      />
+
+      <div className="grid gap-6 lg:grid-cols-3 items-start">
+        {/* Personal Information */}
+        <Card className="shadow-sm border lg:col-span-2">
+          <CardHeader className="p-6 pb-4 border-b">
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>
+              Update your personal details, contact info, and gender.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ProfileForm user={profile} />
+          </CardContent>
+        </Card>
+
+        {/* Change Password */}
+        <Card className="shadow-sm border lg:col-span-1">
+          <CardHeader className="p-6 pb-4 border-b">
+            <CardTitle>Change Password</CardTitle>
+            <CardDescription>
+              Update your account password to keep your account secure.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <PasswordForm />
+          </CardContent>
+        </Card>
       </div>
-      <section className="rounded-lg border p-6">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <Avatar className="size-20 rounded-xl">
-            <AvatarImage src={user.avatar || undefined} alt={name} />
-            <AvatarFallback className="rounded-xl text-lg">
-              {getInitials(name)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0">
-            <h2 className="text-lg font-medium">{name}</h2>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Role: {user.role.replace("_", " ")}
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="rounded-lg border p-6">
-        <h2 className="text-base font-medium">Basic Account Information</h2>
-        <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-          <div>
-            <p className="text-muted-foreground">First name</p>
-            <p className="font-medium">{user.firstName}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Last name</p>
-            <p className="font-medium">{user.lastName}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Email</p>
-            <p className="font-medium">{user.email}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Role</p>
-            <p className="font-medium">{user.role.replace("_", " ")}</p>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

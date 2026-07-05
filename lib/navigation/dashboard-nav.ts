@@ -107,6 +107,7 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
       items: [
         { title: "All Applications", url: "/applications" },
         { title: "Active Applications", url: "/applications/active" },
+        { title: "Draft Applications", url: "/applications/draft" },
         { title: "Application History", url: "/applications/history" },
       ],
     },

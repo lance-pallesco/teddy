@@ -208,3 +208,58 @@ export async function listShelterStaff(options?: { shelterId?: string }) {
     createdAt: user.createdAt,
   }))
 }
+
+export type UserProfile = {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  gender: Gender
+  address: string
+  avatar: string
+  role: Role
+  dateOfBirth: Date | null
+  occupation: string | null
+  isActive: boolean
+  shelterId: string | null
+  shelterName: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      gender: true,
+      address: true,
+      avatar: true,
+      role: true,
+      dateOfBirth: true,
+      occupation: true,
+      isActive: true,
+      shelterId: true,
+      createdAt: true,
+      updatedAt: true,
+      shelter: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  })
+
+  if (!user) return null
+
+  return {
+    ...user,
+    shelterName: user.shelter?.name ?? null,
+  }
+}
+

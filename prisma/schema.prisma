@@ -54,28 +54,145 @@ enum PetGender {
   FEMALE
 }
 
+enum AdoptionStatus {
+  DRAFT
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum AdoptionStep {
+  VERIFY_PERSONAL_DETAILS
+  LIVING_ENVIRONMENT
+  HOUSEHOLD_LIFESTYLE
+  PET_EXPERIENCE
+  ADOPTION_COMMITMENT
+  AGREEMENTS
+}
+
+enum HousingType {
+  HOUSE
+  APARTMENT
+  CONDO
+  TOWNHOUSE
+  OTHER
+}
+
+enum OwnershipStatus {
+  OWN
+  RENT
+  OTHER
+}
+
+enum LandlordAllowsPets {
+  YES
+  NO
+  NOT_APPLICABLE
+}
+
+enum PropertySize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+enum PetAloneTime {
+  LESS_THAN_4_HOURS
+  BETWEEN_4_AND_8_HOURS
+  MORE_THAN_8_HOURS
+  NEVER_ALONE
+}
+
+enum PrimaryCaregiver {
+  MYSELF
+  SPOUSE
+  PARENT
+  SHARED_RESPONSIBILITY
+  OTHER
+}
+
+enum CareWhenAway {
+  FAMILY_MEMBER
+  FRIEND
+  PET_SITTER
+  BOARDING_FACILITY
+  OTHER
+}
+
+enum PetPrimaryLocation {
+  INDOORS
+  OUTDOORS
+  BOTH
+}
+
+enum PetSleepLocation {
+  CRATE_OR_BED
+  INDOORS
+  OUTDOORS
+  GARAGE
+  OTHER
+}
+
+enum ExperienceWithSpecies { 
+  FIRST_TIME
+  SOME_EXPERIENCE
+  VERY_EXPERIENCED
+}
+
+enum HeardAboutPetFrom {
+  PLATFORM_BROWSE
+  SHELTER_VISIT
+  SOCIAL_MEDIA
+  FRIEND_OR_FAMILY_REFERRAL
+  VETERINARIAN
+  OTHER
+}
+
+enum ApplicationDocumentType {
+  GOVERNMENT_ID
+  PROOF_OF_ADDRESS
+  SIGNATURE
+  OTHER
+}
+
+enum GovernmentIDType {
+  DRIVER_LICENSE
+  PASSPORT
+  NATIONAL_ID
+  TAX_ID
+  SOCIAL_SECURITY_NUMBER
+}
+
 model User {
-  id        String   @id @default(uuid())
-  firstName String
-  lastName  String
-  phone     String   @unique
-  address   String
-  gender    Gender
-  avatar    String
-  role      Role
-  isActive  Boolean  @default(true)
-  email     String   @unique
-  password  String
+  id          String   @id @default(uuid())
+  firstName   String
+  lastName    String
+  phone       String   @unique
+  address     String
+  gender      Gender
+  avatar      String
+  role        Role
+  dateOfBirth DateTime?
+  occupation  String?
+  isActive    Boolean  @default(true)
+  email       String   @unique
+  password    String
   failedLoginAttempts Int @default(0)
   lockedUntil DateTime?
-  shelterId String?  
-  shelter   Shelter? @relation(fields: [shelterId], references: [id])
+  shelterId   String?  
+  shelter     Shelter? @relation(fields: [shelterId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   pets      Pet[]   @relation("PostedPets")
   adoptedPets Pet[] @relation("AdoptedPets")
+  applications AdoptionApplication[] @relation("Applicant")
+  reviewedApplications AdoptionApplication[] @relation("ReviewedApplications")
+
   @@index([role])
   @@index([shelterId])
   @@index([isActive])
@@ -146,6 +263,8 @@ model Pet {
   status      PetStatus @default(AVAILABLE)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  adoption AdoptionApplication[]
   
   @@index([species])
   @@index([size])
@@ -164,4 +283,69 @@ model PetImage {
   updatedAt DateTime @updatedAt
   
   @@index([petId])
+}
+
+model AdoptionApplication {
+  id                    String   @id @default(uuid())
+  petId                 String
+  pet                   Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  applicantId           String
+  applicant             User     @relation("Applicant", fields: [applicantId], references: [id])
+  currentStep           Int      @default(1) // 1: Verify Details, 2: Living Environment, 3: Household & Lifestyle, 4: Pet Experience & Current Pets, 5: Adoption Motivation & Commitment
+  // Shape : { housingType: string, ownershipStatus: string, landlordAllowsPets: boolean, propertySize: string, isPetFriendly: boolean }
+  livingEnvironment     Json? 
+  // Shape: { numberOfAdults: number, numberOfChildren: number, childrenAges?: string, householdHasAllergies: boolean, allergyDetails?: string, hoursAloneDaily: number, careWhenAway: string, petPrimaryLocation: string, petSleepLocation: string, petSleepLocationDetails?: string, primaryCaregiver: string, primaryCaregiverDetails?: string}
+  householdLifestyle    Json?
+  // Shape : { hasCurrentPets: boolean, currentPets?: Array<{ species: PetSpecies, breed?: string, age: string, sex: PetGender }>, currentPetsVaccinated?: boolean, ownedPetsPast5Years: boolean, pastPetHistory?: string, hasSurrenderedPets: boolean, surrenderPetsDetails?: string, experienceWithSpecies?: boolean, heardAboutPetFrom?: string }
+  petExperience         Json?
+  // Shape: { whyThisPet: string, typicalDayForPet: string, financiallyPrepared: string, timeCommitment: string, commitToVetCare: boolean, additionalInfo?: string }
+  adoptionCommitment    Json?
+  // Shape: { certifyTruthful: boolean, certifyResponsible: boolean, certifyComplyWithLaws: boolean, certifyNoAbuseNeglect: boolean, certifyNoAbandonment: boolean, agreeToHomeVisit: boolean, agreeAt: string (ISO) }
+  agreements            Json?
+  documents             ApplicationDocument[]
+  signatureUrl          String?
+  reviewNotes           String? @db.Text
+  rejectionReason       String?
+  reviewedById          String?
+  reviewedBy            User?   @relation("ReviewedApplications", fields: [reviewedById], references: [id])
+  reviewedAt            DateTime? 
+  status                AdoptionStatus @default(DRAFT)
+  submittedAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
+  aiInsight             ApplicationAIInsight?
+  
+  @@index([petId])
+  @@index([applicantId])
+}
+
+model ApplicationDocument {
+  id          String   @id @default(uuid())
+  type        ApplicationDocumentType
+  idType      GovernmentIDType
+  name        String
+  url         String
+  applicationId String
+  application   AdoptionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([applicationId])
+}
+
+model ApplicationAIInsight {
+  id                   String              @id @default(uuid())
+  applicationId        String              @unique
+  application          AdoptionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  model                String
+  promptVersion        String
+  summary              String              @db.Text
+  strengths            Json
+  semiFlags            Json
+  redFlags             Json
+  recommendedQuestions Json
+  suitabilityScore     Int
+  rawResponse          String              @db.Text
+  createdAt            DateTime            @default(now())
 }
