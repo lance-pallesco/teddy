@@ -200,10 +200,10 @@ export function AIInsightsPanel({
                   </CardDescription>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={handleGenerate} className="h-8">
+              {/* <Button variant="outline" size="sm" onClick={handleGenerate} className="h-8">
                 <RefreshCw className="size-3.5 mr-1.5" />
                 Regenerate
-              </Button>
+              </Button> */}
             </div>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
