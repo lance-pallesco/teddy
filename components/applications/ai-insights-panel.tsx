@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox"
 import { generateApplicationAIInsightAction } from "@/app/(dashboard)/applications/actions/ai.action"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface AIInsight {
   id: string
@@ -48,6 +49,7 @@ export function AIInsightsPanel({
   applicationId,
   initialInsight,
 }: AIInsightsPanelProps) {
+  const router = useRouter()
   const [insight, setInsight] = useState<AIInsight | null>(initialInsight)
   const [isPending, startTransition] = useTransition()
   const [loadingStepIndex, setLoadingStepIndex] = useState(0)
@@ -84,6 +86,7 @@ export function AIInsightsPanel({
         setInsight(response.data as AIInsight)
         setAcknowledgedFlags({})
         toast.success("AI Insights updated successfully")
+        router.refresh()
       } else {
         setError(response.error)
         toast.error("AI review temporarily unavailable")
@@ -200,10 +203,10 @@ export function AIInsightsPanel({
                   </CardDescription>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={handleGenerate} className="h-8">
+              {/* <Button variant="outline" size="sm" onClick={handleGenerate} className="h-8">
                 <RefreshCw className="size-3.5 mr-1.5" />
                 Regenerate
-              </Button>
+              </Button> */}
             </div>
           </CardHeader>
           <CardContent className="p-6 space-y-6">

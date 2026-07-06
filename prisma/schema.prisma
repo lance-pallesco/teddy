@@ -192,6 +192,7 @@ model User {
   adoptedPets Pet[] @relation("AdoptedPets")
   applications AdoptionApplication[] @relation("Applicant")
   reviewedApplications AdoptionApplication[] @relation("ReviewedApplications")
+  notifications Notification[] @relation("UserNotifications")
 
   @@index([role])
   @@index([shelterId])
@@ -348,4 +349,27 @@ model ApplicationAIInsight {
   suitabilityScore     Int
   rawResponse          String              @db.Text
   createdAt            DateTime            @default(now())
+}
+
+enum NotificationType {
+  APPLICATION
+  AI
+  MEET_AND_GREET
+  SYSTEM
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String           @db.Text
+  type        NotificationType
+  isUnread    Boolean          @default(true)
+  link        String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([isUnread])
 }

@@ -19,6 +19,7 @@ import {
   deleteApplicationDraft,
 } from "@/lib/services/application.service"
 import { ApplicationDocumentType, GovernmentIDType } from "@prisma/client"
+import { notificationService } from "@/lib/services/notification.service"
 
 /**
  * Creates a new draft application or retrieves an existing one for the target pet.
@@ -322,7 +323,7 @@ export async function submitApplicationAction(applicationId: string) {
     // 2. Fetch application
     const app = await prisma.adoptionApplication.findUnique({
       where: { id: applicationId },
-      include: { documents: true },
+      include: { documents: true, pet: true },
     })
 
     if (!app) {
@@ -375,7 +376,27 @@ export async function submitApplicationAction(applicationId: string) {
     // 5. Submit application transaction
     await submitApplication(applicationId, user.id)
 
-    // TODO(MVP 4.9): Trigger notification to shelter/rescuer
+    // Trigger notification to shelter/rescuer + Admins
+    const recipientIds: string[] = []
+    if (app.pet.shelterId) {
+      const staff = await prisma.user.findMany({
+        where: { shelterId: app.pet.shelterId, role: "SHELTER_STAFF", isActive: true },
+        select: { id: true },
+      })
+      recipientIds.push(...staff.map((s) => s.id))
+    }
+    if (app.pet.postedById) {
+      recipientIds.push(app.pet.postedById)
+    }
+
+    const adopterName = `${user.firstName} ${user.lastName}`
+    await notificationService.notifyMultipleUsers(
+      recipientIds,
+      "New Application Received",
+      `New adoption application received for ${app.pet.name} from ${adopterName}.`,
+      "APPLICATION",
+      `/applications/${applicationId}`
+    )
 
     revalidatePath(`/pets/${app.petId}/apply`)
     revalidatePath("/applications/draft")
@@ -416,7 +437,7 @@ export async function withdrawApplicationAction(applicationId: string) {
     // 2. Fetch application and verify ownership and status
     const app = await prisma.adoptionApplication.findUnique({
       where: { id: applicationId },
-      select: { applicantId: true, status: true, petId: true },
+      include: { pet: true },
     })
 
     if (!app) {
@@ -439,6 +460,30 @@ export async function withdrawApplicationAction(applicationId: string) {
         deletedAt: new Date(),
       },
     })
+
+    // 4. Trigger notifications if application was submitted
+    if (app.status === "PENDING") {
+      const recipientIds: string[] = []
+      if (app.pet.shelterId) {
+        const staff = await prisma.user.findMany({
+          where: { shelterId: app.pet.shelterId, role: "SHELTER_STAFF", isActive: true },
+          select: { id: true },
+        })
+        recipientIds.push(...staff.map((s) => s.id))
+      }
+      if (app.pet.postedById) {
+        recipientIds.push(app.pet.postedById)
+      }
+
+      const adopterName = `${user.firstName} ${user.lastName}`
+      await notificationService.notifyMultipleUsers(
+        recipientIds,
+        "Application Withdrawn",
+        `${adopterName} has withdrawn their adoption application for ${app.pet.name}.`,
+        "APPLICATION",
+        `/applications/${applicationId}`
+      )
+    }
 
     revalidatePath(`/applications/${applicationId}`)
     revalidatePath("/applications")
