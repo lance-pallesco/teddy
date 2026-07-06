@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Bell, Bot, FileText, HeartPulse, Calendar, AlertCircle, Check } from "lucide-react"
+import { Bell, Bot, FileText, Calendar, AlertCircle, Check } from "lucide-react"
+import type { Notification, NotificationType } from "@prisma/client"
 
 import {
   Popover,
@@ -11,49 +12,82 @@ import {
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { INITIAL_NOTIFICATIONS, MockNotification } from "@/lib/notifications/mock-data"
 import { cn } from "@/lib/utils"
+import {
+  getNotificationsAction,
+  markNotificationAsReadAction,
+  markAllNotificationsAsReadAction,
+} from "@/app/(dashboard)/notifications/actions/notification.action"
+
+function formatRelativeTime(dateInput: Date | string) {
+  const date = new Date(dateInput)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMins / 60)
+  const diffDays = Math.floor(diffHours / 24)
+
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  return `${diffDays}d ago`
+}
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<MockNotification[]>(INITIAL_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
   const unreadCount = notifications.filter((n) => n.isUnread).length
 
-  const handleMarkAsRead = (id: string) => {
+  async function loadNotifications() {
+    const res = await getNotificationsAction()
+    if (res.success && res.data) {
+      setNotifications(res.data as Notification[])
+    }
+  }
+
+  useEffect(() => {
+    loadNotifications()
+
+    // Poll every 10 seconds to keep the notification bell reactive
+    const interval = setInterval(loadNotifications, 10000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleMarkAsRead = async (id: string) => {
+    // Optimistic UI update
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n))
     )
+    await markNotificationAsReadAction(id)
   }
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
+    // Optimistic UI update
     setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })))
+    await markAllNotificationsAsReadAction()
   }
 
-  const getIcon = (type: MockNotification["type"]) => {
+  const getIcon = (type: NotificationType) => {
     switch (type) {
       case "AI":
         return <Bot className="size-4 text-purple-500" />
       case "APPLICATION":
         return <FileText className="size-4 text-blue-500" />
-      case "MEDICAL":
-        return <HeartPulse className="size-4 text-rose-500" />
-      case "INTERVIEW":
+      case "MEET_AND_GREET":
         return <Calendar className="size-4 text-indigo-500" />
       default:
         return <AlertCircle className="size-4 text-amber-500" />
     }
   }
 
-  const getIconBg = (type: MockNotification["type"]) => {
+  const getIconBg = (type: NotificationType) => {
     switch (type) {
       case "AI":
         return "bg-purple-500/10 border-purple-500/20"
       case "APPLICATION":
         return "bg-blue-500/10 border-blue-500/20"
-      case "MEDICAL":
-        return "bg-rose-500/10 border-rose-500/20"
-      case "INTERVIEW":
+      case "MEET_AND_GREET":
         return "bg-indigo-500/10 border-indigo-500/20"
       default:
         return "bg-amber-500/10 border-amber-500/20"
@@ -142,7 +176,7 @@ export function NotificationBell() {
                       {notification.title}
                     </span>
                     <span className="text-[10px] text-muted-foreground shrink-0">
-                      {notification.timestamp}
+                      {formatRelativeTime(notification.createdAt)}
                     </span>
                   </div>
                   <p className="text-[11px] leading-relaxed text-muted-foreground line-clamp-2">

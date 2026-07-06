@@ -1,12 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Bell,
   Bot,
   FileText,
-  HeartPulse,
   Calendar,
   AlertCircle,
   CheckCircle,
@@ -15,64 +14,168 @@ import {
   ArrowLeft,
   Check,
 } from "lucide-react"
+import type { Notification, NotificationType } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { INITIAL_NOTIFICATIONS, MockNotification } from "@/lib/notifications/mock-data"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import {
+  getNotificationsAction,
+  markNotificationAsReadAction,
+  markAllNotificationsAsReadAction,
+  deleteNotificationAction,
+  clearAllNotificationsAction,
+  triggerMockStatusUpdateAction,
+  triggerMockMeetAndGreetAction,
+  getMockApplicationsAction,
+} from "@/app/(dashboard)/notifications/actions/notification.action"
+
+function formatRelativeTime(dateInput: Date | string) {
+  const date = new Date(dateInput)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMins / 60)
+  const diffDays = Math.floor(diffHours / 24)
+
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  return `${diffDays}d ago`
+}
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<MockNotification[]>(INITIAL_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  
+  // Simulation Controls State
+  const [mockApps, setMockApps] = useState<any[]>([])
+  const [selectedAppId, setSelectedAppId] = useState<string>("")
+  const [simStatus, setSimStatus] = useState<"APPROVED" | "REJECTED">("APPROVED")
+  const [simDate, setSimDate] = useState<string>("")
 
-  const handleMarkAsRead = (id: string) => {
+  async function loadNotifications() {
+    const res = await getNotificationsAction()
+    if (res.success && res.data) {
+      setNotifications(res.data as Notification[])
+    }
+  }
+
+  async function loadApps() {
+    const res = await getMockApplicationsAction()
+    if (res.success && res.data) {
+      const apps = res.data as any[]
+      setMockApps(apps)
+      if (apps.length > 0 && !selectedAppId) {
+        setSelectedAppId(apps[0].id)
+      }
+    }
+  }
+
+  useEffect(() => {
+    loadNotifications()
+    loadApps()
+  }, [])
+
+  const handleMarkAsRead = async (id: string) => {
+    // Optimistic UI update
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n))
     )
-    toast.success("Notification marked as read")
+    const res = await markNotificationAsReadAction(id)
+    if (res.success) {
+      toast.success("Notification marked as read")
+    } else {
+      toast.error(res.error ?? "Failed to update notification")
+      loadNotifications()
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    // Optimistic UI update
     setNotifications((prev) => prev.filter((n) => n.id !== id))
-    toast.success("Notification deleted")
+    const res = await deleteNotificationAction(id)
+    if (res.success) {
+      toast.success("Notification deleted")
+    } else {
+      toast.error(res.error ?? "Failed to delete notification")
+      loadNotifications()
+    }
   }
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
+    // Optimistic UI update
     setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })))
-    toast.success("All notifications marked as read")
+    const res = await markAllNotificationsAsReadAction()
+    if (res.success) {
+      toast.success("All notifications marked as read")
+    } else {
+      toast.error(res.error ?? "Failed to update notifications")
+      loadNotifications()
+    }
   }
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     setNotifications([])
-    toast.success("All notifications cleared")
+    const res = await clearAllNotificationsAction()
+    if (res.success) {
+      toast.success("All notifications cleared")
+    } else {
+      toast.error(res.error ?? "Failed to clear notifications")
+      loadNotifications()
+    }
   }
 
-  const getIcon = (type: MockNotification["type"]) => {
+  const handleSimulateStatus = async () => {
+    if (!selectedAppId) {
+      toast.error("Please select an application first")
+      return
+    }
+    const res = await triggerMockStatusUpdateAction(selectedAppId, simStatus)
+    if (res.success) {
+      toast.success(`Simulated application status updated to ${simStatus}!`)
+      loadNotifications()
+    } else {
+      toast.error(res.error ?? "Failed to simulate status update")
+    }
+  }
+
+  const handleSimulateMeetAndGreet = async () => {
+    if (!selectedAppId || !simDate) {
+      toast.error("Please select an application and a date/time")
+      return
+    }
+    const res = await triggerMockMeetAndGreetAction(selectedAppId, simDate)
+    if (res.success) {
+      toast.success("Simulated Meet & Greet scheduled successfully!")
+      loadNotifications()
+    } else {
+      toast.error(res.error ?? "Failed to simulate Meet & Greet")
+    }
+  }
+
+  const getIcon = (type: NotificationType) => {
     switch (type) {
       case "AI":
         return <Bot className="size-5 text-purple-500" />
       case "APPLICATION":
         return <FileText className="size-5 text-blue-500" />
-      case "MEDICAL":
-        return <HeartPulse className="size-5 text-rose-500" />
-      case "INTERVIEW":
+      case "MEET_AND_GREET":
         return <Calendar className="size-5 text-indigo-500" />
       default:
         return <AlertCircle className="size-5 text-amber-500" />
     }
   }
 
-  const getIconBg = (type: MockNotification["type"]) => {
+  const getIconBg = (type: NotificationType) => {
     switch (type) {
       case "AI":
         return "bg-purple-500/10 border-purple-500/20"
       case "APPLICATION":
         return "bg-blue-500/10 border-blue-500/20"
-      case "MEDICAL":
-        return "bg-rose-500/10 border-rose-500/20"
-      case "INTERVIEW":
+      case "MEET_AND_GREET":
         return "bg-indigo-500/10 border-indigo-500/20"
       default:
         return "bg-amber-500/10 border-amber-500/20"
@@ -82,13 +185,13 @@ export default function NotificationsPage() {
   // Filter notifications
   const unreadNotifications = notifications.filter((n) => n.isUnread)
   const applicationNotifications = notifications.filter(
-    (n) => n.type === "APPLICATION" || n.type === "INTERVIEW"
+    (n) => n.type === "APPLICATION" || n.type === "MEET_AND_GREET"
   )
   const systemAlertNotifications = notifications.filter(
-    (n) => n.type === "SYSTEM" || n.type === "AI" || n.type === "MEDICAL"
+    (n) => n.type === "SYSTEM" || n.type === "AI"
   )
 
-  const renderNotificationList = (list: MockNotification[]) => {
+  const renderNotificationList = (list: Notification[]) => {
     if (list.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed rounded-xl bg-muted/10">
@@ -104,7 +207,7 @@ export default function NotificationsPage() {
     }
 
     return (
-      <div className="divide-y divide-border border rounded-xl overflow-hidden bg-card">
+      <div className="divide-y divide-border border rounded-xl overflow-hidden bg-card shadow-sm">
         {list.map((notification) => (
           <div
             key={notification.id}
@@ -140,14 +243,14 @@ export default function NotificationsPage() {
                   {notification.title}
                 </h4>
                 <span className="text-xs text-muted-foreground shrink-0">
-                  {notification.timestamp}
+                  {formatRelativeTime(notification.createdAt)}
                 </span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground/90">
                 {notification.description}
               </p>
 
-              {/* Action Link Mock */}
+              {/* Action Link */}
               {notification.link && (
                 <div className="pt-2">
                   <Button asChild variant="outline" size="sm" className="h-7 text-xs px-2.5">
@@ -216,7 +319,7 @@ export default function NotificationsPage() {
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight">Notification Center</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Review updates, AI recommendations, system events, and interview schedules.
+          Review updates, AI recommendations, system events, and meet & greet schedules.
         </p>
       </div>
 
@@ -248,13 +351,13 @@ export default function NotificationsPage() {
               value="applications"
               className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
             >
-              Applications
+              Applications & Meetings
             </TabsTrigger>
             <TabsTrigger
               value="system"
               className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
             >
-              System & Alerts
+              System & AI
             </TabsTrigger>
           </TabsList>
         </div>
@@ -272,6 +375,73 @@ export default function NotificationsPage() {
           {renderNotificationList(systemAlertNotifications)}
         </TabsContent>
       </Tabs>
+
+      {/* Sandbox Simulation Controls Card */}
+      {mockApps.length > 0 && (
+        <Card className="border-amber-500/20 bg-amber-500/5 mt-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500">
+              🛠️ Sandbox Simulation Controls
+            </CardTitle>
+            <CardDescription className="text-xs text-amber-700/80 dark:text-amber-400/80">
+              Trigger events to generate real notifications across Adopters, Reviewers, and Admins in the DB.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-foreground/90">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Application Selector */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground">Select Target Application</label>
+                <select
+                  value={selectedAppId}
+                  onChange={(e) => setSelectedAppId(e.target.value)}
+                  className="w-full rounded-md border bg-background px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary text-foreground"
+                >
+                  {mockApps.map((app) => (
+                    <option key={app.id} value={app.id}>
+                      {app.applicant.firstName} - {app.pet.name} ({app.id.substring(0, 8)}...)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Update Simulation */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground block">Simulate Application Decision</label>
+                <div className="flex gap-2 items-center">
+                  <select
+                    value={simStatus}
+                    onChange={(e) => setSimStatus(e.target.value as "APPROVED" | "REJECTED")}
+                    className="rounded-md border bg-background px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary text-foreground"
+                  >
+                    <option value="APPROVED">Approve</option>
+                    <option value="REJECTED">Reject</option>
+                  </select>
+                  <Button variant="outline" size="sm" onClick={handleSimulateStatus} className="h-8 text-xs bg-background text-foreground hover:bg-muted">
+                    Simulate Status
+                  </Button>
+                </div>
+              </div>
+
+              {/* Meet & Greet Simulation */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground block">Simulate Meet & Greet</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="datetime-local"
+                    value={simDate}
+                    onChange={(e) => setSimDate(e.target.value)}
+                    className="rounded-md border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-primary text-foreground"
+                  />
+                  <Button variant="outline" size="sm" onClick={handleSimulateMeetAndGreet} className="h-8 text-xs bg-background text-foreground hover:bg-muted">
+                    Schedule M&G
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

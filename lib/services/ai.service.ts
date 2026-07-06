@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { aiClient } from "@/lib/ai/client"
 import { SYSTEM_PROMPT, buildApplicationAnalysisPrompt } from "@/lib/ai/prompts"
 import { buildApplicationContext } from "@/lib/ai/context-builder"
+import { notificationService } from "@/lib/services/notification.service"
 
 export class AIService {
   private defaultModel: string
@@ -90,6 +91,34 @@ export class AIService {
         createdAt: new Date(),
       },
     })
+
+    // 6. Transition application status to UNDER_REVIEW if it is currently PENDING
+    const application = await prisma.adoptionApplication.findUnique({
+      where: { id: applicationId },
+      select: {
+        status: true,
+        applicantId: true,
+        pet: {
+          select: { name: true },
+        },
+      },
+    })
+
+    if (application && application.status === "PENDING") {
+      await prisma.adoptionApplication.update({
+        where: { id: applicationId },
+        data: { status: "UNDER_REVIEW" },
+      })
+
+      // Trigger Notification: Application Under Review
+      await notificationService.createNotification(
+        application.applicantId,
+        "Application Under Review",
+        `Your application for ${application.pet.name} is now under active review.`,
+        "AI",
+        `/applications/${applicationId}`
+      )
+    }
 
     return insight
   }
