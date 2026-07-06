@@ -174,6 +174,7 @@ export const ADOPTION_STATUS_LABELS: Record<AdoptionStatus, string> = {
   DRAFT: "Draft",
   PENDING: "Pending Review",
   UNDER_REVIEW: "Under Review",
+  INTERVIEW_IN_PROGRESS: "Interview In Progress",
   APPROVED: "Approved",
   REJECTED: "Rejected",
   WITHDRAWN: "Withdrawn",

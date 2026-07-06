@@ -58,9 +58,21 @@ enum AdoptionStatus {
   DRAFT
   PENDING
   UNDER_REVIEW
+  INTERVIEW_IN_PROGRESS
   APPROVED
   REJECTED
   WITHDRAWN
+}
+
+enum ChatMode {
+  MANUAL
+  AI_ASSISTED
+}
+
+enum ChatStatus {
+  ACTIVE
+  AWAITING
+  COMPLETED
 }
 
 enum AdoptionStep {
@@ -193,6 +205,7 @@ model User {
   applications AdoptionApplication[] @relation("Applicant")
   reviewedApplications AdoptionApplication[] @relation("ReviewedApplications")
   notifications Notification[] @relation("UserNotifications")
+  chatMessages  ChatMessage[]
 
   @@index([role])
   @@index([shelterId])
@@ -316,6 +329,12 @@ model AdoptionApplication {
   updatedAt             DateTime @updatedAt
   deletedAt             DateTime?
   aiInsight             ApplicationAIInsight?
+  chatMode              ChatMode?
+  chatStatus            ChatStatus?
+  chatQuestions         Json?
+  chatQuestionIndex     Int                     @default(0)
+  aiPostInterviewSummary Json?
+  chatMessages          ChatMessage[]
   
   @@index([petId])
   @@index([applicantId])
@@ -372,4 +391,20 @@ model Notification {
 
   @@index([userId])
   @@index([isUnread])
+}
+
+model ChatMessage {
+  id              String              @id @default(uuid())
+  applicationId   String
+  application     AdoptionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  senderId        String?
+  sender          User?               @relation(fields: [senderId], references: [id])
+  senderName      String
+  senderRole      String              // "ADOPTER" | "REVIEWER" | "SYSTEM" | "AI"
+  content         String              @db.Text
+  isPinned        Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+
+  @@index([applicationId])
+  @@index([senderId])
 }

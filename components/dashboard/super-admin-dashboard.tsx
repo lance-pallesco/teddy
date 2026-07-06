@@ -146,6 +146,100 @@ export function SuperAdminDashboard() {
           </Suspense>
         </div>
       </div>
+
+      {/* Analytics Charts Section */}
+      <div className="grid gap-6 md:grid-cols-2 pt-4">
+        <PlatformGrowthChart />
+        <AdoptionFunnelChart />
+      </div>
     </div>
+  )
+}
+
+function PlatformGrowthChart() {
+  return (
+    <Card className="border border-primary/10 shadow-xs">
+      <CardHeader>
+        <CardTitle className="text-sm font-semibold">Platform Growth (Past 6 Months)</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center">
+        <svg className="w-full h-[200px]" viewBox="0 0 500 200">
+          <line x1="50" y1="30" x2="450" y2="30" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="4 4" />
+          <line x1="50" y1="80" x2="450" y2="80" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="4 4" />
+          <line x1="50" y1="130" x2="450" y2="130" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="4 4" />
+          <line x1="50" y1="170" x2="450" y2="170" stroke="currentColor" strokeOpacity="0.2" />
+
+          <text x="15" y="35" className="text-[10px] fill-muted-foreground font-medium">1,000</text>
+          <text x="15" y="85" className="text-[10px] fill-muted-foreground font-medium">500</text>
+          <text x="15" y="135" className="text-[10px] fill-muted-foreground font-medium">250</text>
+          <text x="25" y="175" className="text-[10px] fill-muted-foreground font-medium">0</text>
+
+          <defs>
+            <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M 50,170 L 50,165 L 130,150 L 210,130 L 290,105 L 370,75 L 450,45 L 450,170 Z"
+            fill="url(#growthGrad)"
+          />
+
+          <path
+            d="M 50,165 L 130,150 L 210,130 L 290,105 L 370,75 L 450,45"
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+
+          <circle cx="50" cy="165" r="4" className="fill-background stroke-primary stroke-2" />
+          <circle cx="130" cy="150" r="4" className="fill-background stroke-primary stroke-2" />
+          <circle cx="210" cy="130" r="4" className="fill-background stroke-primary stroke-2" />
+          <circle cx="290" cy="105" r="4" className="fill-background stroke-primary stroke-2" />
+          <circle cx="370" cy="75" r="4" className="fill-background stroke-primary stroke-2" />
+          <circle cx="450" cy="45" r="4" className="fill-background stroke-primary stroke-2" />
+
+          <text x="50" y="190" className="text-[10px] fill-muted-foreground font-medium" textAnchor="middle">Jan</text>
+          <text x="130" y="190" className="text-[10px] fill-muted-foreground font-medium" textAnchor="middle">Feb</text>
+          <text x="210" y="190" className="text-[10px] fill-muted-foreground font-medium" textAnchor="middle">Mar</text>
+          <text x="290" y="190" className="text-[10px] fill-muted-foreground font-medium" textAnchor="middle">Apr</text>
+          <text x="370" y="190" className="text-[10px] fill-muted-foreground font-medium" textAnchor="middle">May</text>
+          <text x="450" y="190" className="text-[10px] fill-muted-foreground font-medium" textAnchor="middle">Jun</text>
+        </svg>
+      </CardContent>
+    </Card>
+  )
+}
+
+function AdoptionFunnelChart() {
+  const steps = [
+    { stage: "Submitted", count: 256, percent: 100, color: "bg-primary" },
+    { stage: "Under Review", count: 184, percent: 72, color: "bg-amber-500" },
+    { stage: "Interviews", count: 96, percent: 37, color: "bg-purple-500" },
+    { stage: "Approved M&G", count: 48, percent: 18, color: "bg-emerald-500" },
+  ]
+  return (
+    <Card className="border border-primary/10 shadow-xs">
+      <CardHeader>
+        <CardTitle className="text-sm font-semibold">Adoption Process Funnel</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {steps.map((step) => (
+          <div key={step.stage} className="space-y-1.5">
+            <div className="flex justify-between items-center text-xs">
+              <span className="font-semibold text-foreground">{step.stage}</span>
+              <span className="text-muted-foreground font-medium">{step.count} ({step.percent}%)</span>
+            </div>
+            <div className="w-full bg-muted rounded-lg h-5 overflow-hidden relative flex items-center">
+              <div
+                className={`${step.color} h-full rounded-lg transition-all duration-500`}
+                style={{ width: `${step.percent}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   )
 }

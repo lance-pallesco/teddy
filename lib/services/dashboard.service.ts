@@ -180,6 +180,7 @@ export async function getAdopterStats(userId: string) {
     DRAFT: 0,
     PENDING: 0,
     UNDER_REVIEW: 0,
+    INTERVIEW_IN_PROGRESS: 0,
     APPROVED: 0,
     REJECTED: 0,
     WITHDRAWN: 0,

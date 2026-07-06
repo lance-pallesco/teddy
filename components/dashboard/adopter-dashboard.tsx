@@ -1,14 +1,17 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { ClipboardList, FileHeart, CalendarRange, ArrowRight, Search, HeartHandshake } from "lucide-react"
+import { ClipboardList, FileHeart, CalendarRange, ArrowRight, Search, HeartHandshake, FileText, CheckCircle } from "lucide-react"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatsGridSkeleton, RecentPetsSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { PetCard } from "@/components/pets/pet-card"
 import { getAdopterStats } from "@/lib/services/dashboard.service"
 import { getPets } from "@/lib/services/pet.service"
+import { prisma } from "@/lib/prisma"
+import { ApplicationTimeline } from "@/components/applications/application-timeline"
 
 type AdopterDashboardProps = {
   userId: string
@@ -17,43 +20,124 @@ type AdopterDashboardProps = {
 async function AdopterStatsGrid({ userId }: { userId: string }) {
   const stats = await getAdopterStats(userId)
 
+  // Fetch draft applications for reminders
+  const drafts = await prisma.adoptionApplication.findMany({
+    where: { applicantId: userId, status: "DRAFT", deletedAt: null },
+    include: { pet: true },
+    orderBy: { updatedAt: "desc" },
+    take: 1,
+  })
+
+  // Fetch active applications to show progress timelines
+  const activeApps = await prisma.adoptionApplication.findMany({
+    where: {
+      applicantId: userId,
+      deletedAt: null,
+      status: { in: ["PENDING", "UNDER_REVIEW", "INTERVIEW_IN_PROGRESS"] },
+    },
+    include: { pet: true },
+    orderBy: { updatedAt: "desc" },
+    take: 3,
+  })
+
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      {/* Card 1: Active Applications */}
-      <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Active Applications</CardTitle>
-          <ClipboardList className="size-4 text-primary" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">{stats.applications.PENDING}</div>
-          <p className="text-xs text-muted-foreground mt-1">Applications currently pending review</p>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Section 0: Draft Reminder Banner */}
+      {drafts.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xl shrink-0">📝</span>
+            <div>
+              <p className="text-xs font-bold text-foreground">Draft Application Reminder</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                You started an application for <strong>{drafts[0].pet.name}</strong> but didn't finish. Resume to complete your submission.
+              </p>
+            </div>
+          </div>
+          <Button asChild size="sm" variant="default" className="w-full sm:w-auto text-xs shrink-0 bg-amber-500 hover:bg-amber-600 hover:text-white text-white">
+            <Link href={`/pets/${drafts[0].pet.id}/apply`}>Resume Application</Link>
+          </Button>
+        </div>
+      )}
 
-      {/* Card 2: Under Review */}
-      <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Under Review</CardTitle>
-          <FileHeart className="size-4 text-primary" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">{stats.applications.UNDER_REVIEW}</div>
-          <p className="text-xs text-muted-foreground mt-1">Applications being actively evaluated</p>
-        </CardContent>
-      </Card>
+      {/* Grid Stats */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Applications</CardTitle>
+            <ClipboardList className="size-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.applications.PENDING}</div>
+            <p className="text-xs text-muted-foreground mt-1">Applications currently pending review</p>
+          </CardContent>
+        </Card>
 
-      {/* Card 3: Interview Scheduled */}
-      <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Interviews Scheduled</CardTitle>
-          <CalendarRange className="size-4 text-primary" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">{stats.interviewsScheduled}</div>
-          <p className="text-xs text-muted-foreground mt-1">Scheduled meet & greets or discussions</p>
-        </CardContent>
-      </Card>
+        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Under Review / Chat</CardTitle>
+            <FileHeart className="size-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {stats.applications.UNDER_REVIEW + stats.applications.INTERVIEW_IN_PROGRESS}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Applications in review or discussion</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Approved</CardTitle>
+            <CalendarRange className="size-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.applications.APPROVED}</div>
+            <p className="text-xs text-muted-foreground mt-1">Adoption requests approved</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Active Application Timelines */}
+      {activeApps.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold tracking-tight">Active Applications Progress</h2>
+          <div className="space-y-4">
+            {activeApps.map((app) => (
+              <Card key={app.id} className="border border-primary/10 shadow-xs">
+                <CardHeader className="p-4 border-b bg-muted/10 flex flex-row items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-sm font-bold text-foreground">
+                      Application for {app.pet.name}
+                    </CardTitle>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      Submitted on {app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : new Date(app.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {app.status === "INTERVIEW_IN_PROGRESS" && (
+                      <Button asChild size="xs" className="h-6 text-[10px] bg-primary rounded-lg">
+                        <Link href={`/applications/${app.id}/chat`}>Enter Chat Room</Link>
+                      </Button>
+                    )}
+                    <Button asChild size="xs" variant="outline" className="h-6 text-[10px]">
+                      <Link href={`/applications/${app.id}`}>View Details</Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5">
+                  <ApplicationTimeline
+                    applicationStatus={app.status}
+                    createdAt={app.createdAt}
+                    submittedAt={app.submittedAt}
+                    reviewedAt={app.reviewedAt}
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
