@@ -12,6 +12,7 @@ import { getAdopterStats } from "@/lib/services/dashboard.service"
 import { getPets } from "@/lib/services/pet.service"
 import { prisma } from "@/lib/prisma"
 import { ApplicationTimeline } from "@/components/applications/application-timeline"
+import { TeddyBanner } from "@/components/dashboard/teddy-banner"
 
 type AdopterDashboardProps = {
   userId: string
@@ -26,18 +27,6 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
     include: { pet: true },
     orderBy: { updatedAt: "desc" },
     take: 1,
-  })
-
-  // Fetch active applications to show progress timelines
-  const activeApps = await prisma.adoptionApplication.findMany({
-    where: {
-      applicantId: userId,
-      deletedAt: null,
-      status: { in: ["PENDING", "UNDER_REVIEW", "INTERVIEW_IN_PROGRESS"] },
-    },
-    include: { pet: true },
-    orderBy: { updatedAt: "desc" },
-    take: 3,
   })
 
   return (
@@ -97,47 +86,6 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
           </CardContent>
         </Card>
       </div>
-
-      {/* Active Application Timelines */}
-      {activeApps.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-base font-bold tracking-tight">Active Applications Progress</h2>
-          <div className="space-y-4">
-            {activeApps.map((app) => (
-              <Card key={app.id} className="border border-primary/10 shadow-xs">
-                <CardHeader className="p-4 border-b bg-muted/10 flex flex-row items-center justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-sm font-bold text-foreground">
-                      Application for {app.pet.name}
-                    </CardTitle>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      Submitted on {app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : new Date(app.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {app.status === "INTERVIEW_IN_PROGRESS" && (
-                      <Button asChild size="xs" className="h-6 text-[10px] bg-primary rounded-lg">
-                        <Link href={`/applications/${app.id}/chat`}>Enter Chat Room</Link>
-                      </Button>
-                    )}
-                    <Button asChild size="xs" variant="outline" className="h-6 text-[10px]">
-                      <Link href={`/applications/${app.id}`}>View Details</Link>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-5">
-                  <ApplicationTimeline
-                    applicationStatus={app.status}
-                    createdAt={app.createdAt}
-                    submittedAt={app.submittedAt}
-                    reviewedAt={app.reviewedAt}
-                  />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -172,10 +120,15 @@ async function RecentPetsGrid({ userId }: { userId: string }) {
 export function AdopterDashboard({ userId }: AdopterDashboardProps) {
   return (
     <div className="space-y-8">
-      <PageHeader
+      {/* <PageHeader
         title="Dashboard"
         subtitle="Track your applications and explore available pets."
-      />
+      /> */}
+
+      {/* Welcome Mascot Banner */}
+      <Suspense fallback={<div className="h-44 w-full rounded-2xl bg-[#F5EBE0]/30 border border-[#EADBC8]/40 animate-pulse" />}>
+        <TeddyBanner userId={userId} />
+      </Suspense>
 
       {/* Statistics */}
       <Suspense fallback={<StatsGridSkeleton count={3} />}>
@@ -190,7 +143,7 @@ export function AdopterDashboard({ userId }: AdopterDashboardProps) {
               <HeartHandshake className="size-3.5" />
               Adopt, Don't Shop
             </div>
-            <h3 className="text-2xl font-bold tracking-tight">Find Your Perfect Companion</h3>
+            <h2 className="text-2xl tracking-tight text-[#3D3C3A]">Find Your Perfect Companion</h2>
             <p className="text-muted-foreground text-sm md:text-base">
               Hundreds of lovable dogs, cats, rabbits, and birds are waiting in shelters and foster homes for a second chance. Start searching today.
             </p>

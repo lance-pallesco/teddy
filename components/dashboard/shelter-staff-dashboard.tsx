@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { StatsGridSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { getShelterStaffStats } from "@/lib/services/dashboard.service"
 import { prisma } from "@/lib/prisma"
+import { TeddyBanner } from "@/components/dashboard/teddy-banner"
 
 type ShelterStaffDashboardProps = {
+  userId: string
   shelterId: string
 }
 
@@ -227,10 +229,17 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
   )
 }
 
-export function ShelterStaffDashboard({ shelterId }: ShelterStaffDashboardProps) {
+export function ShelterStaffDashboard({ userId, shelterId }: ShelterStaffDashboardProps) {
   return (
-    <Suspense fallback={<StatsGridSkeleton count={4} />}>
-      <ShelterStaffStatsGrid shelterId={shelterId} />
-    </Suspense>
+    <div className="space-y-8">
+      {/* Welcome Mascot Banner */}
+      <Suspense fallback={<div className="h-44 w-full rounded-2xl bg-[#F5EBE0]/30 border border-[#EADBC8]/40 animate-pulse" />}>
+        <TeddyBanner userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={<StatsGridSkeleton count={4} />}>
+        <ShelterStaffStatsGrid shelterId={shelterId} />
+      </Suspense>
+    </div>
   )
 }

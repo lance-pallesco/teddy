@@ -263,8 +263,8 @@ export class ChatService {
       console.warn("Distokens AI call failed for final summary. Falling back to mock.", error)
       
       // Build a realistic fallback summary
-      const resolutions = [...redFlags, ...semiFlags].map(flag => ({
-        flag: flag.title,
+      const resolutions = ([...redFlags, ...semiFlags] as any[]).map(flag => ({
+        flag: flag?.title || "Flag",
         status: "RESOLVED" as const,
         explanation: "Addressed and clarified during the chat conversation.",
       }))

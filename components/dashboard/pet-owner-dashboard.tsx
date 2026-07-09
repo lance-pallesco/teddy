@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/dashboard/page-header"
 import { StatsGridSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { getPetOwnerStats } from "@/lib/services/dashboard.service"
 import { prisma } from "@/lib/prisma"
+import { TeddyBanner } from "@/components/dashboard/teddy-banner"
 
 type PetOwnerDashboardProps = {
   userId: string
@@ -209,11 +210,11 @@ async function PetOwnerStatsGrid({ userId }: { userId: string }) {
 
 export function PetOwnerDashboard({ userId }: PetOwnerDashboardProps) {
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Dashboard"
-        subtitle="Individual foster management and adoption requests."
-      />
+    <div className="space-y-8">
+      {/* Welcome Mascot Banner */}
+      <Suspense fallback={<div className="h-44 w-full rounded-2xl bg-[#F5EBE0]/30 border border-[#EADBC8]/40 animate-pulse" />}>
+        <TeddyBanner userId={userId} />
+      </Suspense>
 
       <Suspense fallback={<StatsGridSkeleton count={4} />}>
         <PetOwnerStatsGrid userId={userId} />

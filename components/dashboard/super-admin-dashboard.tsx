@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatsCardSkeleton } from "@/components/dashboard/DashboardSkeleton"
+import { TeddyBanner } from "@/components/dashboard/teddy-banner"
 import {
   getShelterStats,
   getUserStats,
@@ -91,13 +92,13 @@ async function ApplicationStatsCard() {
 
 // ---------- Main Component ----------
 
-export function SuperAdminDashboard() {
+export function SuperAdminDashboard({ userId }: { userId: string }) {
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Dashboard"
-        subtitle="System-wide metrics, users, and shelter overview."
-      />
+      {/* Welcome Mascot Banner */}
+      <Suspense fallback={<div className="h-44 w-full rounded-2xl bg-[#F5EBE0]/30 border border-[#EADBC8]/40 animate-pulse" />}>
+        <TeddyBanner userId={userId} />
+      </Suspense>
 
       {/* Quick Action Links */}
       <div className="grid gap-4 sm:grid-cols-2">
