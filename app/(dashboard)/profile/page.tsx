@@ -27,7 +27,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-6 max-w-7xl mx-auto w-full">
+    <div className="flex-1 space-y-6 p-4 md:p-6 mx-auto w-full">
       <PageHeader
         title="Profile Settings"
         subtitle="Manage your personal details, avatar, and security preferences."

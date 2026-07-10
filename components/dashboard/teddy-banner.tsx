@@ -1,6 +1,4 @@
 import Image from "next/image"
-import { MessageCircle } from "lucide-react"
-
 import { prisma } from "@/lib/prisma"
 
 type TeddyBannerProps = {
@@ -80,27 +78,27 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
       teddyMessage = `Your application for ${activeApp.pet.name} is currently ${statusText}. We'll notify you as soon as there's an update!`
     }
   } else if (approvedApp) {
-    teddyMessage = `Great news! Your adoption application for ${approvedApp.pet.name} was approved! 🎉 Time to prepare for your new family member!`
+    teddyMessage = `Great news! Your adoption application for ${approvedApp.pet.name} was approved! Time to prepare for your new family member!`
   }
-
+  
   return (
     <div className="w-full space-y-4">
       {/* Date & Greeting outside at the top - Responsively positioned to clear the mascot */}
       <div className="pl-0 md:pl-[264px] text-center md:text-left transition-all">
-        <span className="text-[10px] md:text-xs tracking-widest text-[#8B7E74]">
+        <span className="text-[10px] md:text-xs tracking-widest text-[#8B7E74] dark:text-[#A89F96]">
           {dateString}
         </span>
-        <h2 className="text-2xl md:text-3xl tracking-tighter text-[#3D3C3A] mt-0.5">
+        <h2 className="text-2xl md:text-3xl l text-[#3D3C3A] dark:text-[#F0EDE8] mt-0.5">
           {greeting}, {firstName}!
         </h2>
       </div>
 
       {/* Banner Card itself */}
-      <div className="relative overflow-visible rounded-2xl border border-[#EADBC8] bg-gradient-to-br from-[#FAF6F0] via-[#F5EBE0] to-[#FAF6F0] p-2 md:py-2 md:px-5 shadow-xs transition-shadow hover:shadow-md mt-4 md:mt-6">
+      <div className="relative overflow-visible rounded-2xl border border-[#EADBC8] dark:border-[#3D3630] bg-gradient-to-br from-[#FAF6F0] via-[#F5EBE0] to-[#FAF6F0] dark:from-[#2A2420] dark:via-[#332C26] dark:to-[#2A2420] p-2 md:py-2 md:px-5 shadow-xs transition-shadow hover:shadow-md mt-4 md:mt-6">
         {/* Decorative background shapes isolated to prevent bleeding outside card boundary */}
         <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-          <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[#EADBC8]/15 blur-xl" />
-          <div className="absolute -left-16 -bottom-16 h-36 w-36 rounded-full bg-[#EADBC8]/15 blur-xl" />
+          <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[#EADBC8]/15 dark:bg-[#8B7E74]/10 blur-xl" />
+          <div className="absolute -left-16 -bottom-16 h-36 w-36 rounded-full bg-[#EADBC8]/15 dark:bg-[#8B7E74]/10 blur-xl" />
         </div>
 
         {/* Mobile Mascot: Relative column placement */}
@@ -131,16 +129,16 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
           {/* Content Column: Offset to the right on desktop to clear the absolute mascot */}
           <div className="flex-1 w-full text-center md:text-left md:pl-[244px]">
             {/* Speech Bubble Container */}
-            <div className="relative w-full md:max-w-md bg-white border border-[#EADBC8]/60 rounded-2xl p-3 md:p-3.5 shadow-xs text-left">
-              <div className="absolute hidden md:block top-1/2 -translate-y-1/2 -left-[6px] w-3 h-3 bg-white border-l border-b border-[#EADBC8]/60 rotate-45" />
-              <div className="absolute block md:hidden left-1/2 -translate-x-1/2 -top-[6px] w-3 h-3 bg-white border-t border-l border-[#EADBC8]/60 rotate-45" />
+            <div className="relative w-full md:max-w-md bg-white dark:bg-[#1E1A16] border border-[#EADBC8]/60 dark:border-[#4A4038]/60 rounded-2xl p-3 md:p-3.5 shadow-xs text-left">
+              <div className="absolute hidden md:block top-1/2 -translate-y-1/2 -left-[6px] w-3 h-3 bg-white dark:bg-[#1E1A16] border-l border-b border-[#EADBC8]/60 dark:border-[#4A4038]/60 rotate-45" />
+              <div className="absolute block md:hidden left-1/2 -translate-x-1/2 -top-[6px] w-3 h-3 bg-white dark:bg-[#1E1A16] border-t border-l border-[#EADBC8]/60 dark:border-[#4A4038]/60 rotate-45" />
 
               <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#8B7E74] animate-pulse" />
-                  <span className="text-[10px] font-black tracking-wider text-[#8B7E74]">TEDDY</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#8B7E74] dark:bg-[#C4B8AC] animate-pulse" />
+                  <span className="text-[10px] font-black tracking-wider text-[#8B7E74] dark:text-[#C4B8AC]">TEDDY</span>
                 </div>
-                <p className="text-xs md:text-sm text-[#5C554E] leading-relaxed">
+                <p className="text-xs md:text-sm text-[#5C554E] dark:text-[#BDB3A8] leading-relaxed">
                   {teddyMessage}
                 </p>
               </div>

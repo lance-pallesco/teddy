@@ -8,6 +8,9 @@ import {
   ChevronRightIcon,
   ClipboardListIcon,
   FileHeartIcon,
+  BellIcon,
+  FilePen,
+  HousePlusIcon,
   LayoutDashboardIcon,
   PawPrintIcon,
   SearchIcon,
@@ -22,7 +25,6 @@ import {
 } from "@/components/ui/collapsible"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -38,8 +40,10 @@ const icons = {
   ChartNoAxesColumn: ChartNoAxesColumnIcon,
   ClipboardList: ClipboardListIcon,
   FileHeart: FileHeartIcon,
-  LayoutDashboard: LayoutDashboardIcon,
+  LayoutDashboard: HousePlusIcon,
   PawPrint: PawPrintIcon,
+  Bell: BellIcon,
+  Folders: FilePen,
   Search: SearchIcon,
   Settings: SettingsIcon,
   Users: UsersIcon,
@@ -66,8 +70,7 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarMenu className="space-y-2 px-2 group-data-[collapsible=icon]:px-0">
         {items.map((item) => {
           const Icon = icons[item.icon as keyof typeof icons] ?? LayoutDashboardIcon
           const activeChildUrl = activeChildByParent.get(item.title)
@@ -78,7 +81,12 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
           if (!item.items?.length) {
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.title}
+                  className="text-base font-light [&_svg]:size-5 h-10 group-data-[collapsible=icon]:[&_svg]:size-4 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&_span]:!hidden data-[active=true]:bg-[#AE8F65] data-[active=true]:text-white data-[active=true]:hover:bg-[#AE8F65]/90 data-[active=true]:font-light"
+                >
                   <Link href={item.url}>
                     <Icon />
                     <span>{item.title}</span>
@@ -97,7 +105,11 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton isActive={isActive} tooltip={item.title}>
+                  <SidebarMenuButton
+                    isActive={isActive}
+                    tooltip={item.title}
+                    className="text-base [&_svg]:size-5 h-10 group-data-[collapsible=icon]:[&_svg]:size-4 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&_span]:!hidden group-data-[collapsible=icon]:[&_.ml-auto]:!hidden data-[active=true]:bg-[#AE8F65] data-[active=true]:text-white data-[active=true]:hover:bg-[#AE8F65]/90"
+                  >
                     <Icon />
                     <span>{item.title}</span>
                     <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -110,6 +122,7 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
                         <SidebarMenuSubButton
                           asChild
                           isActive={activeChildUrl === child.url}
+                          className="text-[15px] h-9 data-[active=true]:bg-[#AE8F65] data-[active=true]:text-white data-[active=true]:hover:bg-[#AE8F65]/90"
                         >
                           <Link href={child.url}>
                             <span>{child.title}</span>

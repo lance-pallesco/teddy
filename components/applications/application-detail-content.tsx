@@ -54,17 +54,11 @@ type ApplicationDetailData = {
   reviewNotes: string | null
   rejectionReason: string | null
   signatureUrl: string | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   livingEnvironment: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   householdLifestyle: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   petExperience: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adoptionCommitment: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agreements: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aiInsight?: any
   applicant: {
     id: string

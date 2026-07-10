@@ -10,107 +10,38 @@ export type DashboardNavItem = {
   }[]
 }
 
-/** Sidebar navigation only — not used for route authorization. */
 export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
   ADMIN: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
-    {
-      title: "Shelter Management",
-      url: "/shelters",
-      icon: "Building2",
-      items: [
-        { title: "All Shelters", url: "/shelters" },
-        { title: "Shelter Staff", url: "/shelters/staff" },
-      ],
-    },
-    {
-      title: "User Management",
-      url: "/users",
-      icon: "Users",
-      items: [
-        { title: "All Users", url: "/users" },
-        { title: "Deactivated Accounts", url: "/users/deactivated" },
-      ],
-    },
-    {
-      title: "Pet Listings",
-      url: "/pets",
-      icon: "PawPrint",
-      items: [{ title: "All Pets", url: "/pets" }],
-    },
+    { title: "Shelters", url: "/shelters", icon: "Building2" },
+    { title: "Users", url: "/users", icon: "Users" },
+    { title: "Pets", url: "/pets", icon: "PawPrint" },
     { title: "Applications", url: "/applications", icon: "ClipboardList" },
     { title: "Analytics & Reports", url: "/analytics", icon: "ChartNoAxesColumn" },
+    { title: "Notifications", url: "/notifications", icon: "Bell" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
   ],
   SHELTER_STAFF: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
-    {
-      title: "Pets",
-      url: "/pets",
-      icon: "PawPrint",
-      items: [
-        { title: "Shelter Pets", url: "/pets" },
-        { title: "Add New Pet", url: "/pets/new" },
-      ],
-    },
+    { title: "My Pets", url: "/pets", icon: "PawPrint" },
     { title: "Adoption Requests", url: "/applications", icon: "FileHeart" },
-    {
-      title: "My Shelter",
-      url: "/shelter/profile",
-      icon: "Building2",
-      items: [
-        { title: "Shelter Profile", url: "/shelter/profile" },
-        { title: "Shelter Staff", url: "/shelter/staff" },
-      ],
-    },
-    { title: "Medical Records", url: "/medical/records", icon: "ClipboardList" },
+    { title: "My Shelter", url: "/shelter/profile", icon: "Building2" },
+    { title: "Notifications", url: "/notifications", icon: "Bell" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
   ],
   PET_OWNER: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
-    {
-      title: "Pets",
-      url: "/pets",
-      icon: "PawPrint",
-      items: [
-        { title: "My Pets", url: "/pets" },
-        { title: "Post a Pet", url: "/pets/new" },
-      ],
-    },
-    {
-      title: "Adoption Applications",
-      url: "/applications/incoming",
-      icon: "ClipboardList",
-      items: [
-        { title: "Incoming Applications", url: "/applications/incoming" },
-        { title: "Approved Adoptions", url: "/applications/approved" },
-      ],
-    },
-    { title: "Medical Records", url: "/medical/records", icon: "FileHeart" },
+    { title: "Pets", url: "/pets", icon: "PawPrint" },
+    { title: "Adoption Requests", url: "/applications", icon: "FileHeart", },
+    { title: "Notifications", url: "/notifications", icon: "Bell" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
   ],
   ADOPTER: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
-    {
-      title: "Browse Pets",
-      url: "/pets",
-      icon: "Search",
-      items: [
-        { title: "Available Pets", url: "/pets" },
-        { title: "Find My Match", url: "/pets/match" },
-      ],
-    },
-    {
-      title: "My Applications",
-      url: "/applications",
-      icon: "ClipboardList",
-      items: [
-        { title: "All Applications", url: "/applications" },
-        { title: "Active Applications", url: "/applications/active" },
-        { title: "Draft Applications", url: "/applications/draft" },
-        { title: "Application History", url: "/applications/history" },
-      ],
-    },
+    { title: "Browse Pets", url: "/pets", icon: "PawPrint" },
+    { title: "Find My Match", url: "/pets/match", icon: "Search" },
+    { title: "My Applications", url: "/applications", icon: "Folders"},
+    { title: "Notifications", url: "/notifications", icon: "Bell" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
   ],
 }
