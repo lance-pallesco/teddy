@@ -22,7 +22,7 @@ export function PetCard({ pet, className }: PetCardProps) {
         className
       )}
     >
-      <CardContent className="p-0">
+      <CardContent className="p-0 bg-white">
         <Link href={`/pets/${pet.id}`} className="block">
           <div className="relative aspect-[4/3] overflow-hidden bg-muted">
             {pet.primaryImageUrl ? (

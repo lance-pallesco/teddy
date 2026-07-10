@@ -42,7 +42,7 @@ export default async function ShelterDetailPage({
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
       <SetBreadcrumbLabel segment={id} label={shelter.name} />
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between ">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
             {shelter.name}
@@ -64,12 +64,9 @@ export default async function ShelterDetailPage({
       <ShelterInfoCard shelter={shelter} />
       <ShelterStatsRow stats={mockStats} />
 
-      <div className="rounded-lg border p-5">
+      <div className="rounded-lg border p-5 bg-white">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-base font-medium">Shelter workspace</h2>
-          <div className="hidden sm:block">
-            <p className="text-sm text-muted-foreground">Tabs are ready for future MVPs</p>
-          </div>
         </div>
         <Separator className="my-4" />
         <ShelterTabs

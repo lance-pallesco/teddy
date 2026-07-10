@@ -19,22 +19,28 @@ export default async function SheltersPage() {
   const shelters = await listShelters()
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-1 flex-col gap-6 p-4 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Shelter Management</h1>
+          <h1 className="text-3xl tracking-tighter">Shelters</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Manage shelter records and prepare them for future staff assignment.
           </p>
         </div>
-        <Button asChild>
+        <Button
+          variant="outline"
+          size="lg"
+          className="rounded-half bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#AE8F65] hover:text-white hover:border-[#9A7D58] text-base font-medium px-6 transition-transform duration-200 gap-2 shadow-sm shrink-0"
+          asChild
+        >
           <Link href="/shelters/new">
-            <PlusIcon />
-            Add Shelter
+            <PlusIcon className="size-5" />
+            <span>Add Shelter</span>
           </Link>
         </Button>
       </div>
 
+      <div className="rounded-xl border bg-white dark:bg-[#1E1A16] shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -68,7 +74,7 @@ export default async function SheltersPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell>
                     <Link
                       href={`/shelters/${shelter.id}`}
                       className="hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -111,6 +117,7 @@ export default async function SheltersPage() {
             )}
           </TableBody>
         </Table>
+      </div>
     </div>
   )
 }

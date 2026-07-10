@@ -94,7 +94,7 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
       </div>
 
       {/* Banner Card itself */}
-      <div className="relative overflow-visible rounded-2xl border border-[#EADBC8] dark:border-[#3D3630] bg-gradient-to-br from-[#FAF6F0] via-[#F5EBE0] to-[#FAF6F0] dark:from-[#2A2420] dark:via-[#332C26] dark:to-[#2A2420] p-2 md:py-2 md:px-5 shadow-xs transition-shadow hover:shadow-md mt-4 md:mt-6">
+      <div className="relative overflow-visible rounded-2xl border border-[#EADBC8] bg-[#AE8F65] p-2 md:py-2 md:px-5 shadow-xs transition-shadow hover:shadow-md mt-4 md:mt-6">
         {/* Decorative background shapes isolated to prevent bleeding outside card boundary */}
         <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
           <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[#EADBC8]/15 dark:bg-[#8B7E74]/10 blur-xl" />

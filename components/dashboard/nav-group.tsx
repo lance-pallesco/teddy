@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  Building2Icon,
   ChartNoAxesColumnIcon,
   ChevronRightIcon,
   ClipboardListIcon,
@@ -13,6 +12,7 @@ import {
   HousePlusIcon,
   LayoutDashboardIcon,
   PawPrintIcon,
+  LandmarkIcon,
   SearchIcon,
   SettingsIcon,
   UsersIcon,
@@ -36,7 +36,7 @@ import type { DashboardNavItem } from "@/lib/navigation/dashboard-nav"
 import { isNavItemActive } from "@/lib/navigation/dashboard-nav"
 
 const icons = {
-  Building2: Building2Icon,
+  Building2: LandmarkIcon,
   ChartNoAxesColumn: ChartNoAxesColumnIcon,
   ClipboardList: ClipboardListIcon,
   FileHeart: FileHeartIcon,

@@ -37,12 +37,6 @@ export function ShelterTabs({ shelter, staffMembers, petsPanel }: ShelterTabsPro
                   {shelter.description}
                 </p>
               </div>
-              <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
-                <ShieldCheckIcon className="size-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Ready for future staff + pet integration.
-                </p>
-              </div>
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -56,10 +50,6 @@ export function ShelterTabs({ shelter, staffMembers, petsPanel }: ShelterTabsPro
               </div>
             </div>
 
-            <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-              <ArrowRightIcon className="size-4" />
-              <p>Use the Staff and Pets tabs to manage future module data.</p>
-            </div>
           </CardContent>
         </Card>
       </TabsContent>
