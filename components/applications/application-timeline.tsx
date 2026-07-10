@@ -43,7 +43,7 @@ function buildTimelineSteps(
   })
 
   // Step 2: Submitted
-  const isSubmitted = ["PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED", "WITHDRAWN"].includes(status)
+  const isSubmitted = ["PENDING", "UNDER_REVIEW", "INTERVIEW_IN_PROGRESS", "APPROVED", "REJECTED", "WITHDRAWN"].includes(status)
   steps.push({
     label: "Submitted",
     timestamp: submittedAt,
@@ -52,13 +52,13 @@ function buildTimelineSteps(
       : status === "WITHDRAWN" ? "completed" : "upcoming",
   })
 
-  // Step 3: Under Review
-  const isReviewed = ["UNDER_REVIEW", "APPROVED", "REJECTED"].includes(status)
+  // Step 3: Under Review / Interview
+  const isUnderReview = ["UNDER_REVIEW", "INTERVIEW_IN_PROGRESS", "APPROVED", "REJECTED"].includes(status)
   steps.push({
-    label: "Under Review",
-    timestamp: isReviewed ? reviewedAt : null,
-    status: isReviewed
-      ? status === "UNDER_REVIEW" ? "current" : "completed"
+    label: status === "INTERVIEW_IN_PROGRESS" ? "Interview" : "Under Review",
+    timestamp: isUnderReview ? reviewedAt : null,
+    status: isUnderReview
+      ? (status === "UNDER_REVIEW" || status === "INTERVIEW_IN_PROGRESS") ? "current" : "completed"
       : "upcoming",
   })
 

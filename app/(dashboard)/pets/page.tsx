@@ -40,7 +40,7 @@ export default async function PetsPage({ searchParams }: PetsPageProps) {
 
   return (
     <div className="flex w-full flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex w-full px-6 flex-col gap-6">
         <PageHeader
           title={isAdmin ? "Pet Listings" : isAdopter ? "Available Pets" : "My Pet Listings"}
           subtitle={

@@ -54,17 +54,11 @@ type ApplicationDetailData = {
   reviewNotes: string | null
   rejectionReason: string | null
   signatureUrl: string | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   livingEnvironment: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   householdLifestyle: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   petExperience: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adoptionCommitment: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agreements: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aiInsight?: any
   applicant: {
     id: string
@@ -255,6 +249,8 @@ export function ApplicationDetailContent({
                   <AIInsightsPanel
                     applicationId={application.id}
                     initialInsight={application.aiInsight}
+                    userRole={userRole}
+                    applicationStatus={application.status}
                   />
                 </TabsContent>
               </Tabs>
@@ -387,21 +383,31 @@ export function ApplicationDetailContent({
               </CardHeader>
               <CardContent className="space-y-2">
                 {isAdopter ? (
-                  <Button
-                    variant="destructive"
-                    className="w-full"
-                    size="sm"
-                    disabled={!canWithdraw || isPending}
-                    title={
-                      canWithdraw
-                        ? "Withdraw this application"
-                        : "You can only withdraw pending applications"
-                    }
-                    onClick={() => setShowWithdrawConfirm(true)}
-                  >
-                    <XCircleIcon className="size-4 mr-1" />
-                    {isPending ? "Withdrawing..." : "Withdraw Application"}
-                  </Button>
+                  <div className="space-y-2">
+                    {application.status === "INTERVIEW_IN_PROGRESS" && (
+                      <Button asChild className="w-full bg-primary" size="sm">
+                        <Link href={`/applications/${application.id}/chat`}>
+                          <MessageCircleIcon className="size-4 mr-1.5" />
+                          Go to Chat Room
+                        </Link>
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      className="w-full"
+                      size="sm"
+                      disabled={!canWithdraw || isPending}
+                      title={
+                        canWithdraw
+                          ? "Withdraw this application"
+                          : "You can only withdraw pending applications"
+                      }
+                      onClick={() => setShowWithdrawConfirm(true)}
+                    >
+                      <XCircleIcon className="size-4 mr-1" />
+                      {isPending ? "Withdrawing..." : "Withdraw Application"}
+                    </Button>
+                  </div>
                 ) : (
                   <>
                     <Button
@@ -416,13 +422,22 @@ export function ApplicationDetailContent({
                       Teddy AI Insights
                     </Button>
                     <Button variant="outline" className="w-full" size="sm" disabled>
-                      <CalendarCheckIcon className="size-4" />
+                      <CalendarCheckIcon className="size-4 mr-1.5" />
                       Schedule Interview
                     </Button>
-                    <Button variant="outline" className="w-full" size="sm" disabled>
-                      <MessageCircleIcon className="size-4" />
-                      Chat with Adopter
-                    </Button>
+                    {application.status === "INTERVIEW_IN_PROGRESS" ? (
+                      <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white" size="sm">
+                        <Link href={`/applications/${application.id}/chat`}>
+                          <MessageCircleIcon className="size-4 mr-1.5" />
+                          Chat with Adopter
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="w-full" size="sm" disabled>
+                        <MessageCircleIcon className="size-4 mr-1.5" />
+                        Chat with Adopter
+                      </Button>
+                    )}
                   </>
                 )}
               </CardContent>

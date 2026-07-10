@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BadgeCheckIcon, MapPinIcon, PawPrintIcon, ScanSearchIcon, User2, UserCheck, Users, UsersIcon } from "lucide-react"
+import { BadgeCheckIcon, Heart, MapPinIcon, PawPrintIcon, User2 } from "lucide-react"
 
 import { PetStatusBadge } from "@/components/pets/pet-status-badge"
 import { Button } from "@/components/ui/button"
@@ -45,20 +45,20 @@ export function PetCard({ pet, className }: PetCardProps) {
           <div className="space-y-3 p-4">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="truncate text-lg font-semibold leading-tight">{pet.name}</p>
-                <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                <p className="truncate text-xl font-semibold leading-tight">{pet.name}</p>
+                <p className="mt-0.5 truncate text-base text-muted-foreground">
                   {pet.speciesBreed}
                 </p>
               </div>
               <PetStatusBadge status={pet.status as PetStatus} className="shrink-0" />
             </div>
 
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-base text-muted-foreground">
               <span>Age: {pet.ageLabel}</span>
               <span>Size: {pet.sizeLabel}</span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-sm">
+            <div className="flex items-center gap-1.5 text-base">
               {pet.attribution.isShelter && pet.attribution.isVerified ? (
                 <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
               ) : <User2 className="size-3.5 shrink-0" aria-hidden />}
@@ -66,24 +66,24 @@ export function PetCard({ pet, className }: PetCardProps) {
                 {pet.attribution.label}
               </span>
               {pet.attribution.isShelter ? (
-                <span className="shrink-0 text-xs text-muted-foreground">Shelter</span>
+                <span className="shrink-0 text-sm text-muted-foreground">Shelter</span>
               ) : (
-                <span className="shrink-0 text-xs text-muted-foreground">Owner</span>
+                <span className="shrink-0 text-sm text-muted-foreground">Owner</span>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-base text-muted-foreground">
               <MapPinIcon className="size-3.5 shrink-0" aria-hidden />
               <span className="truncate">{pet.location}</span>
             </div>
           </div>
         </Link>
 
-        <div className="border-t px-4 py-3">
-          <Button variant="outline" size="sm" className="w-full" asChild>
+        <div className="border-t px-4 py-4">
+          <Button variant="outline" size="lg" className="w-full rounded-full bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#9A7D58] hover:text-white hover:border-[#9A7D58] text-base font-medium px-6 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0" asChild>
             <Link href={`/pets/${pet.id}`}>
-              <ScanSearchIcon />
-              View details
+              <Heart className="size-5" />
+              Meet {pet.name}
             </Link>
           </Button>
         </div>

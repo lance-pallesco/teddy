@@ -17,11 +17,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex w-full flex-1 flex-col p-4 md:p-6 lg:p-8">
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full">
         {role === "ADMIN" ? (
-          <SuperAdminDashboard />
+          <SuperAdminDashboard userId={user.id} />
         ) : role === "SHELTER_STAFF" ? (
-          <ShelterStaffDashboard shelterId={user.shelterId ?? ""} />
+          <ShelterStaffDashboard userId={user.id} shelterId={user.shelterId ?? ""} />
         ) : role === "PET_OWNER" ? (
           <PetOwnerDashboard userId={user.id} />
         ) : role === "ADOPTER" ? (

@@ -195,7 +195,7 @@ export async function deleteApplicationDraft(applicationId: string, applicantId:
 import type { ApplicationTab } from "@/lib/utils/application-list"
 import type { Role } from "@prisma/client"
 
-const ACTIVE_STATUSES: AdoptionStatus[] = ["PENDING", "UNDER_REVIEW"]
+const ACTIVE_STATUSES: AdoptionStatus[] = ["PENDING", "UNDER_REVIEW", "INTERVIEW_IN_PROGRESS"]
 const COMPLETED_STATUSES: AdoptionStatus[] = ["APPROVED", "REJECTED", "WITHDRAWN"]
 
 type ApplicantApplicationItem = {

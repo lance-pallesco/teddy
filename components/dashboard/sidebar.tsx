@@ -32,14 +32,14 @@ export function DashboardSidebar({ role, user, ...props }: DashboardSidebarProps
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg">
+            <SidebarMenuButton asChild size="lg" className="group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:justify-center">
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
-                  <Image src="/logo.png" alt="Teddy" width={32} height={32} />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg shrink-0">
+                  <Image src="/logo.png" alt="Teddy" width={28} height={28} className="group-data-[collapsible=icon]:w-5 group-data-[collapsible=icon]:h-5 transition-all" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Teddy</span>
-                  <span className="truncate text-xs">Pet Adoption</span>
+                <div className="grid flex-1 text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                  <span className="truncate text-xl tracking-tighter">Teddy</span>
+                  <span className="truncate text-xs font-light">Pet Adoption</span>
                 </div>
               </Link>
             </SidebarMenuButton>

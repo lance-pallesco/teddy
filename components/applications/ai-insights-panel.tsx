@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { generateApplicationAIInsightAction } from "@/app/(dashboard)/applications/actions/ai.action"
+import { startChatModeAction, reviewDecisionAction } from "@/app/(dashboard)/applications/actions/chat.action"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -35,6 +37,8 @@ interface AIInsight {
 interface AIInsightsPanelProps {
   applicationId: string
   initialInsight: AIInsight | null
+  userRole: string
+  applicationStatus: string
 }
 
 const LOADING_STEPS = [
@@ -48,12 +52,61 @@ const LOADING_STEPS = [
 export function AIInsightsPanel({
   applicationId,
   initialInsight,
+  userRole,
+  applicationStatus,
 }: AIInsightsPanelProps) {
   const router = useRouter()
   const [insight, setInsight] = useState<AIInsight | null>(initialInsight)
   const [isPending, startTransition] = useTransition()
   const [loadingStepIndex, setLoadingStepIndex] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [isDecisionPending, setIsDecisionPending] = useState(false)
+  const [isChatSelectionOpen, setIsChatSelectionOpen] = useState(false)
+  const [selectedMode, setSelectedMode] = useState<"MANUAL" | "AI_ASSISTED" | null>("AI_ASSISTED")
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+  const [rejectionReason, setRejectionReason] = useState("")
+
+  const isReviewer = ["SHELTER_STAFF", "PET_OWNER", "ADMIN"].includes(userRole)
+
+  const handleStartChat = async () => {
+    if (!selectedMode) return
+    setIsDecisionPending(true)
+    try {
+      const res = await startChatModeAction(applicationId, selectedMode)
+      if (res.success) {
+        toast.success("Discussion chat unlocked and created!")
+        setIsChatSelectionOpen(false)
+        router.push(`/applications/${applicationId}/chat`)
+        router.refresh()
+      } else {
+        toast.error(res.error || "Failed to start chat room.")
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong.")
+    } finally {
+      setIsDecisionPending(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!rejectionReason.trim()) return
+    setIsDecisionPending(true)
+    try {
+      const res = await reviewDecisionAction(applicationId, "REJECTED", rejectionReason)
+      if (res.success) {
+        toast.success("Application rejected and adopter notified.")
+        setIsRejectDialogOpen(false)
+        setRejectionReason("")
+        router.refresh()
+      } else {
+        toast.error(res.error || "Failed to submit rejection.")
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong.")
+    } finally {
+      setIsDecisionPending(false)
+    }
+  }
   
   // Track acknowledged flags by their index or title
   const [acknowledgedFlags, setAcknowledgedFlags] = useState<Record<string, boolean>>({})
@@ -377,9 +430,169 @@ export function AIInsightsPanel({
               </div>
             )}
 
+            {/* Reviewer Action Buttons */}
+            {isReviewer && (applicationStatus === "PENDING" || applicationStatus === "UNDER_REVIEW") && (
+              <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => setIsRejectDialogOpen(true)}
+                  disabled={isDecisionPending}
+                >
+                  Reject Application
+                </Button>
+                <Button
+                  variant="default"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
+                  onClick={() => setIsChatSelectionOpen(true)}
+                  disabled={isDecisionPending}
+                >
+                  Proceed to Chat
+                </Button>
+              </div>
+            )}
+
           </CardContent>
         </Card>
       )}
+
+      {/* Chat Mode Selection Modal */}
+      <Dialog open={isChatSelectionOpen} onOpenChange={setIsChatSelectionOpen}>
+        <DialogContent className="sm:max-w-xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Select Chat Mode</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 sm:grid-cols-2">
+            {/* Mode 1: Manual Chat */}
+            <div
+              className={`border rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50 flex flex-col justify-between h-full ${
+                selectedMode === "MANUAL"
+                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                  : "border-border"
+              }`}
+              onClick={() => setSelectedMode("MANUAL")}
+            >
+              <div className="space-y-2">
+                <h4 className="font-bold text-base text-foreground">1. Manual Chat</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  - You lead the conversation.<br />
+                  - Ask your own questions at your own pace.
+                </p>
+                <div className="pt-2">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Best for:</span>
+                  <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">
+                    • Experienced reviewers<br />
+                    • Quick conversations<br />
+                    • Simple cases
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mode 2: AI-Assisted Interview */}
+            <div
+              className={`border rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50 flex flex-col justify-between h-full ${
+                selectedMode === "AI_ASSISTED"
+                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                  : "border-border"
+              }`}
+              onClick={() => setSelectedMode("AI_ASSISTED")}
+            >
+              <div className="space-y-2">
+                <h4 className="font-bold text-base text-foreground flex items-center gap-1">
+                  2. TeddyAI Interview
+                </h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  - TeddyAI acts as the interviewer.<br />
+                  - You observe and approve questions before conducting.
+                </p>
+                <div className="pt-2">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Best for:</span>
+                  <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">
+                    • First-time reviewers<br />
+                    • Standardized process<br />
+                    • Complex applications
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-primary/5 border border-primary/10 rounded-lg p-3.5 flex items-start gap-2.5 mb-4">
+            <span className="text-base shrink-0">ℹ️</span>
+            <p className="text-xs text-muted-foreground leading-normal">
+              The adopter will be notified that their application has progressed and the chat room has been unlocked.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1 order-last sm:order-first"
+              onClick={() => setIsChatSelectionOpen(false)}
+              disabled={isDecisionPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
+              onClick={handleStartChat}
+              disabled={!selectedMode || isDecisionPending}
+            >
+              {isDecisionPending ? "Opening Chat..." : "Start Chat Room"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rejection Reason Modal */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent className="sm:max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">Reject Adoption Application</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-xs text-muted-foreground">
+              Please provide a clear reason for the rejection. This explanation will be logged and sent to the applicant.
+            </p>
+            <div className="space-y-1.5">
+              <label htmlFor="rejection-reason" className="text-xs font-semibold text-foreground">
+                Rejection Reason
+              </label>
+              <textarea
+                id="rejection-reason"
+                className="w-full min-h-[100px] text-sm p-3 border rounded-lg focus:ring-1 focus:ring-primary outline-none text-foreground bg-background"
+                placeholder="Explain why the application is being rejected..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                disabled={isDecisionPending}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1 order-last sm:order-first"
+              onClick={() => {
+                setIsRejectDialogOpen(false)
+                setRejectionReason("")
+              }}
+              disabled={isDecisionPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={handleReject}
+              disabled={!rejectionReason.trim() || isDecisionPending}
+            >
+              {isDecisionPending ? "Rejecting..." : "Confirm Rejection"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

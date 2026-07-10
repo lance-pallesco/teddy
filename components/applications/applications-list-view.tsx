@@ -80,7 +80,7 @@ export async function ApplicationsListView({
 
   return (
     <div className="flex w-full flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex w-full flex-col gap-6">
         <PageHeader
           title={isAdopter ? "My Applications" : "Incoming Applications"}
           subtitle={
@@ -110,10 +110,10 @@ export async function ApplicationsListView({
             action={
               isAdopter
                 ? {
-                    label: "Browse Pets",
-                    href: "/pets",
-                    icon: <PawPrintIcon className="size-4" />,
-                  }
+                  label: "Browse Pets",
+                  href: "/pets",
+                  icon: <PawPrintIcon className="size-4" />,
+                }
                 : undefined
             }
           />

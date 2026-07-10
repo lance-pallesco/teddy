@@ -6,6 +6,7 @@ const STATUS_CONFIG: Record<AdoptionStatus, { label: string; variant: BadgeProps
   DRAFT: { label: "Draft", variant: "secondary" },
   PENDING: { label: "Pending", variant: "warning" },
   UNDER_REVIEW: { label: "Under Review", variant: "outline" },
+  INTERVIEW_IN_PROGRESS: { label: "Interview", variant: "default" },
   APPROVED: { label: "Approved", variant: "success" },
   REJECTED: { label: "Rejected", variant: "danger" },
   WITHDRAWN: { label: "Withdrawn", variant: "secondary" },

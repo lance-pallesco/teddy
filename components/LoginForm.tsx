@@ -51,7 +51,7 @@ export function LoginForm({
         return
       }
 
-      toast.success("Login successful")
+      toast.success("Login successful!")
       router.push("/dashboard")
     })
   }
@@ -71,10 +71,12 @@ export function LoginForm({
             height={120}
             priority
           />
-          <h1 className="text-5xl font-bold">Teddy</h1>
-          <p className="text-sm text-balance text-muted-foreground">
-            Your partner in giving pets a second chance.
-          </p>
+          <div className="mt-5">
+            <h1 className="text-5xl font-semibold mb-2">Teddy</h1>
+            <p className="text-sm text-balance text-muted-foreground">
+              Your partner in giving pets a second chance.
+            </p>
+          </div>
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>

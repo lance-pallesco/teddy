@@ -28,9 +28,6 @@ import {
   markAllNotificationsAsReadAction,
   deleteNotificationAction,
   clearAllNotificationsAction,
-  triggerMockStatusUpdateAction,
-  triggerMockMeetAndGreetAction,
-  getMockApplicationsAction,
 } from "@/app/(dashboard)/notifications/actions/notification.action"
 
 function formatRelativeTime(dateInput: Date | string) {
@@ -49,12 +46,6 @@ function formatRelativeTime(dateInput: Date | string) {
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
-  
-  // Simulation Controls State
-  const [mockApps, setMockApps] = useState<any[]>([])
-  const [selectedAppId, setSelectedAppId] = useState<string>("")
-  const [simStatus, setSimStatus] = useState<"APPROVED" | "REJECTED">("APPROVED")
-  const [simDate, setSimDate] = useState<string>("")
 
   async function loadNotifications() {
     const res = await getNotificationsAction()
@@ -63,20 +54,8 @@ export default function NotificationsPage() {
     }
   }
 
-  async function loadApps() {
-    const res = await getMockApplicationsAction()
-    if (res.success && res.data) {
-      const apps = res.data as any[]
-      setMockApps(apps)
-      if (apps.length > 0 && !selectedAppId) {
-        setSelectedAppId(apps[0].id)
-      }
-    }
-  }
-
   useEffect(() => {
     loadNotifications()
-    loadApps()
   }, [])
 
   const handleMarkAsRead = async (id: string) => {
@@ -128,33 +107,6 @@ export default function NotificationsPage() {
     }
   }
 
-  const handleSimulateStatus = async () => {
-    if (!selectedAppId) {
-      toast.error("Please select an application first")
-      return
-    }
-    const res = await triggerMockStatusUpdateAction(selectedAppId, simStatus)
-    if (res.success) {
-      toast.success(`Simulated application status updated to ${simStatus}!`)
-      loadNotifications()
-    } else {
-      toast.error(res.error ?? "Failed to simulate status update")
-    }
-  }
-
-  const handleSimulateMeetAndGreet = async () => {
-    if (!selectedAppId || !simDate) {
-      toast.error("Please select an application and a date/time")
-      return
-    }
-    const res = await triggerMockMeetAndGreetAction(selectedAppId, simDate)
-    if (res.success) {
-      toast.success("Simulated Meet & Greet scheduled successfully!")
-      loadNotifications()
-    } else {
-      toast.error(res.error ?? "Failed to simulate Meet & Greet")
-    }
-  }
 
   const getIcon = (type: NotificationType) => {
     switch (type) {
@@ -376,72 +328,6 @@ export default function NotificationsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Sandbox Simulation Controls Card */}
-      {mockApps.length > 0 && (
-        <Card className="border-amber-500/20 bg-amber-500/5 mt-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500">
-              🛠️ Sandbox Simulation Controls
-            </CardTitle>
-            <CardDescription className="text-xs text-amber-700/80 dark:text-amber-400/80">
-              Trigger events to generate real notifications across Adopters, Reviewers, and Admins in the DB.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-foreground/90">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Application Selector */}
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Select Target Application</label>
-                <select
-                  value={selectedAppId}
-                  onChange={(e) => setSelectedAppId(e.target.value)}
-                  className="w-full rounded-md border bg-background px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary text-foreground"
-                >
-                  {mockApps.map((app) => (
-                    <option key={app.id} value={app.id}>
-                      {app.applicant.firstName} - {app.pet.name} ({app.id.substring(0, 8)}...)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status Update Simulation */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-muted-foreground block">Simulate Application Decision</label>
-                <div className="flex gap-2 items-center">
-                  <select
-                    value={simStatus}
-                    onChange={(e) => setSimStatus(e.target.value as "APPROVED" | "REJECTED")}
-                    className="rounded-md border bg-background px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary text-foreground"
-                  >
-                    <option value="APPROVED">Approve</option>
-                    <option value="REJECTED">Reject</option>
-                  </select>
-                  <Button variant="outline" size="sm" onClick={handleSimulateStatus} className="h-8 text-xs bg-background text-foreground hover:bg-muted">
-                    Simulate Status
-                  </Button>
-                </div>
-              </div>
-
-              {/* Meet & Greet Simulation */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-muted-foreground block">Simulate Meet & Greet</label>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="datetime-local"
-                    value={simDate}
-                    onChange={(e) => setSimDate(e.target.value)}
-                    className="rounded-md border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-primary text-foreground"
-                  />
-                  <Button variant="outline" size="sm" onClick={handleSimulateMeetAndGreet} className="h-8 text-xs bg-background text-foreground hover:bg-muted">
-                    Schedule M&G
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
