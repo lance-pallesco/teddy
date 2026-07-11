@@ -12,6 +12,7 @@ import {
   HousePlusIcon,
   LayoutDashboardIcon,
   PawPrintIcon,
+  HeartPlus,
   LandmarkIcon,
   SearchIcon,
   SettingsIcon,
@@ -36,7 +37,7 @@ import type { DashboardNavItem } from "@/lib/navigation/dashboard-nav"
 import { isNavItemActive } from "@/lib/navigation/dashboard-nav"
 
 const icons = {
-  Building2: LandmarkIcon,
+  Building2: HeartPlus,
   ChartNoAxesColumn: ChartNoAxesColumnIcon,
   ClipboardList: ClipboardListIcon,
   FileHeart: FileHeartIcon,

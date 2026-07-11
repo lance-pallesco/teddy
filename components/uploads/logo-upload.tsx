@@ -129,7 +129,7 @@ export function LogoUpload({ value, onChange, disabled }: LogoUploadProps) {
           id={inputId}
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
-          className="sr-only"
+          className="sr-only bg-white"
           disabled={disabled || isUploading}
           onChange={(event) => {
             void handleFileChange(event.target.files?.[0])

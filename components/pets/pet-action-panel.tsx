@@ -41,7 +41,7 @@ export function PetActionPanel({
   const isArchived = pet.status === "ARCHIVED"
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card className="border-primary/20 bg-white">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Adoption actions</CardTitle>
       </CardHeader>

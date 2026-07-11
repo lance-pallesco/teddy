@@ -9,6 +9,7 @@ import {
   Loader2,
   HelpCircle,
   RefreshCw,
+  MailWarning,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -458,7 +459,7 @@ export function AIInsightsPanel({
 
       {/* Chat Mode Selection Modal */}
       <Dialog open={isChatSelectionOpen} onOpenChange={setIsChatSelectionOpen}>
-        <DialogContent className="sm:max-w-xl p-6">
+        <DialogContent className="sm:max-w-xl p-6 bg-white">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Select Chat Mode</DialogTitle>
           </DialogHeader>
@@ -519,7 +520,7 @@ export function AIInsightsPanel({
           </div>
 
           <div className="bg-primary/5 border border-primary/10 rounded-lg p-3.5 flex items-start gap-2.5 mb-4">
-            <span className="text-base shrink-0">ℹ️</span>
+            <MailWarning />
             <p className="text-xs text-muted-foreground leading-normal">
               The adopter will be notified that their application has progressed and the chat room has been unlocked.
             </p>

@@ -34,8 +34,8 @@ export default async function SheltersPage() {
           asChild
         >
           <Link href="/shelters/new">
-            <PlusIcon className="size-5" />
-            <span>Add Shelter</span>
+            <PlusIcon />
+            <span className="text-base font-light">Add Shelter</span>
           </Link>
         </Button>
       </div>

@@ -80,7 +80,7 @@ export function PetCard({ pet, className }: PetCardProps) {
         </Link>
 
         <div className="border-t px-4 py-4">
-          <Button variant="outline" size="lg" className="w-full rounded-full bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#9A7D58] hover:text-white hover:border-[#9A7D58] text-base font-medium px-6 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0" asChild>
+          <Button variant="outline" size="lg" className="w-full rounded-full bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#9A7D58] hover:text-white hover:border-[#9A7D58] text-base font-light tracking-tight px-6 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0" asChild>
             <Link href={`/pets/${pet.id}`}>
               <Heart className="size-5" />
               Meet {pet.name}
