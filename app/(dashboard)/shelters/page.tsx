@@ -19,7 +19,7 @@ export default async function SheltersPage() {
   const shelters = await listShelters()
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-8">
+    <div className="flex flex-1 flex-col gap-6 p-4 md:px-16 md:py-6 w-full max-w-full min-w-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl tracking-tighter">Shelters</h1>
@@ -30,7 +30,7 @@ export default async function SheltersPage() {
         <Button
           variant="outline"
           size="lg"
-          className="rounded-half bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#AE8F65] hover:text-white hover:border-[#9A7D58] text-base font-medium px-6 transition-transform duration-200 gap-2 shadow-sm shrink-0"
+          className="rounded-full bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#AE8F65] hover:text-white hover:border-[#9A7D58] text-base font-medium px-6 transition-transform duration-200 gap-2 shadow-sm shrink-0"
           asChild
         >
           <Link href="/shelters/new">
@@ -40,18 +40,18 @@ export default async function SheltersPage() {
         </Button>
       </div>
 
-      <div className="rounded-xl border bg-white dark:bg-[#1E1A16] shadow-xs overflow-hidden">
+      <div className="w-full min-w-0 rounded-xl border bg-white dark:bg-[#1E1A16] shadow-xs overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead></TableHead>
-              <TableHead>Shelter Name</TableHead>
-              <TableHead>City</TableHead>
-              <TableHead>Province</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-right"></TableHead>
+              <TableHead className="w-14"></TableHead>
+              <TableHead className="min-w-[160px]">Shelter Name</TableHead>
+              <TableHead className="min-w-[100px]">City</TableHead>
+              <TableHead className="min-w-[100px]">Province</TableHead>
+              <TableHead className="min-w-[160px]">Contact</TableHead>
+              <TableHead className="min-w-[80px]">Status</TableHead>
+              <TableHead className="min-w-[120px]">Created At</TableHead>
+              <TableHead className="w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
