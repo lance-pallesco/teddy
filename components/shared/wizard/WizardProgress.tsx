@@ -29,15 +29,15 @@ export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
             </p>
           )}
         </div>
-        <span className="text-sm font-medium text-primary mt-1 sm:mt-0">
+        <span className="text-sm font-semibold text-primary mt-1 sm:mt-0">
           {percentage}% Complete
         </span>
       </div>
 
       {/* Progress Bar */}
-      <div className="h-2 w-full rounded-full bg-muted">
+      <div className="h-2 w-full rounded-full bg-muted/60 dark:bg-muted/30">
         <div
-          className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+          className="h-full rounded-full bg-[#AE8F65] transition-all duration-300 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -63,8 +63,8 @@ export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
                   <span
                     className={cn(
                       "flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-200",
-                      isCompleted && "border-primary bg-primary text-primary-foreground",
-                      isCurrent && "border-primary bg-primary/10 text-primary ring-2 ring-primary/20",
+                      isCompleted && "border-[#AE8F65] bg-[#AE8F65] text-white",
+                      isCurrent && "border-[#AE8F65] bg-[#AE8F65]/10 text-[#AE8F65]",
                       isFuture && "border-border bg-background text-muted-foreground"
                     )}
                   >
@@ -72,7 +72,7 @@ export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
                   </span>
                   <span
                     className={cn(
-                      "hidden lg:inline text-xs font-medium whitespace-nowrap",
+                      "hidden lg:inline text-sm font-normal whitespace-nowrap",
                       isCurrent && "text-foreground font-semibold",
                       isCompleted && "text-muted-foreground",
                       isFuture && "text-muted-foreground/60"
@@ -85,7 +85,7 @@ export function WizardProgress({ steps, currentStep }: WizardProgressProps) {
                   <div
                     className={cn(
                       "hidden sm:block h-px flex-1 mx-2 min-w-4",
-                      isCompleted ? "bg-primary/50" : "bg-border"
+                      isCompleted ? "bg-[#AE8F65]/40" : "bg-border"
                     )}
                   />
                 )}

@@ -92,9 +92,9 @@ export function PetActionPanel({
                 This listing is archived
               </Badge>
             ) : null}
-            <Button variant="outline" size="lg" className="w-full" asChild>
+            <Button size="lg" className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white hover:border-[#9A7D58] cursor-pointer font-medium shadow-none" asChild>
               <Link href={`/pets/${pet.id}/edit`}>
-                <PencilIcon />
+                <PencilIcon className="size-4 mr-2" />
                 Edit pet
               </Link>
             </Button>

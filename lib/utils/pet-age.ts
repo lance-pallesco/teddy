@@ -47,5 +47,5 @@ export function formatBirthDateAsAge(
   const years = Math.floor(months / 12)
   const label = years === 1 ? "1 year" : `${years} years`
 
-  return isAgeEstimated ? `${label} (est.)` : label
+  return isAgeEstimated ? `${label}` : label
 }

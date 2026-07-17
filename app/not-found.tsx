@@ -10,7 +10,7 @@ export default function NotFound() {
   const router = useRouter()
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#D9CEC5] p-4 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
       <div className="flex w-full max-w-md flex-col items-center gap-6 rounded-2xl border border-white/20 bg-white/60 p-8 shadow-xl backdrop-blur-md">
         {/* Logo/Image Container */}
         <div className="relative aspect-square w-64 select-none">

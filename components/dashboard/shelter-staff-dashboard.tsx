@@ -54,9 +54,9 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{stats.shelterName}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#3D3C3A]">{stats.shelterName}</h1>
             <Badge variant={stats.shelterActive ? "success" : "secondary"}>
-              {stats.shelterActive ? "Active Shelter" : "Inactive"}
+              {stats.shelterActive ? "Active" : "Inactive"}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5 font-light">Shelter overview dashboard and actions.</p>
