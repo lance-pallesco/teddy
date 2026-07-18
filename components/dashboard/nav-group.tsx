@@ -86,7 +86,7 @@ export function DashboardNavGroup({ items }: { items: DashboardNavItem[] }) {
                   asChild
                   isActive={isActive}
                   tooltip={item.title}
-                  className="text-base font-light [&_svg]:size-5 h-10 group-data-[collapsible=icon]:[&_svg]:size-4 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&_span]:!hidden data-[active=true]:bg-[#AE8F65] data-[active=true]:text-white data-[active=true]:hover:bg-[#AE8F65]/90 data-[active=true]:font-light"
+                  className="font-normal text-[#3D3C3A] [&_svg]:size-5 h-10 group-data-[collapsible=icon]:[&_svg]:size-4 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&_span]:!hidden data-[active=true]:bg-[#AE8F65] data-[active=true]:text-white data-[active=true]:hover:bg-[#AE8F65]/90 data-[active=true]:font-light"
                 >
                   <Link href={item.url}>
                     <Icon />

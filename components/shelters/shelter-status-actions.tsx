@@ -20,16 +20,22 @@ import {
 type ShelterStatusActionsProps = {
   shelterId: string
   isActive: boolean
+  size?: "default" | "sm" | "xs" | "lg" | "icon" | "icon-sm" | "icon-xs"
+  variant?: "outline" | "ghost" | "default" | "destructive" | "success"
+  className?: string
 }
 
 export function ShelterStatusActions({
   shelterId,
   isActive,
+  size = "default",
+  variant,
+  className,
 }: ShelterStatusActionsProps) {
   const [isPending, startTransition] = useTransition()
 
   const actionLabel = useMemo(
-    () => (isActive ? "Deactivate Shelter" : "Activate Shelter"),
+    () => (isActive ? "Deactivate" : "Activate"),
     [isActive]
   )
 
@@ -64,8 +70,10 @@ export function ShelterStatusActions({
       <AlertDialogTrigger asChild>
         <Button
           type="button"
-          variant={isActive ? "destructive" : "success"}
+          variant={variant ?? (isActive ? "destructive" : "success")}
+          size={size}
           disabled={isPending}
+          className={className}
         >
           {isPending ? "Updating..." : actionLabel}
         </Button>

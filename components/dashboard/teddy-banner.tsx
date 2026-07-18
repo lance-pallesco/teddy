@@ -83,7 +83,6 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
   
   return (
     <div className="w-full space-y-4">
-      {/* Date & Greeting outside at the top - Responsively positioned to clear the mascot */}
       <div className="pl-0 md:pl-[264px] text-center md:text-left transition-all">
         <span className="text-[10px] md:text-xs tracking-widest text-[#8B7E74] dark:text-[#A89F96]">
           {dateString}
