@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 
 import { EditShelterForm } from "@/components/shelters/edit-shelter-form"
-import { ShelterSummaryCard } from "@/components/shelters/shelter-summary-card"
 import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
 import { requireRole } from "@/lib/auth/require-role"
 import { getShelterById } from "@/lib/services/shelter.service"
@@ -33,18 +32,7 @@ export default async function EditShelterPage({ params }: EditShelterPageProps) 
           </p>
         </div>
 
-        {/* 2-Column Layout */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left Column: Current Shelter Preview */}
-          <div className="lg:col-span-1">
-            <ShelterSummaryCard variant="preview" shelter={shelter} />
-          </div>
-
-          {/* Right Column: Edit Form */}
-          <div className="lg:col-span-2">
-            <EditShelterForm shelter={shelter} />
-          </div>
-        </div>
+        <EditShelterForm shelter={shelter} />
       </div>
     </div>
   )

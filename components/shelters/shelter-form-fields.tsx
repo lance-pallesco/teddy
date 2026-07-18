@@ -135,9 +135,9 @@ export function ShelterFormFields({
 
       <section className="rounded-lg border p-5 bg-white">
         <div className="mb-5">
-          <h2 className="text-base font-medium">Contact & Logo</h2>
+          <h2 className="text-base font-medium">Contact Details</h2>
           <p className="text-sm text-muted-foreground">
-            Contact channels and the optional shelter logo.
+            Contact channels for the shelter operations.
           </p>
         </div>
         <FieldGroup>
@@ -165,17 +165,6 @@ export function ShelterFormFields({
               <FieldError errors={[errors.email]} />
             </Field>
           </div>
-          <Field>
-            <FieldLabel>Logo</FieldLabel>
-            <ShelterLogoUpload
-              value={logo}
-              disabled={disabled}
-              onChange={(url) =>
-                setValue("logo", url, { shouldDirty: true, shouldValidate: true })
-              }
-            />
-            <FieldError errors={[errors.logo]} />
-          </Field>
         </FieldGroup>
       </section>
     </>

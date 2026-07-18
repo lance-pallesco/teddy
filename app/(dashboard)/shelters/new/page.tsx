@@ -1,5 +1,4 @@
 import { CreateShelterForm } from "@/components/shelters/create-shelter-form"
-import { ShelterSummaryCard } from "@/components/shelters/shelter-summary-card"
 import { requireRole } from "@/lib/auth/require-role"
 
 export default async function NewShelterPage() {
@@ -17,18 +16,7 @@ export default async function NewShelterPage() {
           </p>
         </div>
 
-        {/* 2-Column Layout */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left Column: Placeholder Summary */}
-          <div className="lg:col-span-1">
-            <ShelterSummaryCard variant="new" />
-          </div>
-
-          {/* Right Column: Create Form */}
-          <div className="lg:col-span-2">
-            <CreateShelterForm />
-          </div>
-        </div>
+        <CreateShelterForm />
       </div>
     </div>
   )
