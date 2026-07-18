@@ -9,6 +9,8 @@ import { StatsGridSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { getShelterStaffStats } from "@/lib/services/dashboard.service"
 import { prisma } from "@/lib/prisma"
 import { TeddyBanner } from "@/components/dashboard/teddy-banner"
+import { getShelterAnalyticsData } from "@/lib/services/analytics.service"
+import { ShelterAnalyticsCharts } from "@/components/analytics/shelter-analytics-charts"
 
 type ShelterStaffDashboardProps = {
   userId: string
@@ -17,6 +19,7 @@ type ShelterStaffDashboardProps = {
 
 async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
   const stats = await getShelterStaffStats(shelterId)
+  const analyticsData = await getShelterAnalyticsData(shelterId)
 
   // Fetch priority inbox applications (pending, oldest first)
   const priorityApplications = await prisma.adoptionApplication.findMany({
@@ -224,6 +227,9 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Shelter Charts Section */}
+      <ShelterAnalyticsCharts data={analyticsData} />
     </div>
   )
 }

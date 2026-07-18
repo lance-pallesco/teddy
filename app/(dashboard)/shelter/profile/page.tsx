@@ -8,12 +8,17 @@ import {
   MailIcon,
   PawPrintIcon,
   UsersIcon,
+  HeartHandshakeIcon,
+  ClipboardListIcon,
+  TimerIcon,
 } from "lucide-react"
 
 import { requireRole } from "@/lib/auth/require-role"
 import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { getShelterAnalyticsData } from "@/lib/services/analytics.service"
+import { ShelterAnalyticsCharts } from "@/components/analytics/shelter-analytics-charts"
 
 export default async function MyShelterProfilePage() {
   const user = await requireRole(["SHELTER_STAFF"])
@@ -58,6 +63,7 @@ export default async function MyShelterProfilePage() {
     notFound()
   }
 
+  const analyticsData = await getShelterAnalyticsData(user.shelterId)
   const petsCount = shelter.pets.length
   const staffCount = shelter.users.length
 
@@ -227,7 +233,11 @@ export default async function MyShelterProfilePage() {
                         pet.petImages[0]?.url
 
                       return (
-                        <div key={pet.id} className="group block text-center space-y-1">
+                        <Link
+                          key={pet.id}
+                          href={`/pets/${pet.id}`}
+                          className="group block text-center space-y-1 hover:opacity-90 transition-opacity"
+                        >
                           <div className="relative aspect-square rounded-lg bg-muted border overflow-hidden">
                             {primaryImage ? (
                               <Image
@@ -246,7 +256,7 @@ export default async function MyShelterProfilePage() {
                           </div>
                           <div className="text-xs font-semibold truncate px-1 text-foreground pt-1">{pet.name}</div>
                           <div className="text-[10px] text-muted-foreground truncate">{pet.breed ?? pet.species}</div>
-                        </div>
+                        </Link>
                       )
                     })}
                   </div>
@@ -254,6 +264,52 @@ export default async function MyShelterProfilePage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Shelter Operational Analytics section */}
+        <div className="pt-6 border-t space-y-6">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-[#3D3C3A]">Shelter Performance & Analytics</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Review current metrics and application volumes specific to your shelter.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Card className="bg-white dark:bg-[#1E1A16] border border-primary/10 text-center p-4">
+              <div className="flex items-center justify-center size-8 rounded-full bg-emerald-500/10 text-emerald-600 mx-auto mb-2">
+                <HeartHandshakeIcon className="size-4" />
+              </div>
+              <p className="text-lg font-bold text-emerald-600">{analyticsData.adoptedPets}</p>
+              <p className="text-[10px] uppercase font-semibold text-muted-foreground">Adoptions Completed</p>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#1E1A16] border border-primary/10 text-center p-4">
+              <div className="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary mx-auto mb-2">
+                <ClipboardListIcon className="size-4" />
+              </div>
+              <p className="text-lg font-bold text-foreground">{analyticsData.totalApplications}</p>
+              <p className="text-[10px] uppercase font-semibold text-muted-foreground">Total Applications</p>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#1E1A16] border border-primary/10 text-center p-4">
+              <div className="flex items-center justify-center size-8 rounded-full bg-amber-500/10 text-amber-600 mx-auto mb-2">
+                <ClipboardListIcon className="size-4" />
+              </div>
+              <p className="text-lg font-bold text-amber-600">{analyticsData.pendingApplications}</p>
+              <p className="text-[10px] uppercase font-semibold text-muted-foreground">Pending Review</p>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#1E1A16] border border-primary/10 text-center p-4">
+              <div className="flex items-center justify-center size-8 rounded-full bg-rose-500/10 text-rose-600 mx-auto mb-2">
+                <TimerIcon className="size-4" />
+              </div>
+              <p className="text-lg font-bold text-rose-600">{analyticsData.avgDaysToAdopt} days</p>
+              <p className="text-[10px] uppercase font-semibold text-muted-foreground">Avg. Days to Adopt</p>
+            </Card>
+          </div>
+
+          <ShelterAnalyticsCharts data={analyticsData} />
         </div>
       </div>
     </div>

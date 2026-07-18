@@ -1,15 +1,16 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { PawPrint, ClipboardList, FileHeart, CalendarRange, Plus, ArrowRight, TrendingUp } from "lucide-react"
+import { PawPrint, ClipboardList, FileHeart, CalendarRange, Plus, ArrowRight } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { PageHeader } from "@/components/dashboard/page-header"
 import { StatsGridSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { getPetOwnerStats } from "@/lib/services/dashboard.service"
 import { prisma } from "@/lib/prisma"
 import { TeddyBanner } from "@/components/dashboard/teddy-banner"
+import { getPetOwnerAnalyticsData } from "@/lib/services/analytics.service"
+import { OwnerAnalyticsCharts } from "@/components/analytics/owner-analytics-charts"
 
 type PetOwnerDashboardProps = {
   userId: string
@@ -17,6 +18,7 @@ type PetOwnerDashboardProps = {
 
 async function PetOwnerStatsGrid({ userId }: { userId: string }) {
   const stats = await getPetOwnerStats(userId)
+  const analyticsData = await getPetOwnerAnalyticsData(userId)
 
   // Fetch listed pets with application count
   const myPets = await prisma.pet.findMany({
@@ -99,44 +101,44 @@ async function PetOwnerStatsGrid({ userId }: { userId: string }) {
 
           <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Adopted Fosters</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Rehomed Successfully</CardTitle>
               <FileHeart className="size-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.pets.ADOPTED}</div>
-              <p className="text-xs text-muted-foreground mt-1">Successfully adopted pets</p>
+              <p className="text-xs text-muted-foreground mt-1">Fosters matched with forever homes</p>
             </CardContent>
           </Card>
 
           <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Weekly Applications</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Adoption Ratios</CardTitle>
               <CalendarRange className="size-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.appsThisWeek}</div>
-              <p className="text-xs text-muted-foreground mt-1">Applications received in last 7 days</p>
+              <div className="text-3xl font-bold">{adoptionRate}%</div>
+              <p className="text-xs text-muted-foreground mt-1">Percentage of placements completed</p>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Fostering Insights */}
+      {/* Visual Analytics */}
       <div className="grid gap-6 md:grid-cols-3 pt-4">
-        {/* Card A: My Impact */}
-        <Card className="border border-primary/10 shadow-xs md:col-span-1 flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <TrendingUp className="size-4 text-emerald-500" /> My Foster Impact
+        {/* Card A: Success summary info */}
+        <Card className="border border-primary/10 shadow-xs flex flex-col justify-between">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-bold uppercase tracking-wider">
+              Fostering Success Stats
             </CardTitle>
             <CardDescription className="text-xs">
-              Lifetime stats for your foster care listings
+              Overview summary metrics of your animal foster care.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 p-6 pt-0">
+          <CardContent className="space-y-4">
             <div className="flex items-end justify-between border-b pb-3">
               <span className="text-xs text-muted-foreground">Adoption Rate</span>
-              <span className="text-2xl font-black text-emerald-600">{adoptionRate}%</span>
+              <span className="text-sm font-bold text-primary">{adoptionRate}% match rate</span>
             </div>
             <div className="flex items-end justify-between border-b pb-3">
               <span className="text-xs text-muted-foreground">Total Listings Posted</span>
@@ -204,6 +206,8 @@ async function PetOwnerStatsGrid({ userId }: { userId: string }) {
           </CardContent>
         </Card>
       </div>
+
+      <OwnerAnalyticsCharts data={analyticsData} />
     </div>
   )
 }

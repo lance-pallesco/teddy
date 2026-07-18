@@ -216,18 +216,17 @@ export function ApplicationDetailContent({
             {/* Form data sections / Tabs */}
             {isReviewer ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full justify-start border-b rounded-none h-12 bg-transparent p-0 mb-6 gap-6">
+                <TabsList className="grid grid-cols-2 max-w-md gap-1 rounded-lg border bg-[#8B7E74]/10 p-1 h-auto shadow-none mb-6">
                   <TabsTrigger
                     value="info"
-                    className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
+                    className="rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground focus-visible:outline-none cursor-pointer"
                   >
                     Application Info
                   </TabsTrigger>
                   <TabsTrigger
                     value="ai"
-                    className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium flex items-center gap-1.5"
+                    className="rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground focus-visible:outline-none cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    <BotIcon className="size-4 text-primary animate-pulse" />
                     Teddy AI Review
                   </TabsTrigger>
                 </TabsList>
