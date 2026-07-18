@@ -48,8 +48,16 @@ export function UpdatePetStatusDialog({ petId, petName, isArchived, disabled }: 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="lg" className="w-full" disabled={disabled || isPending}>
-          {isArchived ? <RotateCcwIcon/> : <ArchiveIcon />}
+        <Button
+          size="lg"
+          className={`w-full border rounded-lg ${
+            isArchived
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30"
+              : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+          } cursor-pointer font-medium`}
+          disabled={disabled || isPending}
+        >
+          {isArchived ? <RotateCcwIcon className="size-4 mr-2" /> : <ArchiveIcon className="size-4 mr-2" />}
           {isArchived ? "Restore pet" : "Archive pet"}
         </Button>
       </AlertDialogTrigger>

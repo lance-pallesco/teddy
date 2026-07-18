@@ -18,11 +18,11 @@ export function PetCard({ pet, className }: PetCardProps) {
   return (
     <Card
       className={cn(
-        "group overflow-hidden transition-shadow hover:shadow-md",
+        "group overflow-hidden transition-shadow hover:shadow-md ",
         className
       )}
     >
-      <CardContent className="p-0">
+      <CardContent className="p-0 bg-white">
         <Link href={`/pets/${pet.id}`} className="block">
           <div className="relative aspect-[4/3] overflow-hidden bg-muted">
             {pet.primaryImageUrl ? (
@@ -42,47 +42,47 @@ export function PetCard({ pet, className }: PetCardProps) {
             )}
           </div>
 
-          <div className="space-y-3 p-4">
+          <div className="space-y-2.5 p-3.5">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="truncate text-xl font-semibold leading-tight">{pet.name}</p>
-                <p className="mt-0.5 truncate text-base text-muted-foreground">
+                <p className="truncate text-lg font-medium leading-tight">{pet.name}</p>
+                <p className="mt-0.5 truncate text-sm text-muted-foreground">
                   {pet.speciesBreed}
                 </p>
               </div>
               <PetStatusBadge status={pet.status as PetStatus} className="shrink-0" />
             </div>
 
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-base text-muted-foreground">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
               <span>Age: {pet.ageLabel}</span>
               <span>Size: {pet.sizeLabel}</span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-base">
+            <div className="flex items-center gap-1.5 text-sm">
               {pet.attribution.isShelter && pet.attribution.isVerified ? (
                 <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
               ) : <User2 className="size-3.5 shrink-0" aria-hidden />}
-              <span className="truncate font-medium text-foreground">
+              <span className="truncate text-foreground">
                 {pet.attribution.label}
               </span>
               {pet.attribution.isShelter ? (
-                <span className="shrink-0 text-sm text-muted-foreground">Shelter</span>
+                <span className="shrink-0 text-xs text-muted-foreground">(Shelter)</span>
               ) : (
-                <span className="shrink-0 text-sm text-muted-foreground">Owner</span>
+                <span className="shrink-0 text-xs text-muted-foreground">(Owner)</span>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-base text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPinIcon className="size-3.5 shrink-0" aria-hidden />
               <span className="truncate">{pet.location}</span>
             </div>
           </div>
         </Link>
 
-        <div className="border-t px-4 py-4">
-          <Button variant="outline" size="lg" className="w-full rounded-full bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#9A7D58] hover:text-white hover:border-[#9A7D58] text-base font-medium px-6 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0" asChild>
+        <div className="border-t px-3.5 py-3.5">
+          <Button variant="outline" className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white hover:border-[#9A7D58] text-sm font-medium  transition-colors duration-200 cursor-pointer shadow-none" asChild>
             <Link href={`/pets/${pet.id}`}>
-              <Heart className="size-5" />
+              <Heart />
               Meet {pet.name}
             </Link>
           </Button>

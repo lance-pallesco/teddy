@@ -54,21 +54,21 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{stats.shelterName}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#3D3C3A]">{stats.shelterName}</h1>
             <Badge variant={stats.shelterActive ? "success" : "secondary"}>
-              {stats.shelterActive ? "Active Shelter" : "Inactive"}
+              {stats.shelterActive ? "Active" : "Inactive"}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5 font-medium">Shelter overview dashboard and actions.</p>
+          <p className="text-sm text-muted-foreground mt-0.5 font-light">Shelter overview dashboard and actions.</p>
         </div>
       </div>
 
       {/* Quick Action Links */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="flex items-center justify-between p-6 border bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/30 transition-all shadow-xs">
+        <Card className="flex items-center justify-between p-6 border bg-white shadow-xs">
           <div className="space-y-1">
             <h3 className="font-semibold">Add Pet</h3>
-            <p className="text-sm text-muted-foreground">Post a new pet listing to make them available for adoption.</p>
+            <p className="text-sm text-muted-foreground font-light">Post a new pet listing to make them available for adoption.</p>
           </div>
           <Button asChild size="sm" className="shrink-0 ml-4">
             <Link href="/pets/new">
@@ -78,10 +78,10 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
           </Button>
         </Card>
 
-        <Card className="flex items-center justify-between p-6 border bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/30 transition-all shadow-xs">
+        <Card className="flex items-center justify-between p-6 border bg-white shadow-xs">
           <div className="space-y-1">
             <h3 className="font-semibold">View Applications</h3>
-            <p className="text-sm text-muted-foreground">Review incoming adoption requests and check candidate details.</p>
+            <p className="text-sm text-muted-foreground font-light">Review incoming adoption requests and check candidate details.</p>
           </div>
           <Button asChild size="sm" variant="secondary" className="shrink-0 ml-4">
             <Link href="/applications">
@@ -94,7 +94,6 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
 
       {/* Statistics */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">Metrics & Activity</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

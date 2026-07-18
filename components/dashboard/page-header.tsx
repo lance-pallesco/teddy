@@ -23,7 +23,7 @@ export function PageHeader({ title, subtitle, action }: PageHeaderProps) {
         ) : null}
       </div>
       {action ? (
-        <Button asChild size="lg" className="shrink-0">
+        <Button asChild size="lg" className="shrink-0 bg-[#987554] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer rounded-lg transition-colors duration-200 font-medium shadow-none">
           <Link href={action.href}>
             {action.icon}
             {action.label}

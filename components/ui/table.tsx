@@ -6,7 +6,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div data-slot="table" className="w-full overflow-auto">
       <table
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn("w-full caption-bottom text-md font-light", className)}
         {...props}
       />
     </div>
@@ -61,7 +61,7 @@ function TableHead({
   return (
     <th
       scope="col"
-      className={cn("px-4 py-3 text-left font-medium", className)}
+      className={cn("px-4 py-3 text-left text-lg font-light", className)}
       {...props}
     />
   )

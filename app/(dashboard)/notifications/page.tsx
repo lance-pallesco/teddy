@@ -17,7 +17,6 @@ import {
 import type { Notification, NotificationType } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -269,7 +268,7 @@ export default function NotificationsPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Notification Center</h1>
+        <h1 className="text-3xl font-extrabold text-[#3D3C3A] tracking-tight">Notification Center</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Review updates, AI recommendations, system events, and meet & greet schedules.
         </p>
@@ -277,42 +276,40 @@ export default function NotificationsPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full space-y-6">
-        <div className="border-b">
-          <TabsList className="justify-start border-none rounded-none h-12 bg-transparent p-0 gap-6">
-            <TabsTrigger
-              value="all"
-              className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
-            >
-              All Notifications
-              <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 py-0 font-normal">
-                {notifications.length}
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full gap-1 rounded-lg border bg-[#8B7E74]/10 p-1 h-auto shadow-none">
+          <TabsTrigger
+            value="all"
+            className="rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground focus-visible:outline-none cursor-pointer"
+          >
+            All Notifications
+            <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 py-0 font-normal">
+              {notifications.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger
+            value="unread"
+            className="rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground focus-visible:outline-none cursor-pointer"
+          >
+            Unread
+            {unreadNotifications.length > 0 && (
+              <Badge variant="danger" className="ml-1.5 text-[10px] px-1 py-0 font-normal bg-rose-500/10 text-rose-600 border-rose-500/20">
+                {unreadNotifications.length}
               </Badge>
-            </TabsTrigger>
-            <TabsTrigger
-              value="unread"
-              className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
-            >
-              Unread
-              {unreadNotifications.length > 0 && (
-                <Badge variant="danger" className="ml-1.5 text-[10px] px-1 py-0 font-normal bg-rose-500/10 text-rose-600 border-rose-500/20">
-                  {unreadNotifications.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger
-              value="applications"
-              className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
-            >
-              Applications & Meetings
-            </TabsTrigger>
-            <TabsTrigger
-              value="system"
-              className="rounded-none border-b-2 border-transparent data-[aria-selected=true]:border-primary data-[aria-selected=true]:bg-transparent px-1 py-3 text-sm font-medium"
-            >
-              System & AI
-            </TabsTrigger>
-          </TabsList>
-        </div>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="applications"
+            className="rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground focus-visible:outline-none cursor-pointer"
+          >
+            Applications & Meetings
+          </TabsTrigger>
+          <TabsTrigger
+            value="system"
+            className="rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground focus-visible:outline-none cursor-pointer"
+          >
+            System & AI
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="all" className="mt-0 focus-visible:outline-none">
           {renderNotificationList(notifications)}

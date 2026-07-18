@@ -72,10 +72,10 @@ export function ShelterForm(props: ShelterFormProps) {
       />
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" asChild disabled={isPending}>
+        <Button type="button" className="bg-white text-black text-base font-light px-6 transition-transform duration-200 gap-2 shadow-sm" variant="outline" asChild disabled={isPending}>
           <Link href="/shelters">Cancel</Link>
         </Button>
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending} className="cursor-pointer bg-[#AE8F65] text-white border-[#AE8F65] hover:bg-[#AE8F65] hover:text-white hover:border-[#9A7D58] text-base font-light px-6 transition-transform duration-200 gap-2 shadow-sm">
           {isPending
             ? isEdit
               ? "Saving changes..."

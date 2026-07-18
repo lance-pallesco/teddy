@@ -19,7 +19,7 @@ import {
 async function ShelterStatsCard() {
   const stats = await getShelterStats()
   return (
-    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">Total Shelters</CardTitle>
         <Building2 className="size-4 text-primary" />
@@ -38,7 +38,7 @@ async function UserStatsCard() {
   const users = await getUserStats()
   const total = Object.values(users).reduce((a, b) => a + b, 0)
   return (
-    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
         <Users className="size-4 text-primary" />
@@ -57,7 +57,7 @@ async function PetStatsCard() {
   const pets = await getPetStats()
   const total = Object.values(pets).reduce((a, b) => a + b, 0)
   return (
-    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">Total Pets</CardTitle>
         <PawPrint className="size-4 text-primary" />
@@ -75,7 +75,7 @@ async function PetStatsCard() {
 async function ApplicationStatsCard() {
   const count = await getMonthlyApplicationStats()
   return (
-    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+    <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">Applications This Month</CardTitle>
         <ClipboardList className="size-4 text-primary" />
@@ -90,8 +90,6 @@ async function ApplicationStatsCard() {
   )
 }
 
-// ---------- Main Component ----------
-
 export function SuperAdminDashboard({ userId }: { userId: string }) {
   return (
     <div className="space-y-6">
@@ -102,7 +100,7 @@ export function SuperAdminDashboard({ userId }: { userId: string }) {
 
       {/* Quick Action Links */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="flex items-center justify-between p-6 border bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/30 transition-all">
+        <Card className="flex items-center justify-between p-6 border bg-white">
           <div className="space-y-1">
             <h3 className="font-semibold">Manage Shelters</h3>
             <p className="text-sm text-muted-foreground">Review registered shelters, verify accounts, and add staff members.</p>
@@ -115,7 +113,7 @@ export function SuperAdminDashboard({ userId }: { userId: string }) {
           </Button>
         </Card>
 
-        <Card className="flex items-center justify-between p-6 border bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/30 transition-all">
+        <Card className="flex items-center justify-between p-6 border bg-white">
           <div className="space-y-1">
             <h3 className="font-semibold">Manage Users</h3>
             <p className="text-sm text-muted-foreground">View and modify system users, roles, account statuses, and profiles.</p>
@@ -131,7 +129,6 @@ export function SuperAdminDashboard({ userId }: { userId: string }) {
 
       {/* Statistics Section */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">System Metrics</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Suspense fallback={<StatsCardSkeleton />}>
             <ShelterStatsCard />
@@ -159,7 +156,7 @@ export function SuperAdminDashboard({ userId }: { userId: string }) {
 
 function PlatformGrowthChart() {
   return (
-    <Card className="border border-primary/10 shadow-xs">
+    <Card className="border border-primary/10 shadow-xs bg-white">
       <CardHeader>
         <CardTitle className="text-sm font-semibold">Platform Growth (Past 6 Months)</CardTitle>
       </CardHeader>
@@ -221,7 +218,7 @@ function AdoptionFunnelChart() {
     { stage: "Approved M&G", count: 48, percent: 18, color: "bg-emerald-500" },
   ]
   return (
-    <Card className="border border-primary/10 shadow-xs">
+    <Card className="border border-primary/10 shadow-xs bg-white">
       <CardHeader>
         <CardTitle className="text-sm font-semibold">Adoption Process Funnel</CardTitle>
       </CardHeader>

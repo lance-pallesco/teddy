@@ -155,7 +155,7 @@ export function ApplicationDetailContent({
     <div className="flex w-full flex-1 flex-col gap-6 p-4 md:p-6">
       <SetBreadcrumbLabel segment={application.id} label={pet.name} />
 
-      <div className="mx-auto w-full max-w-7xl space-y-6">
+      <div className="mx-auto w-full px-6 space-y-6">
         {/* Back + Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -200,14 +200,14 @@ export function ApplicationDetailContent({
           <div className="space-y-6">
             {/* Review notes / rejection reason */}
             {application.rejectionReason ? (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 bg-white">
                 <h3 className="text-sm font-semibold text-destructive">Rejection Reason</h3>
                 <p className="mt-1 text-sm text-foreground">{application.rejectionReason}</p>
               </div>
             ) : null}
 
             {application.reviewNotes && !application.rejectionReason ? (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 bg-white">
                 <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Review Notes</h3>
                 <p className="mt-1 text-sm text-foreground">{application.reviewNotes}</p>
               </div>
@@ -273,7 +273,7 @@ export function ApplicationDetailContent({
           {/* Right column — Sidebar */}
           <div className="space-y-5 lg:sticky lg:top-6">
             {/* Pet Info Card */}
-            <Card className="overflow-hidden border-primary/15 bg-muted/20">
+            <Card className="overflow-hidden border-primary/15 bg-white">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                   Pet Applied For
@@ -326,7 +326,7 @@ export function ApplicationDetailContent({
 
             {/* Applicant Info Card (for reviewers) */}
             {isReviewer ? (
-              <Card className="border-primary/15 bg-muted/20">
+              <Card className="border-primary/15 bg-white">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                     Applicant

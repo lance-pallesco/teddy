@@ -24,7 +24,7 @@ export function PetManagementTabs({
   ]
 
   return (
-    <div className="flex gap-1 rounded-lg border bg-muted/30 p-1">
+    <div className="flex gap-1 rounded-lg border bg-[#8B7E74]/10 p-1">
       {tabs.map((tab) => {
         const href = buildPetListHref(
           basePath,

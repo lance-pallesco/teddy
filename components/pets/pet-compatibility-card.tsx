@@ -31,13 +31,15 @@ function CompatibilityRow({ label, positive, icon: Icon }: CompatibilityItem) {
         "flex items-center gap-3 rounded-lg border px-3 py-2.5",
         positive
           ? "border-emerald-500/25 bg-emerald-500/5"
-          : "border-border bg-muted/30"
+          : "border-red-500/20 bg-red-500/5"
       )}
     >
       <div
         className={cn(
           "flex size-8 items-center justify-center rounded-full",
-          positive ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+          positive
+            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+            : "bg-red-500/15 text-red-600 dark:text-red-400"
         )}
       >
         <Icon className="size-4" aria-hidden />
@@ -46,7 +48,7 @@ function CompatibilityRow({ label, positive, icon: Icon }: CompatibilityItem) {
       {positive ? (
         <CheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" aria-label="Yes" />
       ) : (
-        <XIcon className="size-4 text-muted-foreground" aria-label="No" />
+        <XIcon className="size-4 text-red-600 dark:text-red-400" aria-label="No" />
       )}
     </div>
   )

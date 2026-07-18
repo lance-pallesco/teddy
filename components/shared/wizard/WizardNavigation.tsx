@@ -40,6 +40,7 @@ export function WizardNavigation({
               size="lg"
               disabled={isSubmitting || isSavingDraft}
               onClick={onBack}
+              className="rounded-lg cursor-pointer transition-colors duration-200 hover:bg-neutral-50 hover:text-neutral-900 font-medium shadow-none"
             >
               Back
             </Button>
@@ -54,7 +55,7 @@ export function WizardNavigation({
               size="lg"
               disabled={isSubmitting || isSavingDraft || disableNext}
               onClick={onNext}
-              className="min-w-32"
+              className="min-w-32 bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer rounded-lg transition-colors duration-200 font-medium shadow-none"
             >
               {isSubmitting ? (
                 <>
@@ -62,7 +63,7 @@ export function WizardNavigation({
                   Submitting...
                 </>
               ) : (
-                "Submit Application"
+                "Submit"
               )}
             </Button>
           ) : (
@@ -71,7 +72,7 @@ export function WizardNavigation({
               size="lg"
               disabled={isSubmitting || isSavingDraft || disableNext}
               onClick={onNext}
-              className="min-w-28"
+              className="min-w-28 bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer rounded-lg transition-colors duration-200 font-medium shadow-none"
             >
               {isSubmitting ? (
                 <>

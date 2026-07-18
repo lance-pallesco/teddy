@@ -38,7 +38,7 @@ export function DashboardSidebar({ role, user, ...props }: DashboardSidebarProps
                   <Image src="/logo.png" alt="Teddy" width={28} height={28} className="group-data-[collapsible=icon]:w-5 group-data-[collapsible=icon]:h-5 transition-all" />
                 </div>
                 <div className="grid flex-1 text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate text-xl tracking-tighter">Teddy</span>
+                  <span className="truncate text-lg font-extrabold tracking-tight text-[#3D3C3A]">Teddy</span>
                   <span className="truncate text-xs font-light">Pet Adoption</span>
                 </div>
               </Link>
