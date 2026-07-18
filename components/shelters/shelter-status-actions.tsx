@@ -1,21 +1,11 @@
 "use client"
 
-import { useMemo, useTransition } from "react"
+import { useMemo, useTransition, useState } from "react"
 import { toast } from "sonner"
 
 import { toggleShelterStatusAction } from "@/app/(dashboard)/shelters/actions/toggle-shelter-status"
 import { Button } from "@/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { ConfirmationDialog } from "@/components/shared/confirmation-dialog"
 
 type ShelterStatusActionsProps = {
   shelterId: string
@@ -32,6 +22,7 @@ export function ShelterStatusActions({
   variant,
   className,
 }: ShelterStatusActionsProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const actionLabel = useMemo(
@@ -62,41 +53,33 @@ export function ShelterStatusActions({
       }
 
       toast.success(result.message)
+      setIsOpen(false)
     })
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          variant={variant ?? (isActive ? "destructive" : "success")}
-          size={size}
-          disabled={isPending}
-          className={className}
-        >
-          {isPending ? "Updating..." : actionLabel}
-        </Button>
-      </AlertDialogTrigger>
+    <>
+      <Button
+        type="button"
+        variant={variant ?? (isActive ? "destructive" : "success")}
+        size={size}
+        disabled={isPending}
+        className={className}
+        onClick={() => setIsOpen(true)}
+      >
+        {isPending ? "Updating..." : actionLabel}
+      </Button>
 
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{dialogTitle}</AlertDialogTitle>
-          <AlertDialogDescription>{dialogDescription}</AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            disabled={isPending}
-            className={isActive ? "" : ""}
-          >
-            {isPending ? "Please wait..." : actionLabel}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onConfirm={onConfirm}
+        title={dialogTitle}
+        description={dialogDescription}
+        confirmText={actionLabel}
+        variant={isActive ? "destructive" : "info"}
+        isLoading={isPending}
+      />
+    </>
   )
 }
-

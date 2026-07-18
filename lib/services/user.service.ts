@@ -263,3 +263,21 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
   }
 }
 
+export async function toggleUserStatus(id: string) {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { isActive: true },
+  })
+
+  if (!user) {
+    throw new Error("User not found")
+  }
+
+  return prisma.user.update({
+    where: { id },
+    data: { isActive: !user.isActive },
+    select: { id: true, isActive: true },
+  })
+}
+
+
