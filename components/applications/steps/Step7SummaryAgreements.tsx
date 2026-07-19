@@ -278,7 +278,6 @@ export function Step7SummaryAgreements({
           </dl>
         </div>
 
-        {/* Adoption Commitment */}
         <div className="space-y-2 border-b pb-4">
           <h4 className="font-semibold text-foreground text-base">5. Adoption Commitment</h4>
           <div className="space-y-2">

@@ -283,8 +283,6 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
           </p>
         </div>
       )}
-
-      {/* Confirmation Alert Dialog */}
       <ConfirmationDialog
         isOpen={!!confirmUser}
         onClose={() => setConfirmUser(null)}

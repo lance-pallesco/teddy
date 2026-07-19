@@ -18,6 +18,7 @@ import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ShelterStaffList } from "@/components/shelters/shelter-staff-list"
 
 type ShelterDetailPageProps = {
   params: Promise<{ id: string }>
@@ -113,7 +114,7 @@ export default async function ShelterDetailPage({
                     size="sm"
                     className="bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer rounded-lg transition-colors duration-200 font-medium shadow-none shrink-0 text-xs h-8"
                   >
-                    <Link href={`/shelters/${shelter.id}/staff/new`}>
+                    <Link href={`/shelters/${shelter.id}/new`}>
                       <PlusIcon className="size-3.5" />
                       Add Staff
                     </Link>
@@ -121,57 +122,7 @@ export default async function ShelterDetailPage({
                 </div>
               </CardHeader>
               <CardContent>
-                {staffWithAvatars.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed rounded-lg bg-muted/10">
-                    <UsersIcon className="size-10 text-muted-foreground opacity-40 mb-2" />
-                    <h5 className="font-semibold text-sm">No staff members assigned yet</h5>
-                    <p className="text-xs text-muted-foreground max-w-xs mt-0.5">
-                      Add a staff account to start shelter operations.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {staffWithAvatars.map((staff) => (
-                      <div
-                        key={staff.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/10 transition-colors"
-                      >
-                        <div className="relative size-10 rounded-full bg-muted border overflow-hidden shrink-0">
-                          {staff.avatar ? (
-                            <Image
-                              src={staff.avatar}
-                              alt={`${staff.firstName} ${staff.lastName}`}
-                              fill
-                              className="object-cover"
-                              sizes="40px"
-                              unoptimized={staff.avatar.startsWith("/uploads/")}
-                            />
-                          ) : (
-                            <div className="flex size-full items-center justify-center text-muted-foreground bg-primary/5 text-primary text-xs font-bold">
-                              {staff.firstName[0]}
-                              {staff.lastName[0]}
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-sm font-semibold text-foreground truncate">
-                            {staff.firstName} {staff.lastName}
-                          </h4>
-                          <p className="text-xs text-muted-foreground truncate">{staff.email}</p>
-                        </div>
-                        <Badge
-                          variant={staff.isActive ? "outline" : "warning"}
-                          className={staff.isActive
-                            ? "text-[9px] uppercase tracking-wider font-semibold border-primary/20 bg-primary/5 text-primary shrink-0"
-                            : "text-[9px] uppercase tracking-wider font-semibold shrink-0"
-                          }
-                        >
-                          {staff.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ShelterStaffList staffMembers={staffWithAvatars} />
               </CardContent>
             </Card>
 

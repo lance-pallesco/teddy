@@ -101,7 +101,7 @@ export async function SuperAdminDashboard({ userId }: { userId: string }) {
         <TeddyBanner userId={userId} />
       </Suspense>
 
-      {/* Quick Action Links */}
+      {/* Quick Action Links
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="flex items-center justify-between p-6 border bg-white">
           <div className="space-y-1">
@@ -128,7 +128,7 @@ export async function SuperAdminDashboard({ userId }: { userId: string }) {
             </Link>
           </Button>
         </Card>
-      </div>
+      </div> */}
 
       {/* Statistics Section */}
       <div className="space-y-4">
@@ -149,7 +149,7 @@ export async function SuperAdminDashboard({ userId }: { userId: string }) {
       </div>
 
       {/* Analytics Charts Section */}
-      <div className="pt-4 space-y-4">
+      <div className="space-y-4">
         <h2 className="text-lg font-bold text-[#3D3C3A] dark:text-white">Platform Performance Trends</h2>
         <AnalyticsCharts data={analyticsData} />
       </div>

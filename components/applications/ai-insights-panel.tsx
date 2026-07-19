@@ -108,7 +108,7 @@ export function AIInsightsPanel({
       setIsDecisionPending(false)
     }
   }
-  
+
   // Track acknowledged flags by their index or title
   const [acknowledgedFlags, setAcknowledgedFlags] = useState<Record<string, boolean>>({})
 
@@ -153,7 +153,7 @@ export function AIInsightsPanel({
   let scoreLabel = "Match Level"
   let scoreColor = "bg-emerald-500"
   let scoreBg = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-  
+
   if (score >= 80) {
     scoreLabel = "Excellent Match"
     scoreColor = "bg-emerald-500"
@@ -228,7 +228,7 @@ export function AIInsightsPanel({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Teddy AI will read the complete application context (applicant lifestyle, current pets, pet behavior profile, housing parameters) to build reviewer insights. 
+              Teddy AI will read the complete application context (applicant lifestyle, current pets, pet behavior profile, housing parameters) to build reviewer insights.
               <strong> Final approval decisions remain strictly with the human reviewer.</strong>
             </p>
             <Button onClick={handleGenerate} className="w-full sm:w-auto">
@@ -245,9 +245,6 @@ export function AIInsightsPanel({
           <CardHeader className="border-b bg-muted/20 pb-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="bg-primary/10 p-2 rounded-lg text-primary">
-                  <Sparkles className="size-5" />
-                </div>
                 <div>
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     Teddy AI Insights
@@ -264,7 +261,7 @@ export function AIInsightsPanel({
             </div>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
-            
+
             {/* Score & AI Recommendation Row */}
             <div className="grid gap-6 md:grid-cols-[200px_1fr] items-center border-b pb-6">
               {/* Score block */}
@@ -359,11 +356,10 @@ export function AIInsightsPanel({
                   {semiFlags.map((flag, idx) => {
                     const isAck = !!acknowledgedFlags[flag.title]
                     return (
-                      <div key={idx} className={`flex flex-col gap-3 rounded-lg border p-4 transition-colors ${
-                        isAck 
-                          ? "border-muted bg-muted/20 opacity-70" 
-                          : "border-amber-200/50 bg-amber-500/5 dark:border-amber-950/30"
-                      }`}>
+                      <div key={idx} className={`flex flex-col gap-3 rounded-lg border p-4 transition-colors ${isAck
+                        ? "border-muted bg-muted/20 opacity-70"
+                        : "border-amber-200/50 bg-amber-500/5 dark:border-amber-950/30"
+                        }`}>
                         <div className="flex gap-3">
                           <AlertTriangle className={`size-5 shrink-0 mt-0.5 ${isAck ? "text-muted-foreground" : "text-amber-600 dark:text-amber-500"}`} />
                           <div className="space-y-1.5 flex-1">
@@ -378,13 +374,13 @@ export function AIInsightsPanel({
                         </div>
                         {/* Human override Decision */}
                         <div className="flex items-center gap-2 pl-8 pt-1 border-t border-muted-foreground/10">
-                          <Checkbox 
-                            id={`ack-${idx}`} 
+                          <Checkbox
+                            id={`ack-${idx}`}
                             checked={isAck}
                             onCheckedChange={(checked) => handleAcknowledge(flag.title, !!checked)}
                             disabled={isPending}
                           />
-                          <label 
+                          <label
                             htmlFor={`ack-${idx}`}
                             className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
                           >
@@ -436,7 +432,7 @@ export function AIInsightsPanel({
               <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
                 <Button
                   variant="destructive"
-                  className="flex-1"
+                  className="flex-1 h-10 sm:h-9"
                   onClick={() => setIsRejectDialogOpen(true)}
                   disabled={isDecisionPending}
                 >
@@ -444,7 +440,7 @@ export function AIInsightsPanel({
                 </Button>
                 <Button
                   variant="default"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
+                  className="flex-1 h-10 sm:h-9 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
                   onClick={() => setIsChatSelectionOpen(true)}
                   disabled={isDecisionPending}
                 >
@@ -459,18 +455,17 @@ export function AIInsightsPanel({
 
       {/* Chat Mode Selection Modal */}
       <Dialog open={isChatSelectionOpen} onOpenChange={setIsChatSelectionOpen}>
-        <DialogContent className="sm:max-w-xl p-6 bg-white">
+        <DialogContent className="w-[92%] sm:max-w-xl p-5 sm:p-6 bg-white rounded-xl overflow-y-auto max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Select Chat Mode</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4 sm:grid-cols-2">
             {/* Mode 1: Manual Chat */}
             <div
-              className={`border rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50 flex flex-col justify-between h-full ${
-                selectedMode === "MANUAL"
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border"
-              }`}
+              className={`border rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50 flex flex-col justify-between h-full ${selectedMode === "MANUAL"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "border-border"
+                }`}
               onClick={() => setSelectedMode("MANUAL")}
             >
               <div className="space-y-2">
@@ -492,11 +487,10 @@ export function AIInsightsPanel({
 
             {/* Mode 2: AI-Assisted Interview */}
             <div
-              className={`border rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50 flex flex-col justify-between h-full ${
-                selectedMode === "AI_ASSISTED"
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border"
-              }`}
+              className={`border rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50 flex flex-col justify-between h-full ${selectedMode === "AI_ASSISTED"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "border-border"
+                }`}
               onClick={() => setSelectedMode("AI_ASSISTED")}
             >
               <div className="space-y-2">
@@ -529,7 +523,7 @@ export function AIInsightsPanel({
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               variant="outline"
-              className="flex-1 order-last sm:order-first"
+              className="flex-1 h-10 sm:h-9 order-last sm:order-first"
               onClick={() => setIsChatSelectionOpen(false)}
               disabled={isDecisionPending}
             >
@@ -537,7 +531,7 @@ export function AIInsightsPanel({
             </Button>
             <Button
               variant="default"
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
+              className="flex-1 h-10 sm:h-9 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
               onClick={handleStartChat}
               disabled={!selectedMode || isDecisionPending}
             >
