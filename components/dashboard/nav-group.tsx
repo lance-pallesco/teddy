@@ -15,6 +15,7 @@ import {
   HandHeart,
   SearchIcon,
   SettingsIcon,
+  MessageCircleHeart,
   UsersIcon,
 } from "lucide-react"
 
@@ -45,6 +46,7 @@ const icons = {
   Bell: BellIcon,
   Folders: FilePen,
   Search: SearchIcon,
+  MessageCircleHeart: MessageCircleHeart,
   Settings: SettingsIcon,
   Users: UsersIcon,
 }
