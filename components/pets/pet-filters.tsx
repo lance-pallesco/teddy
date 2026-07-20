@@ -87,7 +87,7 @@ export function PetFilters({ filters, basePath = "/pets" }: PetFiltersProps) {
 
       <div className="flex flex-wrap items-center gap-2">
         <Select
-          value={filters.species}
+          value={filters.species ?? ""}
           onValueChange={(value) =>
             applyFilters({ ...filters, species: value as PetSpecies })
           }
@@ -105,7 +105,7 @@ export function PetFilters({ filters, basePath = "/pets" }: PetFiltersProps) {
         </Select>
 
         <Select
-          value={filters.size}
+          value={filters.size ?? ""}
           onValueChange={(value) =>
             applyFilters({ ...filters, size: value as PetSize })
           }
@@ -123,7 +123,7 @@ export function PetFilters({ filters, basePath = "/pets" }: PetFiltersProps) {
         </Select>
 
         <Select
-          value={filters.gender}
+          value={filters.gender ?? ""}
           onValueChange={(value) =>
             applyFilters({ ...filters, gender: value as PetGender })
           }

@@ -48,7 +48,6 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
     orderBy: { updatedAt: "desc" },
   })
 
-  // Fetch active application
   const activeApp = await prisma.adoptionApplication.findFirst({
     where: {
       applicantId: userId,
@@ -59,7 +58,6 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
     orderBy: { updatedAt: "desc" },
   })
 
-  // Fetch approved application
   const approvedApp = await prisma.adoptionApplication.findFirst({
     where: { applicantId: userId, status: "APPROVED", deletedAt: null },
     include: { pet: true },
@@ -80,7 +78,7 @@ export async function TeddyBanner({ userId }: TeddyBannerProps) {
   } else if (approvedApp) {
     teddyMessage = `Great news! Your adoption application for ${approvedApp.pet.name} was approved! Time to prepare for your new family member!`
   }
-  
+
   return (
     <div className="w-full space-y-4">
       <div className="pl-0 md:pl-[264px] text-center md:text-left transition-all">

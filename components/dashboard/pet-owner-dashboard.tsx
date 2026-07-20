@@ -44,38 +44,8 @@ async function PetOwnerStatsGrid({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Quick Action Links */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="flex items-center justify-between p-6 border bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/30 transition-all shadow-xs">
-          <div className="space-y-1">
-            <h3 className="font-semibold">Post a Pet</h3>
-            <p className="text-sm text-muted-foreground">List a pet for adoption under your individual foster care.</p>
-          </div>
-          <Button asChild size="sm" className="shrink-0 ml-4">
-            <Link href="/pets/new">
-              <Plus className="size-4 mr-1" />
-              Post Pet
-            </Link>
-          </Button>
-        </Card>
-
-        <Card className="flex items-center justify-between p-6 border bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/30 transition-all shadow-xs">
-          <div className="space-y-1">
-            <h3 className="font-semibold">View Applications</h3>
-            <p className="text-sm text-muted-foreground">Review adoption requests submitted by potential adopters for your pets.</p>
-          </div>
-          <Button asChild size="sm" variant="secondary" className="shrink-0 ml-4">
-            <Link href="/applications">
-              Applications
-              <ArrowRight className="size-4 ml-1" />
-            </Link>
-          </Button>
-        </Card>
-      </div>
-
       {/* Statistics */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">Fostering & Adoptions</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
