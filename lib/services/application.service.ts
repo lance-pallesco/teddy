@@ -203,6 +203,7 @@ type ApplicantApplicationItem = {
   status: AdoptionStatus
   submittedAt: Date | null
   createdAt: Date
+  rejectionReason: string | null
   pet: {
     id: string
     name: string
@@ -252,6 +253,7 @@ export async function getApplicationsByApplicant(
         status: true,
         submittedAt: true,
         createdAt: true,
+        rejectionReason: true,
         pet: {
           select: {
             id: true,
@@ -284,6 +286,7 @@ export async function getApplicationsByApplicant(
       status: r.status,
       submittedAt: r.submittedAt,
       createdAt: r.createdAt,
+      rejectionReason: r.rejectionReason,
       pet: {
         id: r.pet.id,
         name: r.pet.name,

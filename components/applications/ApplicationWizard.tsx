@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
+import { z } from "zod"
 
 import { WizardShell } from "@/components/shared/wizard/WizardShell"
 import type { WizardStep } from "@/components/shared/wizard/types"
@@ -213,8 +214,19 @@ export function ApplicationWizard({
     signatureBase64: "",
   }
 
-  const methods = useForm({
-    resolver: undefined, // custom step-by-step triggers
+  const methods = useForm<any>({
+    resolver: zodResolver(
+      z.object({
+        livingEnvironment: Step2Schema,
+        householdLifestyle: Step3Schema,
+        petExperience: Step4Schema,
+        adoptionCommitment: Step5Schema,
+        agreements: Step7Schema.omit({ signatureSigned: true }),
+        signatureSigned: z.boolean().refine((val) => val === true, {
+          message: "Digital signature is required",
+        }),
+      })
+    ),
     defaultValues,
     mode: "onBlur",
   })

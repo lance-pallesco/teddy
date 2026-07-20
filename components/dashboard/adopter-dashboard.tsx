@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { ClipboardList, FileHeart, CalendarRange, ArrowRight, Search, HeartHandshake, FileText, CheckCircle } from "lucide-react"
+import { ClipboardList, FileHeart, CalendarRange, ArrowRight, Search, HeartHandshake, FileText, CheckCircle, Check, AlertCircle, MessageSquare } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import { getPets } from "@/lib/services/pet.service"
 import { prisma } from "@/lib/prisma"
 import { ApplicationTimeline } from "@/components/applications/application-timeline"
 import { TeddyBanner } from "@/components/dashboard/teddy-banner"
+import { cn } from "@/lib/utils"
 
 type AdopterDashboardProps = {
   userId: string
@@ -34,7 +35,7 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
     where: {
       applicantId: userId,
       deletedAt: null,
-      status: { not: "DRAFT" },
+      status: { notIn: ["DRAFT", "REJECTED", "WITHDRAWN"] },
     },
     include: {
       pet: {
@@ -121,8 +122,8 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
               Real-time pipeline tracking steps of your active adoption requests
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-4 space-y-5 divide-y divide-border">
-            {activeApplications.map((app, index) => {
+          <CardContent className="p-4 space-y-4">
+            {activeApplications.map((app) => {
               const petImage = app.pet.petImages[0]?.url
               // Map status to active step index (0-based)
               let activeStep = 0
@@ -130,90 +131,128 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
               if (app.status === "INTERVIEW_IN_PROGRESS") activeStep = 2
               if (app.status === "APPROVED") activeStep = 3
 
-              const steps = ["Submitted", "Screening", "Interview", "Approved"]
+              const steps = [
+                { label: "Submitted", desc: "Form received", icon: FileText },
+                { label: "Screening", desc: "Background check", icon: Search },
+                { label: "Interview", desc: "Interactive chat", icon: MessageSquare },
+                { label: "Approved", desc: "Ready for adoption", icon: CheckCircle },
+              ]
+
               const isTerminated = ["REJECTED", "WITHDRAWN"].includes(app.status)
 
               return (
-                <div key={app.id} className={`flex flex-col gap-4 ${index > 0 ? "pt-4" : ""}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="relative size-10 rounded-lg bg-muted border overflow-hidden shrink-0">
-                        {petImage ? (
-                          <img
-                            src={petImage}
-                            alt={app.pet.name}
-                            className="object-cover size-full"
-                          />
-                        ) : (
-                          <div className="flex size-full items-center justify-center text-muted-foreground bg-primary/5 text-primary text-xs font-bold">
-                            🐾
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-foreground">
-                          Adoption request for {app.pet.name}
-                        </h4>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
-                          Last updated {new Date(app.updatedAt).toLocaleDateString()}
-                        </p>
-                      </div>
+                <div key={app.id} className="border border-border/60 rounded-xl p-5 hover:shadow-xs transition-shadow bg-background/50 flex flex-col lg:flex-row lg:items-center gap-6">
+                  {/* Left Side: Pet Info & Navigation */}
+                  <div className="flex items-center gap-4 lg:w-1/4 shrink-0 border-b lg:border-b-0 pb-4 lg:pb-0 border-border/50">
+                    <div className="relative size-16 rounded-xl border border-primary/10 overflow-hidden shadow-xs shrink-0">
+                      {petImage ? (
+                        <img src={petImage} alt={app.pet.name} className="object-cover size-full" />
+                      ) : (
+                        <div className="flex size-full items-center justify-center text-[#AE8F65] bg-[#AE8F65]/5 text-lg font-bold">
+                          🐾
+                        </div>
+                      )}
                     </div>
-                    <Badge
-                      variant={
-                        app.status === "APPROVED"
-                          ? "success"
-                          : isTerminated
-                            ? "danger"
-                            : "default"
-                      }
-                      className="text-[9px] uppercase font-semibold"
-                    >
-                      {app.status}
-                    </Badge>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-sm text-foreground">
+                        Adopting {app.pet.name}
+                      </h4>
+                      <p className="text-[10px] text-muted-foreground">
+                        Updated {new Date(app.updatedAt).toLocaleDateString()}
+                      </p>
+                      <Button asChild size="sm" variant="link" className="h-6 p-0 text-xs font-semibold text-[#AE8F65] hover:text-[#9A7D58] justify-start">
+                        <Link href={`/applications/${app.id}`} className="flex items-center gap-1">
+                          View details <ArrowRight className="size-3" />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
 
-                  {/* Progress Line */}
-                  {!isTerminated ? (
-                    <div className="w-full flex items-center justify-between relative px-2 py-1">
-                      <div className="absolute top-1/2 left-4 right-4 h-0.5 -translate-y-1/2 bg-muted -z-10" />
-                      <div
-                        className="absolute top-1/2 left-4 h-0.5 -translate-y-1/2 bg-primary transition-all duration-500 -z-10"
-                        style={{ width: `${(activeStep / 3) * 90}%` }}
-                      />
+                  {/* Right Side: Step Tracker */}
+                  <div className="flex-1">
+                    {!isTerminated ? (
+                      // Stepper flow
+                      <div className="flex items-center w-full relative py-2">
+                        {/* Background track line */}
+                        <div className="absolute top-[26px] sm:top-[30px] left-[12.5%] right-[12.5%] h-0.5 bg-muted z-0" />
 
-                      {steps.map((step, idx) => {
-                        const isDone = idx <= activeStep
-                        const isCurrent = idx === activeStep
-                        return (
-                          <div key={step} className="flex flex-col items-center gap-1.5">
-                            <div
-                              className={`size-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-300 ${
-                                isCurrent
-                                  ? "bg-primary border-primary text-white scale-110 shadow-xs"
-                                  : isDone
-                                    ? "bg-primary/20 border-primary text-primary"
-                                    : "bg-white border-muted text-muted-foreground"
-                              }`}
-                            >
-                              {idx + 1}
+                        {/* Active progress track line */}
+                        <div
+                          className="absolute top-[26px] sm:top-[30px] left-[12.5%] h-0.5 transition-all duration-500 z-0"
+                          style={{
+                            width: `${(activeStep / 3) * 75}%`,
+                            background: activeStep === 3
+                              ? "#10b981"
+                              : "linear-gradient(to right, #10b981, #ae8f65)"
+                          }}
+                        />
+
+                        {steps.map((step, idx) => {
+                          const isDone = idx < activeStep
+                          const isCurrent = idx === activeStep
+                          const StepIcon = step.icon
+
+                          return (
+                            <div key={step.label} className="w-1/4 flex flex-col items-center text-center space-y-1">
+                              <div
+                                className={cn(
+                                  "size-9 sm:size-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative z-10",
+                                  isCurrent
+                                    ? "bg-[#AE8F65] border-[#AE8F65] text-white scale-110 shadow-md ring-4 ring-[#AE8F65]/10"
+                                    : isDone
+                                      ? "bg-emerald-500 border-emerald-500 text-white"
+                                      : "bg-white border-border text-muted-foreground"
+                                )}
+                              >
+                                {isDone ? (
+                                  <Check className="size-4 sm:size-5 stroke-[2.5]" />
+                                ) : (
+                                  <StepIcon className="size-4 sm:size-5" />
+                                )}
+                              </div>
+                              <div className="space-y-0.5">
+                                <p
+                                  className={cn(
+                                    "text-[10px] sm:text-xs font-bold leading-tight",
+                                    isCurrent
+                                      ? "text-[#AE8F65]"
+                                      : isDone
+                                        ? "text-emerald-600"
+                                        : "text-muted-foreground"
+                                  )}
+                                >
+                                  {step.label}
+                                </p>
+                                <p className="hidden sm:block text-[9px] text-muted-foreground/80 leading-none">
+                                  {step.desc}
+                                </p>
+                              </div>
                             </div>
-                            <span
-                              className={`text-[9px] font-semibold tracking-tight transition-colors ${
-                                isDone ? "text-foreground font-bold" : "text-muted-foreground"
-                              }`}
-                            >
-                              {step}
-                            </span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-red-500 font-medium pl-13">
-                      This application has been finalized as: {app.status.toLowerCase()}
-                    </p>
-                  )}
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      // Finalized Message
+                      <div className={cn(
+                        "rounded-lg p-3.5 border flex items-center gap-3",
+                        app.status === "REJECTED"
+                          ? "bg-destructive/5 border-destructive/10 text-destructive"
+                          : "bg-muted border-border text-muted-foreground"
+                      )}>
+                        <AlertCircle className="size-4 shrink-0" />
+                        <div className="text-xs text-left">
+                          <p className="font-bold">
+                            Application {app.status === "REJECTED" ? "Rejected" : "Withdrawn"}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-normal">
+                            {app.status === "REJECTED"
+                              ? `Thank you for your interest in adopting ${app.pet.name}. Unfortunately, the shelter staff has decided to reject this application.`
+                              : `You have successfully withdrawn your adoption application for ${app.pet.name}.`}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )
             })}

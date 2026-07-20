@@ -14,6 +14,7 @@ type ApplicationCardProps = {
     status: AdoptionStatus
     submittedAt: Date | null
     createdAt: Date
+    rejectionReason?: string | null
     applicant?: {
       firstName: string
       lastName: string
@@ -101,7 +102,7 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
                   />
                 ) : (
                   <div className="flex size-full items-center justify-center bg-muted/40 text-muted-foreground">
-                    <PawPrintIcon className="size-4 opacity-40" />
+                    <PawPrintIcon className="size-4 bg-muted/40 opacity-40" />
                   </div>
                 )}
               </div>
@@ -150,7 +151,7 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
 
             {/* 6. Action Button */}
             <div className="md:col-span-1 flex md:justify-end">
-              <Button asChild size="sm" variant="default" className="w-full md:w-auto min-w-20 bg-[#AE8F65] text-white hover:bg-[#9A7D58] hover:text-white rounded-lg">
+              <Button asChild size="sm" variant="default" className="w-full md:w-auto min-w-20 bg-[#AE8F65] text-white hover:bg-[#9A7D58] hover:text-white rounded-lg cursor-pointer">
                 <Link href={`/applications/${application.id}`}>
                   Review
                 </Link>
@@ -225,7 +226,7 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
 
             {/* 5. Action Button */}
             <div className="md:col-span-1 flex md:justify-end">
-              <Button asChild size="sm" variant="outline" className="w-full md:w-auto rounded-lg">
+              <Button asChild size="sm" variant="outline" className="w-full md:w-auto rounded-lg cursor-pointer">
                 <Link href={`/applications/${application.id}`}>
                   View
                 </Link>
