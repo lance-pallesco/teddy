@@ -29,6 +29,29 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
     take: 1,
   })
 
+  // Fetch active applications for pipeline tracker
+  const activeApplications = await prisma.adoptionApplication.findMany({
+    where: {
+      applicantId: userId,
+      deletedAt: null,
+      status: { not: "DRAFT" },
+    },
+    include: {
+      pet: {
+        select: {
+          name: true,
+          species: true,
+          petImages: {
+            orderBy: { isPrimary: "desc" },
+            take: 1,
+          },
+        },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 3,
+  })
+
   return (
     <div className="space-y-6">
       {/* Section 0: Draft Reminder Banner */}
@@ -51,7 +74,7 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
 
       {/* Grid Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Applications</CardTitle>
             <ClipboardList className="size-4 text-primary" />
@@ -62,7 +85,7 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
           </CardContent>
         </Card>
 
-        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Under Review / Chat</CardTitle>
             <FileHeart className="size-4 text-primary" />
@@ -75,7 +98,7 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
           </CardContent>
         </Card>
 
-        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow">
+        <Card className="shadow-xs border border-primary/10 hover:shadow-md transition-shadow bg-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Approved</CardTitle>
             <CalendarRange className="size-4 text-primary" />
@@ -86,6 +109,117 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Adoption Progress Pipeline Trackers */}
+      {activeApplications.length > 0 && (
+        <Card className="border border-primary/10 shadow-xs bg-white">
+          <CardHeader className="pb-3 border-b">
+            <CardTitle className="text-sm font-bold uppercase tracking-wider">
+              My Application Progress Tracker
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Real-time pipeline tracking steps of your active adoption requests
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 space-y-5 divide-y divide-border">
+            {activeApplications.map((app, index) => {
+              const petImage = app.pet.petImages[0]?.url
+              // Map status to active step index (0-based)
+              let activeStep = 0
+              if (app.status === "UNDER_REVIEW") activeStep = 1
+              if (app.status === "INTERVIEW_IN_PROGRESS") activeStep = 2
+              if (app.status === "APPROVED") activeStep = 3
+
+              const steps = ["Submitted", "Screening", "Interview", "Approved"]
+              const isTerminated = ["REJECTED", "WITHDRAWN"].includes(app.status)
+
+              return (
+                <div key={app.id} className={`flex flex-col gap-4 ${index > 0 ? "pt-4" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative size-10 rounded-lg bg-muted border overflow-hidden shrink-0">
+                        {petImage ? (
+                          <img
+                            src={petImage}
+                            alt={app.pet.name}
+                            className="object-cover size-full"
+                          />
+                        ) : (
+                          <div className="flex size-full items-center justify-center text-muted-foreground bg-primary/5 text-primary text-xs font-bold">
+                            🐾
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">
+                          Adoption request for {app.pet.name}
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          Last updated {new Date(app.updatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant={
+                        app.status === "APPROVED"
+                          ? "success"
+                          : isTerminated
+                            ? "danger"
+                            : "default"
+                      }
+                      className="text-[9px] uppercase font-semibold"
+                    >
+                      {app.status}
+                    </Badge>
+                  </div>
+
+                  {/* Progress Line */}
+                  {!isTerminated ? (
+                    <div className="w-full flex items-center justify-between relative px-2 py-1">
+                      <div className="absolute top-1/2 left-4 right-4 h-0.5 -translate-y-1/2 bg-muted -z-10" />
+                      <div
+                        className="absolute top-1/2 left-4 h-0.5 -translate-y-1/2 bg-primary transition-all duration-500 -z-10"
+                        style={{ width: `${(activeStep / 3) * 90}%` }}
+                      />
+
+                      {steps.map((step, idx) => {
+                        const isDone = idx <= activeStep
+                        const isCurrent = idx === activeStep
+                        return (
+                          <div key={step} className="flex flex-col items-center gap-1.5">
+                            <div
+                              className={`size-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-300 ${
+                                isCurrent
+                                  ? "bg-primary border-primary text-white scale-110 shadow-xs"
+                                  : isDone
+                                    ? "bg-primary/20 border-primary text-primary"
+                                    : "bg-white border-muted text-muted-foreground"
+                              }`}
+                            >
+                              {idx + 1}
+                            </div>
+                            <span
+                              className={`text-[9px] font-semibold tracking-tight transition-colors ${
+                                isDone ? "text-foreground font-bold" : "text-muted-foreground"
+                              }`}
+                            >
+                              {step}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-red-500 font-medium pl-13">
+                      This application has been finalized as: {app.status.toLowerCase()}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

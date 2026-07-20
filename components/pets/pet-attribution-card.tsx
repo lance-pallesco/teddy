@@ -42,8 +42,8 @@ export function PetAttributionCard({ pet }: PetAttributionCardProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold">{pet.shelter.name}</p>
                 {pet.shelter.isActive ? (
-                  <Badge variant="secondary" className="gap-1">
-                    <BadgeCheckIcon className="size-3" />
+                  <Badge variant="secondary" className="gap-1 bg-emerald-500/10 text-emerald-500">
+                    <BadgeCheckIcon className="size-3 " />
                     Verified
                   </Badge>
                 ) : null}

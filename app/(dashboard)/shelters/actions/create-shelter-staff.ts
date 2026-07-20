@@ -44,7 +44,7 @@ export async function createShelterStaffAction(
 
     revalidatePath("/shelters")
     revalidatePath(`/shelters/${parsed.data.shelterId}`)
-    revalidatePath(`/shelters/${parsed.data.shelterId}/staff/new`)
+    revalidatePath(`/shelters/${parsed.data.shelterId}/new`)
     revalidatePath("/shelters/staff/new")
 
     return {

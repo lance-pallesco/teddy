@@ -119,7 +119,7 @@ export async function ApplicationsListView({
           />
         ) : (
           <>
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="flex flex-col gap-3.5">
               {applications.map((application: any) => (
                 <ApplicationCard
                   key={application.id}

@@ -36,7 +36,7 @@ export function ShelterStaffTable({
 
         <div className="flex gap-2">
           <Button asChild>
-            <Link href={shelterId ? `/shelters/${shelterId}/staff/new` : "/shelters/staff/new"}>
+            <Link href={shelterId ? `/shelters/${shelterId}/new` : "/shelters/staff/new"}>
               <PlusIcon />
               Add Staff
             </Link>

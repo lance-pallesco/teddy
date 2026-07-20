@@ -117,6 +117,7 @@ export async function createShelterStaffUser(input: {
   address: string
   passwordHash: string
   shelterId: string
+  avatar?: string | null
 }): Promise<PublicUser> {
   const shelter = await prisma.shelter.findUnique({
     where: { id: input.shelterId },
@@ -158,7 +159,7 @@ export async function createShelterStaffUser(input: {
         password: input.passwordHash,
         role: "SHELTER_STAFF",
         shelterId: shelter.id,
-        avatar: "",
+        avatar: input.avatar ?? "",
       },
       select: userSelect,
     })

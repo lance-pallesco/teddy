@@ -18,6 +18,7 @@ export const createShelterStaffSchema = z.object({
     .regex(/[A-Z]/, "Password must include an uppercase letter")
     .regex(/\d/, "Password must include a number"),
   shelterId: z.uuid("Invalid shelter id"),
+  avatar: z.string().trim().nullable().optional(),
 })
 
 export type CreateShelterStaffInput = z.output<typeof createShelterStaffSchema>

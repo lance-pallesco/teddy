@@ -1,14 +1,13 @@
 import { Suspense } from "react"
-import Link from "next/link"
-import { PawPrint, ClipboardList, FileHeart, CalendarRange, Plus, ArrowRight, MessageSquare, AlertCircle, Clock } from "lucide-react"
+import { PawPrint, ClipboardList, FileHeart, CalendarRange } from "lucide-react"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { StatsGridSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { getShelterStaffStats } from "@/lib/services/dashboard.service"
-import { prisma } from "@/lib/prisma"
 import { TeddyBanner } from "@/components/dashboard/teddy-banner"
+import { getShelterAnalyticsData } from "@/lib/services/analytics.service"
+import { ShelterAnalyticsCharts } from "@/components/analytics/shelter-analytics-charts"
 
 type ShelterStaffDashboardProps = {
   userId: string
@@ -17,36 +16,7 @@ type ShelterStaffDashboardProps = {
 
 async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
   const stats = await getShelterStaffStats(shelterId)
-
-  // Fetch priority inbox applications (pending, oldest first)
-  const priorityApplications = await prisma.adoptionApplication.findMany({
-    where: {
-      deletedAt: null,
-      status: { in: ["PENDING", "UNDER_REVIEW"] },
-      pet: { shelterId },
-    },
-    orderBy: { createdAt: "asc" },
-    take: 3,
-    include: {
-      applicant: { select: { firstName: true, lastName: true } },
-      pet: { select: { name: true } },
-    },
-  })
-
-  // Fetch active interviews and meet-and-greets
-  const activeInterviews = await prisma.adoptionApplication.findMany({
-    where: {
-      deletedAt: null,
-      status: { in: ["INTERVIEW_IN_PROGRESS", "APPROVED"] },
-      pet: { shelterId },
-    },
-    orderBy: { updatedAt: "desc" },
-    take: 3,
-    include: {
-      applicant: { select: { firstName: true, lastName: true } },
-      pet: { select: { name: true } },
-    },
-  })
+  const analyticsData = await getShelterAnalyticsData(shelterId)
 
   return (
     <div className="space-y-6">
@@ -61,35 +31,6 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
           </div>
           <p className="text-sm text-muted-foreground mt-0.5 font-light">Shelter overview dashboard and actions.</p>
         </div>
-      </div>
-
-      {/* Quick Action Links */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="flex items-center justify-between p-6 border bg-white shadow-xs">
-          <div className="space-y-1">
-            <h3 className="font-semibold">Add Pet</h3>
-            <p className="text-sm text-muted-foreground font-light">Post a new pet listing to make them available for adoption.</p>
-          </div>
-          <Button asChild size="sm" className="shrink-0 ml-4">
-            <Link href="/pets/new">
-              <Plus className="size-4 mr-1" />
-              Add Pet
-            </Link>
-          </Button>
-        </Card>
-
-        <Card className="flex items-center justify-between p-6 border bg-white shadow-xs">
-          <div className="space-y-1">
-            <h3 className="font-semibold">View Applications</h3>
-            <p className="text-sm text-muted-foreground font-light">Review incoming adoption requests and check candidate details.</p>
-          </div>
-          <Button asChild size="sm" variant="secondary" className="shrink-0 ml-4">
-            <Link href="/applications">
-              Review
-              <ArrowRight className="size-4 ml-1" />
-            </Link>
-          </Button>
-        </Card>
       </div>
 
       {/* Statistics */}
@@ -141,89 +82,8 @@ async function ShelterStaffStatsGrid({ shelterId }: { shelterId: string }) {
         </div>
       </div>
 
-      {/* Operational Sections */}
-      <div className="grid gap-6 md:grid-cols-2 pt-4">
-        {/* Section A: Priority Review Inbox */}
-        <Card className="border border-primary/10 shadow-xs flex flex-col">
-          <CardHeader className="pb-3 border-b">
-            <CardTitle className="text-sm font-bold flex items-center gap-1.5 uppercase tracking-wider">
-              <AlertCircle className="size-4 text-amber-500 animate-pulse" /> Priority Review Inbox
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Oldest unreviewed applications needing attention
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 flex-1 flex flex-col justify-between">
-            {priorityApplications.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">Inbox clean! No pending applications.</p>
-            ) : (
-              <div className="space-y-3">
-                {priorityApplications.map((app) => (
-                  <div key={app.id} className="flex items-center justify-between border-b pb-2.5 last:border-0 last:pb-0">
-                    <div className="space-y-0.5">
-                      <span className="font-semibold text-xs text-foreground block">
-                        {app.applicant.firstName} {app.applicant.lastName}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        Applying to adopt <strong>{app.pet.name}</strong>
-                      </span>
-                    </div>
-                    <Button asChild size="sm" variant="outline" className="h-7 text-xs">
-                      <Link href={`/applications/${app.id}`}>Review</Link>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Section B: Active Chats & Meet & Greets */}
-        <Card className="border border-primary/10 shadow-xs flex flex-col">
-          <CardHeader className="pb-3 border-b">
-            <CardTitle className="text-sm font-bold flex items-center gap-1.5 uppercase tracking-wider">
-              <Clock className="size-4 text-emerald-500" /> Interview & Meet schedule
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Active structured chats and approved meetings
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 flex-1 flex flex-col justify-between">
-            {activeInterviews.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">No active interviews or meetups scheduled.</p>
-            ) : (
-              <div className="space-y-3">
-                {activeInterviews.map((app) => (
-                  <div key={app.id} className="flex items-center justify-between border-b pb-2.5 last:border-0 last:pb-0">
-                    <div className="space-y-0.5">
-                      <span className="font-semibold text-xs text-foreground block flex items-center gap-1.5">
-                        {app.applicant.firstName} {app.applicant.lastName}
-                        <Badge variant={app.status === "INTERVIEW_IN_PROGRESS" ? "default" : "success"} className="text-[8px] h-3 px-1">
-                          {app.status === "INTERVIEW_IN_PROGRESS" ? "Interview" : "Meet & Greet"}
-                        </Badge>
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        Pet: <strong>{app.pet.name}</strong>
-                      </span>
-                    </div>
-                    {app.status === "INTERVIEW_IN_PROGRESS" ? (
-                      <Button asChild size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                        <Link href={`/applications/${app.id}/chat`}>
-                          <MessageSquare className="size-3 mr-1" /> Chat
-                        </Link>
-                      </Button>
-                    ) : (
-                      <Button asChild size="sm" variant="outline" className="h-7 text-xs">
-                        <Link href={`/applications/${app.id}`}>Details</Link>
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Shelter Charts Section */}
+      <ShelterAnalyticsCharts data={analyticsData} />
     </div>
   )
 }
