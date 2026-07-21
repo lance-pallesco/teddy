@@ -21,13 +21,8 @@ export class AIService {
   }
 
   async generateAIInsightForApplication(applicationId: string) {
-    // 1. Build application context
     const context = await buildApplicationContext(applicationId)
-
-    // 2. Generate prompt content
     const userPrompt = buildApplicationAnalysisPrompt(context)
-
-    // 3. Request completion from AI API
     const response = await aiClient.createChatCompletion({
       model: this.defaultModel,
       response_format: { type: "json_object" },
@@ -43,8 +38,6 @@ export class AIService {
     }
 
     const rawResponseText = choice.message.content.trim()
-
-    // 4. Parse & validate JSON response
     let parsed
     try {
       parsed = JSON.parse(rawResponseText)
@@ -52,8 +45,6 @@ export class AIService {
       console.error("Failed to parse AI response as JSON. Raw text:", rawResponseText)
       throw new Error("AI response was not valid JSON")
     }
-
-    // Ensure all required fields exist or fall back
     const summary = parsed.summary ?? "Information not provided."
     const strengths = Array.isArray(parsed.strengths) ? parsed.strengths : []
     const semiFlags = Array.isArray(parsed.semiFlags) ? parsed.semiFlags : []
@@ -63,7 +54,6 @@ export class AIService {
       ? parsed.overallSuitability.score
       : (typeof parsed.suitabilityScore === "number" ? parsed.suitabilityScore : 50)
 
-    // 5. Upsert analysis cache record in database
     const insight = await prisma.applicationAIInsight.upsert({
       where: { applicationId },
       create: {
@@ -92,7 +82,6 @@ export class AIService {
       },
     })
 
-    // 6. Transition application status to UNDER_REVIEW if it is currently PENDING
     const application = await prisma.adoptionApplication.findUnique({
       where: { id: applicationId },
       select: {
