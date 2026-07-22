@@ -25,12 +25,30 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
   // Fetch draft applications for reminders
   const drafts = await prisma.adoptionApplication.findMany({
     where: { applicantId: userId, status: "DRAFT", deletedAt: null },
-    include: { pet: true },
+    include: {
+      pet: {
+        include: {
+          petImages: {
+            orderBy: { isPrimary: "desc" },
+            take: 1,
+          },
+        },
+      },
+    },
     orderBy: { updatedAt: "desc" },
     take: 1,
   })
 
-  // Fetch active applications for pipeline tracker
+  // Count total active applications
+  const totalActiveCount = await prisma.adoptionApplication.count({
+    where: {
+      applicantId: userId,
+      deletedAt: null,
+      status: { notIn: ["DRAFT", "REJECTED", "WITHDRAWN"] },
+    },
+  })
+
+  // Fetch only the latest active application for pipeline tracker
   const activeApplications = await prisma.adoptionApplication.findMany({
     where: {
       applicantId: userId,
@@ -50,28 +68,51 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
       },
     },
     orderBy: { updatedAt: "desc" },
-    take: 3,
+    take: 1,
   })
 
   return (
     <div className="space-y-6">
       {/* Section 0: Draft Reminder Banner */}
-      {drafts.length > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-xl shrink-0">📝</span>
-            <div>
-              <p className="text-xs font-bold text-foreground">Draft Application Reminder</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                You started an application for <strong>{drafts[0].pet.name}</strong> but didn't finish. Resume to complete your submission.
-              </p>
+      {drafts.length > 0 && (() => {
+        const draftPet = drafts[0].pet
+        const draftPetImage = draftPet.petImages?.[0]?.url
+        return (
+          <div className="relative overflow-hidden rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-amber-500/10 p-4 sm:p-5 shadow-xs transition-all hover:shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-3.5 min-w-0">
+                {draftPetImage ? (
+                  <div className="relative size-12 sm:size-14 rounded-xl border border-amber-300/80 overflow-hidden shrink-0 shadow-xs">
+                    <img src={draftPetImage} alt={draftPet.name} className="object-cover size-full" />
+                  </div>
+                ) : (
+                  <div className="size-12 sm:size-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs text-xl font-bold">
+                    📝
+                  </div>
+                )}
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="bg-amber-500/15 border-amber-400/40 text-amber-800 dark:text-amber-300 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">
+                      Draft Application
+                    </Badge>
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground truncate">
+                    Unfinished Application for {draftPet.name}
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-normal line-clamp-1">
+                    You started an application for <strong>{draftPet.name}</strong>. Resume to complete and submit your application!
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" className="w-full sm:w-auto text-xs font-bold shrink-0 bg-[#AE8F65] hover:bg-[#9A7D58] text-white shadow-xs rounded-xl px-5 h-9">
+                <Link href={`/pets/${draftPet.id}/apply`} className="flex items-center justify-center gap-1.5">
+                  Resume Application <ArrowRight className="size-3.5" />
+                </Link>
+              </Button>
             </div>
           </div>
-          <Button asChild size="sm" variant="default" className="w-full sm:w-auto text-xs shrink-0 bg-amber-500 hover:bg-amber-600 hover:text-white text-white">
-            <Link href={`/pets/${drafts[0].pet.id}/apply`}>Resume Application</Link>
-          </Button>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Grid Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -114,13 +155,23 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
       {/* Adoption Progress Pipeline Trackers */}
       {activeApplications.length > 0 && (
         <Card className="border border-primary/10 shadow-xs bg-white">
-          <CardHeader className="pb-3 border-b">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">
-              My Application Progress Tracker
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Real-time pipeline tracking steps of your active adoption requests
-            </CardDescription>
+          <CardHeader className="pb-3 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <CardTitle className="text-sm font-bold uppercase tracking-wider">
+                My Application Progress Tracker
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Real-time pipeline tracking for your latest active adoption request
+              </CardDescription>
+            </div>
+            {totalActiveCount > 1 && (
+              <Button asChild variant="outline" size="sm" className="text-xs h-8 border-primary/20 hover:bg-muted/50 rounded-lg shrink-0">
+                <Link href="/applications" className="flex items-center gap-1">
+                  View All ({totalActiveCount})
+                  <ArrowRight className="size-3" />
+                </Link>
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="p-4 space-y-4">
             {activeApplications.map((app) => {
@@ -256,6 +307,17 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
                 </div>
               )
             })}
+
+            {totalActiveCount > 1 && (
+              <div className="pt-2 flex justify-center border-t border-border/50">
+                <Button asChild variant="ghost" size="sm" className="text-xs font-semibold text-[#AE8F65] hover:text-[#9A7D58] hover:bg-[#AE8F65]/5">
+                  <Link href="/applications" className="flex items-center gap-1.5">
+                    Show more applications ({totalActiveCount - 1} more)
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -268,7 +330,7 @@ async function RecentPetsGrid({ userId }: { userId: string }) {
     { userId, role: "ADOPTER", shelterId: null },
     { tab: "active" },
     1,
-    3
+    4
   )
 
   const recentPets = result.pets
@@ -282,7 +344,7 @@ async function RecentPetsGrid({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {recentPets.map((pet) => (
         <PetCard key={pet.id} pet={pet} />
       ))}

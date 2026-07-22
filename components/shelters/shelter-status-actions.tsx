@@ -77,7 +77,7 @@ export function ShelterStatusActions({
         title={dialogTitle}
         description={dialogDescription}
         confirmText={actionLabel}
-        variant={isActive ? "destructive" : "info"}
+        variant={isActive ? "destructive" : "success"}
         isLoading={isPending}
       />
     </>

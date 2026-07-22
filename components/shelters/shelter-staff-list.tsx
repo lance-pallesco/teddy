@@ -144,7 +144,7 @@ export function ShelterStaffList({ staffMembers }: ShelterStaffListProps) {
         }}
         confirmText={confirmUser?.isActive ? "Deactivate" : "Activate"}
         cancelText="Cancel"
-        variant={confirmUser?.isActive ? "warning" : "success"}
+        variant={confirmUser?.isActive ? "destructive" : "success"}
       />
     </>
   )

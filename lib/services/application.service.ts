@@ -227,19 +227,23 @@ export async function getApplicationsByApplicant(
   page: number = 1,
   limit: number = 10
 ): Promise<ApplicantApplicationListResult> {
-  const statusFilter: AdoptionStatus[] | undefined =
-    tab === "active"
-      ? ACTIVE_STATUSES
-      : tab === "completed"
-        ? COMPLETED_STATUSES
-        : undefined
+  let statusFilterExpr = undefined
+
+  if (tab === "active") {
+    statusFilterExpr = { in: ACTIVE_STATUSES }
+  } else if (tab === "completed") {
+    statusFilterExpr = { in: COMPLETED_STATUSES }
+  } else if (tab === "draft") {
+    statusFilterExpr = { equals: "DRAFT" as AdoptionStatus }
+  } else {
+    // "all" tab: excludes drafts by default
+    statusFilterExpr = { not: "DRAFT" as AdoptionStatus }
+  }
 
   const where = {
     applicantId,
     deletedAt: null,
-    status: statusFilter
-      ? { in: statusFilter }
-      : { not: "DRAFT" as AdoptionStatus },
+    status: statusFilterExpr,
   }
 
   const skip = (page - 1) * limit

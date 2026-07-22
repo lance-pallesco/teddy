@@ -29,7 +29,6 @@ export function WizardNavigation({
   const showSaveDraft = currentStep >= 2 && currentStep <= 6
 
   return (
-    <div className="w-full space-y-4">
       <div className="flex flex-row items-center justify-between gap-4 pt-4 border-t">
         {/* Back Button */}
         <div>
@@ -47,8 +46,27 @@ export function WizardNavigation({
           )}
         </div>
 
-        {/* Next / Submit Button */}
-        <div>
+        {/* Right side buttons */}
+        <div className="flex items-center gap-3">
+          {showSaveDraft && onSaveDraft && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSubmitting || isSavingDraft}
+              onClick={onSaveDraft}
+              className="min-w-28 border-[#AE8F65]/20 text-[#AE8F65] hover:bg-[#AE8F65]/10 cursor-pointer rounded-lg font-medium shadow-none"
+            >
+              {isSavingDraft ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                "Save as Draft"
+              )}
+            </Button>
+          )}
+
           {isLastStep ? (
             <Button
               type="button"
@@ -86,20 +104,5 @@ export function WizardNavigation({
           )}
         </div>
       </div>
-
-      {/* Save as Draft Link */}
-      {showSaveDraft && onSaveDraft && (
-        <div className="text-center">
-          <button
-            type="button"
-            disabled={isSubmitting || isSavingDraft}
-            onClick={onSaveDraft}
-            className="text-sm font-medium text-primary hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
-          >
-            {isSavingDraft ? "Saving progress..." : "Save as Draft"}
-          </button>
-        </div>
-      )}
-    </div>
   )
 }

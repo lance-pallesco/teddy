@@ -2,9 +2,9 @@ import type { AdoptionStatus } from "@prisma/client"
 
 export const APPLICATION_LIST_PAGE_SIZE = 10
 
-export type ApplicationTab = "all" | "active" | "completed"
+export type ApplicationTab = "all" | "active" | "completed" | "draft"
 
-export const APPLICATION_TAB_VALUES = ["all", "active", "completed"] as const
+export const APPLICATION_TAB_VALUES = ["all", "active", "completed", "draft"] as const
 
 export type ApplicationListSearchParams = Record<string, string | string[] | undefined>
 
@@ -45,7 +45,8 @@ export function parseApplicationListQuery(
   const tab: ApplicationTab =
     tabParam === "active" ? "active"
       : tabParam === "completed" ? "completed"
-        : "all"
+        : tabParam === "draft" ? "draft"
+          : "all"
 
   const statusParam = firstParam(searchParams.status)
   const status = statusParam && ADOPTION_STATUS_VALUES.includes(statusParam)

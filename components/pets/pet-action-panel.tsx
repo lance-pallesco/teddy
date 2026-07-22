@@ -47,7 +47,7 @@ export function PetActionPanel({
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {!viewer ? (
-          <Button asChild size="lg" className="w-full">
+          <Button asChild size="lg" className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer font-medium shadow-none">
             <Link href="/login">
               <HeartIcon />
               Login to apply
@@ -74,7 +74,7 @@ export function PetActionPanel({
           ) : (
             <Button
               size="lg"
-              className="w-full"
+              className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer font-medium shadow-none"
               asChild
             >
               <Link href={`/pets/${pet.id}/apply`}>

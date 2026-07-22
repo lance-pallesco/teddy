@@ -336,33 +336,25 @@ export function ApplicationWizard({
 
   const handleSaveDraftLink = async () => {
     const stepPath = STEP_PATHS[currentStep as keyof typeof STEP_PATHS]
-    const schema = STEP_SCHEMAS[currentStep]
 
-    if (stepPath && schema) {
+    if (stepPath) {
       const stepData = methods.getValues(stepPath)
-      const parsed = schema.safeParse(stepData)
-
-      if (!parsed.success) {
-        await methods.trigger(stepPath)
-        toast.error("Please complete all required fields on this step before saving.")
-        return
-      }
 
       setIsSavingDraft(true)
       const res = await saveApplicationStepAction({
         applicationId: application.id,
         step: currentStep,
-        data: parsed.data,
+        data: stepData,
       })
       setIsSavingDraft(false)
 
       if (res.success) {
-        toast.success("Progress saved")
+        toast.success("Progress saved as draft successfully!")
       } else {
         toast.error(res.error ?? "Failed to save draft.")
       }
     } else if (currentStep === 6) {
-      toast.success("Progress saved")
+      toast.success("Progress saved as draft successfully!")
     }
   }
 

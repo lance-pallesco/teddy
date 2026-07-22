@@ -226,11 +226,19 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
 
             {/* 5. Action Button */}
             <div className="md:col-span-1 flex md:justify-end">
-              <Button asChild size="sm" variant="outline" className="w-full md:w-auto rounded-lg cursor-pointer">
-                <Link href={`/applications/${application.id}`}>
-                  View
-                </Link>
-              </Button>
+              {application.status === "DRAFT" ? (
+                <Button asChild size="sm" className="w-full md:w-auto bg-[#AE8F65] text-white hover:bg-[#9A7D58] hover:text-white rounded-lg cursor-pointer font-bold">
+                  <Link href={`/pets/${pet.id}/apply`}>
+                    Resume
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild size="sm" variant="outline" className="w-full md:w-auto rounded-lg cursor-pointer">
+                  <Link href={`/applications/${application.id}`}>
+                    View
+                  </Link>
+                </Button>
+              )}
             </div>
 
           </div>
