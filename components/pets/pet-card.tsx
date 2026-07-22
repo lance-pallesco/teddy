@@ -58,13 +58,29 @@ export function PetCard({ pet, className }: PetCardProps) {
               <span>Size: {pet.sizeLabel}</span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-sm">
-              {pet.attribution.isShelter && pet.attribution.isVerified ? (
-                <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
-              ) : <User2 className="size-3.5 shrink-0" aria-hidden />}
-              <span className="truncate text-foreground">
+            <div className="flex items-center gap-2 text-sm min-w-0">
+              <div className="relative size-5 rounded-full bg-muted border overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
+                {pet.attribution.avatarUrl ? (
+                  <Image
+                    src={pet.attribution.avatarUrl}
+                    alt={pet.attribution.label}
+                    fill
+                    className="object-cover"
+                    sizes="20px"
+                    unoptimized={pet.attribution.avatarUrl.startsWith("/uploads/")}
+                  />
+                ) : (
+                  <div className="flex size-full items-center justify-center bg-[#AE8F65]/10 text-[#AE8F65] text-[10px] font-bold">
+                    {pet.attribution.label?.[0]?.toUpperCase() || "P"}
+                  </div>
+                )}
+              </div>
+              <span className="truncate text-foreground font-medium">
                 {pet.attribution.label}
               </span>
+              {pet.attribution.isShelter && pet.attribution.isVerified && (
+                <BadgeCheckIcon className="size-3.5 shrink-0 text-[#AE8F65]" aria-hidden />
+              )}
               {pet.attribution.isShelter ? (
                 <span className="shrink-0 text-xs text-muted-foreground">(Shelter)</span>
               ) : (

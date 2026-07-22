@@ -12,6 +12,7 @@ import { getAdopterStats } from "@/lib/services/dashboard.service"
 import { getPets } from "@/lib/services/pet.service"
 import { prisma } from "@/lib/prisma"
 import { ApplicationTimeline } from "@/components/applications/application-timeline"
+import { DeleteDraftButton } from "@/components/applications/delete-draft-button"
 import { TeddyBanner } from "@/components/dashboard/teddy-banner"
 import { cn } from "@/lib/utils"
 
@@ -104,11 +105,18 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
                   </p>
                 </div>
               </div>
-              <Button asChild size="sm" className="w-full sm:w-auto text-xs font-bold shrink-0 bg-[#AE8F65] hover:bg-[#9A7D58] text-white shadow-xs rounded-xl px-5 h-9">
-                <Link href={`/pets/${draftPet.id}/apply`} className="flex items-center justify-center gap-1.5">
-                  Resume Application <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <DeleteDraftButton
+                  applicationId={drafts[0].id}
+                  petName={draftPet.name}
+                  variant="icon"
+                />
+                <Button asChild size="icon" className="size-9 rounded-xl bg-[#AE8F65] hover:bg-[#9A7D58] text-white shadow-xs cursor-pointer" title="Resume Application">
+                  <Link href={`/pets/${draftPet.id}/apply`}>
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         )

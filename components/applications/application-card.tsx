@@ -6,6 +6,7 @@ import type { AdoptionStatus } from "@prisma/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge"
+import { DeleteDraftButton } from "@/components/applications/delete-draft-button"
 import { cn } from "@/lib/utils"
 
 type ApplicationCardProps = {
@@ -164,7 +165,7 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 
             {/* 1. Pet Thumbnail & Name */}
-            <div className="md:col-span-4 flex items-center gap-3.5 min-w-0">
+            <div className="md:col-span-3 flex items-center gap-3.5 min-w-0">
               <div className="relative size-12 rounded-xl border bg-muted overflow-hidden shrink-0">
                 {pet.primaryImageUrl ? (
                   <Image
@@ -192,7 +193,7 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
             </div>
 
             {/* 2. Attribution */}
-            <div className="md:col-span-2 min-w-0">
+            <div className="md:col-span-3 min-w-0">
               <span className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">
                 Shelter / Owner
               </span>
@@ -207,7 +208,7 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
             </div>
 
             {/* 3. Submission Date */}
-            <div className="md:col-span-3 min-w-0">
+            <div className="md:col-span-2 min-w-0">
               <span className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">
                 Submitted
               </span>
@@ -225,13 +226,20 @@ export function ApplicationCard({ application, applicantName }: ApplicationCardP
             </div>
 
             {/* 5. Action Button */}
-            <div className="md:col-span-1 flex md:justify-end">
+            <div className="md:col-span-2 flex items-center md:justify-end gap-2">
               {application.status === "DRAFT" ? (
-                <Button asChild size="sm" className="w-full md:w-auto bg-[#AE8F65] text-white hover:bg-[#9A7D58] hover:text-white rounded-lg cursor-pointer font-bold">
-                  <Link href={`/pets/${pet.id}/apply`}>
-                    Resume
-                  </Link>
-                </Button>
+                <>
+                  <DeleteDraftButton
+                    applicationId={application.id}
+                    petName={pet.name}
+                    variant="icon"
+                  />
+                  <Button asChild size="sm" className="w-full md:w-auto bg-[#AE8F65] text-white hover:bg-[#9A7D58] hover:text-white rounded-lg cursor-pointer font-bold">
+                    <Link href={`/pets/${pet.id}/apply`}>
+                      Resume
+                    </Link>
+                  </Button>
+                </>
               ) : (
                 <Button asChild size="sm" variant="outline" className="w-full md:w-auto rounded-lg cursor-pointer">
                   <Link href={`/applications/${application.id}`}>

@@ -126,14 +126,15 @@ export function formatPetLocation(input: {
 }
 
 export function formatPetAttribution(pet: {
-  shelter?: { name: string; isActive: boolean } | null
-  postedBy?: { firstName: string; lastName: string } | null
-}): { label: string; isShelter: boolean; isVerified: boolean } {
+  shelter?: { name: string; logo?: string | null; isActive: boolean } | null
+  postedBy?: { firstName: string; lastName: string; avatar?: string | null } | null
+}): { label: string; isShelter: boolean; isVerified: boolean; avatarUrl: string | null } {
   if (pet.shelter) {
     return {
       label: pet.shelter.name,
       isShelter: true,
       isVerified: pet.shelter.isActive,
+      avatarUrl: pet.shelter.logo ?? null,
     }
   }
 
@@ -142,6 +143,7 @@ export function formatPetAttribution(pet: {
       label: `${pet.postedBy.firstName} ${pet.postedBy.lastName}`.trim(),
       isShelter: false,
       isVerified: false,
+      avatarUrl: pet.postedBy.avatar ?? null,
     }
   }
 
@@ -149,5 +151,6 @@ export function formatPetAttribution(pet: {
     label: "Unknown poster",
     isShelter: false,
     isVerified: false,
+    avatarUrl: null,
   }
 }

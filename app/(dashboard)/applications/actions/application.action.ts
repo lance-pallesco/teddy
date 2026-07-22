@@ -418,7 +418,9 @@ export async function discardDraftAction(applicationId: string) {
 
   try {
     await deleteApplicationDraft(applicationId, user.id)
+    revalidatePath("/applications")
     revalidatePath("/applications/draft")
+    revalidatePath("/")
     return { success: true }
   } catch (err) {
     console.error("[discardDraftAction]", err)
