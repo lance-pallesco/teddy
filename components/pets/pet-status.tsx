@@ -68,7 +68,7 @@ export function UpdatePetStatusDialog({ petId, petName, isArchived, disabled }: 
         title={`${actionText} ${petName}?`}
         description={dialogDescription}
         confirmText={actionText}
-        variant={isArchived ? "success" : "warning"}
+        variant={isArchived ? "success" : "info"}
         isLoading={isPending}
       />
     </>

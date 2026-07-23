@@ -132,3 +132,13 @@
     @apply font-sans;
   }
 }
+
+/* Pet Discovery Carousel — infinite auto-scroll */
+@keyframes pet-carousel-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

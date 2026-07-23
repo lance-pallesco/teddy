@@ -56,7 +56,9 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
   // 4. Check for existing applications (any status)
   const existingApp = await checkExistingApplication(pet.id, user.id)
   if (existingApp && existingApp.status !== "DRAFT") {
-    // Redirect to applications with a toast trigger parameter
+    if (existingApp.status === "REJECTED") {
+      redirect(`/applications?error=rejected&name=${encodeURIComponent(pet.name)}`)
+    }
     redirect(`/applications?error=duplicate&name=${encodeURIComponent(pet.name)}`)
   }
 

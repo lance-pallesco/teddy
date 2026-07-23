@@ -82,49 +82,73 @@ export function SignupForm({
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4">
-            <Field>
-              <FieldLabel htmlFor="first-name">First Name</FieldLabel>
-              <Input
-                id="first-name"
-                type="text"
-                placeholder="John"
-                autoComplete="given-name"
-                aria-invalid={!!errors.firstName}
-                className="bg-background"
-                {...register("firstName")}
-              />
-              <FieldError errors={[errors.firstName]} />
+          <Field>
+            <FieldLabel htmlFor="first-name">First Name</FieldLabel>
+            <Input
+              id="first-name"
+              type="text"
+              placeholder="John"
+              autoComplete="given-name"
+              aria-invalid={!!errors.firstName}
+              className="bg-background"
+              {...register("firstName")}
+            />
+            <FieldError errors={[errors.firstName]} />
           </Field>
           <Field>
-              <FieldLabel htmlFor="last-name">Last Name</FieldLabel>
-              <Input
-                id="last-name"
-                type="text"
-                placeholder="Doe"
-                autoComplete="family-name"
-                aria-invalid={!!errors.lastName}
-                className="bg-background"
-                {...register("lastName")}
-              />
-              <FieldError errors={[errors.lastName]} />
+            <FieldLabel htmlFor="last-name">Last Name</FieldLabel>
+            <Input
+              id="last-name"
+              type="text"
+              placeholder="Doe"
+              autoComplete="family-name"
+              aria-invalid={!!errors.lastName}
+              className="bg-background"
+              {...register("lastName")}
+            />
+            <FieldError errors={[errors.lastName]} />
           </Field>
         </div>
         <Field>
-          <FieldLabel htmlFor="role">Role</FieldLabel>
-          <Select
-            value={selectedRole ?? "ADOPTER"}
-            onValueChange={(value: "ADOPTER" | "PET_OWNER") =>
-              setValue("role", value, { shouldDirty: true, shouldValidate: true })
-            }
-          >
-            <SelectTrigger id="role" className="bg-background" aria-invalid={!!errors.role}>
-              <SelectValue placeholder="Select your role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ADOPTER">Adopter</SelectItem>
-              <SelectItem value="PET_OWNER">Pet Owner</SelectItem>
-            </SelectContent>
-          </Select>
+          <FieldLabel className="text-sm mb-2">Role</FieldLabel>
+          <div className="grid gap-4 sm:grid-cols-2">
+
+            {/* Adopter Card */}
+            <div
+              className={cn(
+                "border rounded-xl p-4 cursor-pointer transition-all hover:border-[#AE8F65]/50 flex flex-col justify-between text-left h-full",
+                selectedRole === "ADOPTER"
+                  ? "border-[#AE8F65] bg-[#AE8F65]/5 ring-1 ring-[#AE8F65]"
+                  : "border-border bg-background"
+              )}
+              onClick={() => setValue("role", "ADOPTER", { shouldDirty: true, shouldValidate: true })}
+            >
+              <div className="space-y-1">
+                <h4 className=" text-sm text-foreground">Adopter</h4>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  Browse available companion animals, find local shelter matches, and submit adoption applications.
+                </p>
+              </div>
+            </div>
+
+            {/* Pet Owner Card */}
+            <div
+              className={cn(
+                "border rounded-xl p-4 cursor-pointer transition-all hover:border-[#AE8F65]/50 flex flex-col justify-between text-left h-full",
+                selectedRole === "PET_OWNER"
+                  ? "border-[#AE8F65] bg-[#AE8F65]/5 ring-1 ring-[#AE8F65]"
+                  : "border-border bg-background"
+              )}
+              onClick={() => setValue("role", "PET_OWNER", { shouldDirty: true, shouldValidate: true })}
+            >
+              <div className="space-y-1">
+                <h4 className="text-sm text-foreground">Pet Owner</h4>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  Rehome a pet, keep records, and manage adoption requests.
+                </p>
+              </div>
+            </div>
+          </div>
           <FieldError errors={[errors.role]} />
         </Field>
         <Field>

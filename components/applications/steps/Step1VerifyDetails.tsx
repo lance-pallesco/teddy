@@ -68,7 +68,7 @@ export function Step1VerifyDetails({ user }: Step1VerifyDetailsProps) {
 
         <Field>
           <FieldLabel>Occupation</FieldLabel>
-          <Input value={user.occupation ?? "Not provided"} disabled readOnly className="bg-muted/30" />
+          <Input value={user.occupation?.trim() ? user.occupation.trim() : "Not provided"} disabled readOnly className="bg-muted/30" />
         </Field>
 
         <Field>
@@ -109,16 +109,6 @@ export function Step1VerifyDetails({ user }: Step1VerifyDetailsProps) {
           <div className="space-y-1">
             <p className="font-semibold">Age requirement not met</p>
             <p>You must be 18 or older to apply for pet adoption.</p>
-          </div>
-        </div>
-      )}
-
-      {!isDobMissing && !isUnderage && (
-        <div className="flex gap-3 rounded-lg border border-green-200 bg-green-50/50 p-4 text-sm text-green-800 dark:border-green-950 dark:bg-green-950/20 dark:text-green-300">
-          <ShieldCheck className="size-5 shrink-0 text-green-600 dark:text-green-400" />
-          <div className="space-y-1">
-            <p className="font-semibold">Identity Verified</p>
-            <p>Your profile meets the initial criteria. You may proceed to the next step.</p>
           </div>
         </div>
       )}

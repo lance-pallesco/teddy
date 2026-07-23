@@ -1,99 +1,13 @@
 import type { AdoptionStatus } from "@prisma/client"
-import { CheckCircle2Icon, CircleIcon, CircleDotIcon, XCircleIcon } from "lucide-react"
+import { FileText, Search, MessageSquare, CheckCircle, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-type TimelineStep = {
-  label: string
-  timestamp: Date | null
-  status: "completed" | "current" | "upcoming" | "rejected"
-}
 
 type ApplicationTimelineProps = {
   applicationStatus: AdoptionStatus
   createdAt: Date
   submittedAt: Date | null
   reviewedAt: Date | null
-}
-
-function formatTimestamp(date: Date | null): string {
-  if (!date) return ""
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date)
-}
-
-function buildTimelineSteps(
-  status: AdoptionStatus,
-  createdAt: Date,
-  submittedAt: Date | null,
-  reviewedAt: Date | null
-): TimelineStep[] {
-  const steps: TimelineStep[] = []
-
-  // Step 1: Draft created
-  const draftCompleted = status !== "DRAFT"
-  steps.push({
-    label: "Application Created",
-    timestamp: createdAt,
-    status: draftCompleted ? "completed" : "current",
-  })
-
-  // Step 2: Submitted
-  const isSubmitted = ["PENDING", "UNDER_REVIEW", "INTERVIEW_IN_PROGRESS", "APPROVED", "REJECTED", "WITHDRAWN"].includes(status)
-  steps.push({
-    label: "Submitted",
-    timestamp: submittedAt,
-    status: isSubmitted
-      ? status === "PENDING" ? "current" : "completed"
-      : status === "WITHDRAWN" ? "completed" : "upcoming",
-  })
-
-  // Step 3: Screening (maps to UNDER_REVIEW)
-  const isScreening = ["UNDER_REVIEW", "INTERVIEW_IN_PROGRESS", "APPROVED", "REJECTED"].includes(status)
-  steps.push({
-    label: "Screening",
-    timestamp: isScreening ? reviewedAt : null,
-    status: isScreening
-      ? status === "UNDER_REVIEW" ? "current" : "completed"
-      : "upcoming",
-  })
-
-  // Step 4: Interview (maps to INTERVIEW_IN_PROGRESS)
-  const isInterview = ["INTERVIEW_IN_PROGRESS", "APPROVED", "REJECTED"].includes(status)
-  steps.push({
-    label: "Interview",
-    timestamp: isInterview ? reviewedAt : null,
-    status: isInterview
-      ? status === "INTERVIEW_IN_PROGRESS" ? "current" : "completed"
-      : "upcoming",
-  })
-
-  // Step 5: Decision (Approved / Rejected / Withdrawn)
-  if (status === "REJECTED") {
-    steps.push({
-      label: "Rejected",
-      timestamp: reviewedAt,
-      status: "rejected",
-    })
-  } else if (status === "WITHDRAWN") {
-    steps.push({
-      label: "Withdrawn",
-      timestamp: null,
-      status: "rejected",
-    })
-  } else {
-    steps.push({
-      label: "Approved",
-      timestamp: status === "APPROVED" ? reviewedAt : null,
-      status: status === "APPROVED" ? "completed" : "upcoming",
-    })
-  }
-
-  return steps
+  chatMode?: string | null
 }
 
 export function ApplicationTimeline({
@@ -101,72 +15,132 @@ export function ApplicationTimeline({
   createdAt,
   submittedAt,
   reviewedAt,
+  chatMode,
 }: ApplicationTimelineProps) {
-  const steps = buildTimelineSteps(applicationStatus, createdAt, submittedAt, reviewedAt)
+  const isRejected = applicationStatus === "REJECTED"
+  const isWithdrawn = applicationStatus === "WITHDRAWN"
+  const isTerminated = isRejected || isWithdrawn
+
+  // 3-step timeline check: application is rejected and never reached interview stage (chatMode is null)
+  const isThreeStep = isRejected && !chatMode
+
+  let activeStep = 0
+  let steps = []
+
+  if (isThreeStep) {
+    // 3 steps: Submitted, Screening, Rejected
+    activeStep = 2
+    steps = [
+      { label: "Submitted", desc: "Form received", icon: FileText },
+      { label: "Screening", desc: "Background check", icon: Search },
+      {
+        label: "Rejected",
+        desc: "Adoption declined",
+        icon: X,
+      },
+    ]
+  } else {
+    // 4 steps: Submitted, Screening, Interview, Approved/Rejected/Withdrawn
+    if (applicationStatus === "UNDER_REVIEW") activeStep = 1
+    if (applicationStatus === "INTERVIEW_IN_PROGRESS") activeStep = 2
+    if (applicationStatus === "APPROVED" || isTerminated) activeStep = 3
+
+    steps = [
+      { label: "Submitted", desc: "Form received", icon: FileText },
+      { label: "Screening", desc: "Background check", icon: Search },
+      { label: "Interview", desc: "Interactive chat", icon: MessageSquare },
+      {
+        label: isRejected ? "Rejected" : isWithdrawn ? "Withdrawn" : "Approved",
+        desc: isRejected ? "Adoption declined" : isWithdrawn ? "Cancelled" : "Ready for adoption",
+        icon: isTerminated ? X : CheckCircle,
+      },
+    ]
+  }
+
+  const totalSteps = steps.length - 1
+  const cellWidthClass = isThreeStep ? "w-1/3" : "w-1/4"
+  const trackLeft = isThreeStep ? "16.67%" : "12.5%"
+  const trackRight = isThreeStep ? "16.67%" : "12.5%"
+  const progressMultiplier = isThreeStep ? 66.67 : 75
 
   return (
-    <div className="w-full py-2">
-      {/* Horizontal layout on medium/large screens, vertical layout on mobile */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-4">
-        {steps.map((step, index) => {
-          const isLast = index === steps.length - 1
+    <div className="flex items-center w-full relative py-2">
+      {/* Background track line */}
+      <div 
+        className="absolute top-[26px] sm:top-[30px] h-0.5 bg-muted z-0" 
+        style={{ left: trackLeft, right: trackRight }}
+      />
+      
+      {/* Active progress track line */}
+      <div
+        className="absolute top-[26px] sm:top-[30px] h-0.5 transition-all duration-500 z-0"
+        style={{
+          left: trackLeft,
+          width: `${(activeStep / totalSteps) * progressMultiplier}%`,
+          background: isRejected
+            ? "linear-gradient(to right, #10b981, #ae8f65, #ef4444)"
+            : isWithdrawn
+              ? "linear-gradient(to right, #10b981, #ae8f65, #9ca3af)"
+              : activeStep === totalSteps
+                ? "#10b981"
+                : "linear-gradient(to right, #10b981, #ae8f65)"
+        }}
+      />
+      
+      {steps.map((step, idx) => {
+        const isDone = idx < activeStep
+        const isCurrent = idx === activeStep
+        const StepIcon = step.icon
 
-          return (
+        // Determine step-specific color schemas
+        let circleStyle = ""
+        let textStyle = ""
+
+        const isLastStep = idx === totalSteps
+
+        if (isLastStep && isTerminated) {
+          circleStyle = isRejected
+            ? "bg-red-500 border-red-500 text-white scale-110 shadow-md ring-4 ring-red-500/10"
+            : "bg-muted border-border text-muted-foreground scale-110"
+          textStyle = isRejected ? "text-red-500" : "text-muted-foreground"
+        } else if (isCurrent) {
+          circleStyle = "bg-[#AE8F65] border-[#AE8F65] text-white scale-110 shadow-md ring-4 ring-[#AE8F65]/10"
+          textStyle = "text-[#AE8F65]"
+        } else if (isDone) {
+          circleStyle = "bg-emerald-500 border-emerald-500 text-white"
+          textStyle = "text-emerald-600"
+        } else {
+          circleStyle = "bg-white border-border text-muted-foreground"
+          textStyle = "text-muted-foreground"
+        }
+
+        return (
+          <div key={step.label} className={cn(cellWidthClass, "flex flex-col items-center text-center space-y-1")}>
             <div
-              key={step.label}
-              className="flex flex-1 flex-col md:flex-row md:items-center gap-4 w-full"
+              className={cn(
+                "size-9 sm:size-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative z-10",
+                circleStyle
+              )}
             >
-              <div className="flex items-center gap-3">
-                {/* Icon */}
-                <div className="relative z-10 flex shrink-0 items-center justify-center rounded-full bg-background">
-                  {step.status === "completed" ? (
-                    <CheckCircle2Icon className="size-6 text-emerald-500" />
-                  ) : step.status === "current" ? (
-                    <CircleDotIcon className="size-6 text-amber-500 animate-pulse" />
-                  ) : step.status === "rejected" ? (
-                    <XCircleIcon className="size-6 text-destructive" />
-                  ) : (
-                    <CircleIcon className="size-6 text-muted-foreground/40" />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="min-w-0">
-                  <p
-                    className={cn(
-                      "text-sm font-semibold whitespace-nowrap",
-                      step.status === "upcoming"
-                        ? "text-muted-foreground/60"
-                        : step.status === "rejected"
-                          ? "text-destructive"
-                          : "text-foreground"
-                    )}
-                  >
-                    {step.label}
-                  </p>
-                  {step.timestamp ? (
-                    <p className="mt-0.5 text-xs text-muted-foreground whitespace-nowrap">
-                      {formatTimestamp(step.timestamp)}
-                    </p>
-                  ) : (
-                    <p className="mt-0.5 text-xs text-transparent select-none whitespace-nowrap">—</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Desktop connector line */}
-              {!isLast && (
-                <div
-                  className={cn(
-                    "hidden md:block h-0.5 flex-1 min-w-[20px]",
-                    step.status === "completed" ? "bg-emerald-500" : "bg-border"
-                  )}
-                />
+              {isLastStep && isTerminated ? (
+                <X className="size-4 sm:size-5 stroke-[2.5]" />
+              ) : isDone ? (
+                <Check className="size-4 sm:size-5 stroke-[2.5]" />
+              ) : (
+                <StepIcon className="size-4 sm:size-5" />
               )}
             </div>
-          )
-        })}
-      </div>
+            <div className="space-y-0.5">
+              <p className={cn("text-[10px] sm:text-xs font-bold leading-tight", textStyle)}>
+                {step.label}
+              </p>
+              <p className="hidden sm:block text-[9px] text-muted-foreground/80 leading-none">
+                {step.desc}
+              </p>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

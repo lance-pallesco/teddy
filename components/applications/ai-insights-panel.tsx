@@ -432,7 +432,7 @@ export function AIInsightsPanel({
               <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
                 <Button
                   variant="destructive"
-                  className="flex-1 h-10 sm:h-9"
+                  className="flex-1 sm:h-9 cursor-pointer"
                   onClick={() => setIsRejectDialogOpen(true)}
                   disabled={isDecisionPending}
                 >
@@ -440,7 +440,7 @@ export function AIInsightsPanel({
                 </Button>
                 <Button
                   variant="default"
-                  className="flex-1 h-10 sm:h-9 bg-emerald-600 hover:bg-emerald-700 hover:text-white text-white font-semibold"
+                  className="flex-1 sm:h-9 bg-emerald-600 cursor-pointer hover:bg-emerald-700 hover:text-white text-white font-semibold"
                   onClick={() => setIsChatSelectionOpen(true)}
                   disabled={isDecisionPending}
                 >

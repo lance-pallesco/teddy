@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
+import { z } from "zod"
 
 import { WizardShell } from "@/components/shared/wizard/WizardShell"
 import type { WizardStep } from "@/components/shared/wizard/types"
@@ -213,8 +214,19 @@ export function ApplicationWizard({
     signatureBase64: "",
   }
 
-  const methods = useForm({
-    resolver: undefined, // custom step-by-step triggers
+  const methods = useForm<any>({
+    resolver: zodResolver(
+      z.object({
+        livingEnvironment: Step2Schema,
+        householdLifestyle: Step3Schema,
+        petExperience: Step4Schema,
+        adoptionCommitment: Step5Schema,
+        agreements: Step7Schema.omit({ signatureSigned: true }),
+        signatureSigned: z.boolean().refine((val) => val === true, {
+          message: "Digital signature is required",
+        }),
+      })
+    ),
     defaultValues,
     mode: "onBlur",
   })
@@ -324,33 +336,25 @@ export function ApplicationWizard({
 
   const handleSaveDraftLink = async () => {
     const stepPath = STEP_PATHS[currentStep as keyof typeof STEP_PATHS]
-    const schema = STEP_SCHEMAS[currentStep]
 
-    if (stepPath && schema) {
+    if (stepPath) {
       const stepData = methods.getValues(stepPath)
-      const parsed = schema.safeParse(stepData)
-
-      if (!parsed.success) {
-        await methods.trigger(stepPath)
-        toast.error("Please complete all required fields on this step before saving.")
-        return
-      }
 
       setIsSavingDraft(true)
       const res = await saveApplicationStepAction({
         applicationId: application.id,
         step: currentStep,
-        data: parsed.data,
+        data: stepData,
       })
       setIsSavingDraft(false)
 
       if (res.success) {
-        toast.success("Progress saved")
+        toast.success("Progress saved as draft successfully!")
       } else {
         toast.error(res.error ?? "Failed to save draft.")
       }
     } else if (currentStep === 6) {
-      toast.success("Progress saved")
+      toast.success("Progress saved as draft successfully!")
     }
   }
 

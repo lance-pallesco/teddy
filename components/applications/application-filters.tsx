@@ -3,7 +3,9 @@
 import { useCallback, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import type { AdoptionStatus } from "@prisma/client"
+import { XIcon } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -46,6 +48,11 @@ export function ApplicationFilters({
       })
     },
     [basePath, router]
+  )
+
+  const hasActiveFilters = Boolean(
+    (filters.status && filters.status !== ("ALL" as unknown as AdoptionStatus)) ||
+      (filters.petId && filters.petId !== "ALL")
   )
 
   return (
@@ -97,6 +104,19 @@ export function ApplicationFilters({
           ))}
         </SelectContent>
       </Select>
+
+      {hasActiveFilters ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 text-muted-foreground hover:text-foreground cursor-pointer"
+          onClick={() => applyFilters({})}
+        >
+          <XIcon className="size-3.5 mr-1" />
+          Clear
+        </Button>
+      ) : null}
     </div>
   )
 }

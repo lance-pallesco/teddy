@@ -18,6 +18,7 @@ import {
   MapPinIcon,
   BriefcaseIcon,
   XCircleIcon,
+  AlertCircle,
 } from "lucide-react"
 import type { AdoptionStatus, ApplicationDocumentType, GovernmentIDType } from "@prisma/client"
 
@@ -42,6 +43,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 // ---------- Types ----------
 
@@ -119,6 +126,7 @@ export function ApplicationDetailContent({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showWithdrawConfirm, setShowWithdrawConfirm] = useState(false)
+  const [showRemarks, setShowRemarks] = useState(false)
   const [activeTab, setActiveTab] = useState("info")
 
   const { pet, applicant } = application
@@ -198,20 +206,6 @@ export function ApplicationDetailContent({
         <div className="grid gap-6 lg:grid-cols-[1fr_380px] items-start">
           {/* Left column — Main content */}
           <div className="space-y-6">
-            {/* Review notes / rejection reason */}
-            {application.rejectionReason ? (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 bg-white">
-                <h3 className="text-sm font-semibold text-destructive">Rejection Reason</h3>
-                <p className="mt-1 text-sm text-foreground">{application.rejectionReason}</p>
-              </div>
-            ) : null}
-
-            {application.reviewNotes && !application.rejectionReason ? (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 bg-white">
-                <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Review Notes</h3>
-                <p className="mt-1 text-sm text-foreground">{application.reviewNotes}</p>
-              </div>
-            ) : null}
 
             {/* Form data sections / Tabs */}
             {isReviewer ? (

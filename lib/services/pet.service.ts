@@ -46,6 +46,7 @@ export type PetListItem = {
     label: string
     isShelter: boolean
     isVerified: boolean
+    avatarUrl: string | null
   }
   location: string
 }
@@ -261,6 +262,7 @@ const petListSelect = {
   shelter: {
     select: {
       name: true,
+      logo: true,
       isActive: true,
       city: true,
       province: true,
@@ -270,6 +272,7 @@ const petListSelect = {
     select: {
       firstName: true,
       lastName: true,
+      avatar: true,
       address: true,
     },
   },

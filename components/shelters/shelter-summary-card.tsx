@@ -302,7 +302,7 @@ export function ShelterSummaryCard(props: ShelterSummaryCardProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-xl font-bold tracking-tight truncate">{shelter.name || "Shelter Name"}</h3>
-            <Badge variant={shelter.isActive ? "success" : "secondary"}>
+            <Badge variant={shelter.isActive ? "success" : "danger"}>
               {statusLabel}
             </Badge>
           </div>
@@ -357,8 +357,7 @@ export function ShelterSummaryCard(props: ShelterSummaryCardProps) {
             <Button
               asChild
               size="sm"
-              variant="outline"
-              className="w-full rounded-lg border-transparent text-[#AE8F65] bg-[#AE8F65]/10 hover:bg-[#AE8F65]/20 hover:text-[#AE8F65] font-medium shadow-none cursor-pointer text-xs h-8"
+              className="w-full rounded-lg border-transparent text-white bg-blue-400 hover:bg-blue-500 font-semibold shadow-none cursor-pointer text-xs h-8"
             >
               <Link href={`/shelters/${shelter.id}/edit`} className="gap-1.5 justify-center w-full">
                 <PencilIcon className="size-3.5" />
@@ -369,7 +368,12 @@ export function ShelterSummaryCard(props: ShelterSummaryCardProps) {
               shelterId={shelter.id!}
               isActive={shelter.isActive!}
               size="sm"
-              className="rounded-lg shadow-none font-medium h-8 text-xs cursor-pointer w-full justify-center"
+              className={cn(
+                "rounded-lg shadow-none font-semibold h-8 text-xs cursor-pointer w-full justify-center transition-colors duration-150 border-transparent text-white",
+                shelter.isActive
+                  ? "bg-red-400 hover:bg-red-500"
+                  : "bg-emerald-600 hover:bg-emerald-700"
+              )}
             />
           </div>
         )}

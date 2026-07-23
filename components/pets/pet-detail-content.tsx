@@ -26,9 +26,13 @@ type Viewer = {
 type PetDetailContentProps = {
   pet: PetDetail
   viewer: Viewer
+  existingApplication?: {
+    id: string
+    status: string
+  } | null
 }
 
-export function PetDetailContent({ pet, viewer }: PetDetailContentProps) {
+export function PetDetailContent({ pet, viewer, existingApplication }: PetDetailContentProps) {
   const speciesLabel = PET_SPECIES_LABELS[pet.species as PetSpecies]
   const subtitleParts = [
     speciesLabel,
@@ -58,7 +62,11 @@ export function PetDetailContent({ pet, viewer }: PetDetailContentProps) {
           </p>
         </div>
 
-        <PetActionPanel pet={pet} viewer={viewer} />
+        <PetActionPanel
+          pet={pet}
+          viewer={viewer}
+          existingApplication={existingApplication}
+        />
 
         <PetAttributionCard pet={pet} />
 

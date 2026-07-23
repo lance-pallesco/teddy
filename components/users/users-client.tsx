@@ -299,7 +299,7 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
             : `Are you sure you want to activate ${confirmUser?.firstName} ${confirmUser?.lastName}'s account? They will immediately regain access to the platform.`
         }
         confirmText={confirmUser?.isActive ? "Deactivate" : "Activate"}
-        variant={confirmUser?.isActive ? "destructive" : "info"}
+        variant={confirmUser?.isActive ? "destructive" : "success"}
         isLoading={isPending}
       />
     </div>

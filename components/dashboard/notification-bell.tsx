@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Bell, Bot, FileText, Calendar, AlertCircle, Check } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Bell, Bot, FileText, Calendar, AlertCircle } from "lucide-react"
 import type { Notification, NotificationType } from "@prisma/client"
+import { toast } from "sonner"
 
 import {
   Popover,
@@ -36,13 +38,39 @@ function formatRelativeTime(dateInput: Date | string) {
 export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+  const notifiedIdsRef = useRef<Set<string>>(new Set())
+  const isInitialLoadRef = useRef(true)
 
   const unreadCount = notifications.filter((n) => n.isUnread).length
 
   async function loadNotifications() {
     const res = await getNotificationsAction()
     if (res.success && res.data) {
-      setNotifications(res.data as Notification[])
+      const list = res.data as Notification[]
+
+      // Trigger pop-up toast notifications for newly arrived unread alerts
+      if (!isInitialLoadRef.current) {
+        list.forEach((n) => {
+          if (n.isUnread && !notifiedIdsRef.current.has(n.id)) {
+            notifiedIdsRef.current.add(n.id)
+            toast(n.title, {
+              description: n.description,
+              action: n.link
+                ? {
+                    label: "View",
+                    onClick: () => handleNotificationClick(n),
+                  }
+                : undefined,
+            })
+          }
+        })
+      } else {
+        list.forEach((n) => notifiedIdsRef.current.add(n.id))
+        isInitialLoadRef.current = false
+      }
+
+      setNotifications(list)
     }
   }
 
@@ -54,12 +82,18 @@ export function NotificationBell() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleMarkAsRead = async (id: string) => {
-    // Optimistic UI update
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n))
-    )
-    await markNotificationAsReadAction(id)
+  const handleNotificationClick = async (notification: Notification) => {
+    // Optimistic mark as read
+    if (notification.isUnread) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notification.id ? { ...n, isUnread: false } : n))
+      )
+      await markNotificationAsReadAction(notification.id)
+    }
+    setIsOpen(false)
+    if (notification.link) {
+      router.push(notification.link)
+    }
   }
 
   const handleMarkAllAsRead = async () => {
@@ -148,7 +182,7 @@ export function NotificationBell() {
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                onClick={() => handleMarkAsRead(notification.id)}
+                onClick={() => handleNotificationClick(notification)}
                 className={cn(
                   "flex gap-3 px-4 py-3 hover:bg-muted/30 cursor-pointer transition-colors relative group",
                   notification.isUnread && "bg-muted/15"
@@ -209,3 +243,4 @@ export function NotificationBell() {
     </Popover>
   )
 }
+

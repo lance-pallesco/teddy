@@ -1,10 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { ClipboardListIcon, HeartIcon, PencilIcon, RotateCcwIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { UpdatePetStatusDialog } from "@/components/pets/pet-status"
+import { AdoptionCommitmentDialog } from "@/components/applications/adoption-commitment-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -21,8 +23,10 @@ type Viewer = {
 type PetActionPanelProps = {
   pet: Pick<PetDetail, "id" | "name" | "status" | "postedById" | "shelterId">
   viewer: Viewer
-  /** Placeholder until adoption applications ship. */
-  hasExistingApplication?: boolean
+  existingApplication?: {
+    id: string
+    status: string
+  } | null
 }
 
 function comingSoon(message: string) {
@@ -34,11 +38,16 @@ function comingSoon(message: string) {
 export function PetActionPanel({
   pet,
   viewer,
-  hasExistingApplication = false,
+  existingApplication,
 }: PetActionPanelProps) {
+  const [showCommitment, setShowCommitment] = useState(false)
   const canManage = viewer ? canManagePet(pet, viewer) : false
   const isAdopter = viewer?.role === "ADOPTER"
   const isArchived = pet.status === "ARCHIVED"
+
+  const isRejected = existingApplication?.status === "REJECTED"
+  const isDraft = existingApplication?.status === "DRAFT"
+  const hasActiveApp = !!existingApplication && !isDraft && !isRejected
 
   return (
     <Card className="border-primary/20 bg-white">
@@ -47,7 +56,7 @@ export function PetActionPanel({
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {!viewer ? (
-          <Button asChild size="lg" className="w-full">
+          <Button asChild size="lg" className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer font-medium shadow-none">
             <Link href="/login">
               <HeartIcon />
               Login to apply
@@ -56,32 +65,61 @@ export function PetActionPanel({
         ) : null}
 
         {viewer && isAdopter && !isArchived ? (
-          hasExistingApplication ? (
-            <>
+          isRejected ? (
+            <div className="space-y-2 p-3.5 rounded-xl border border-red-200 bg-red-50/50">
+              <Badge variant="danger" className="w-fit">
+                Application Declined
+              </Badge>
+              <p className="text-xs text-red-700 leading-normal">
+                Your previous application for <strong>{pet.name}</strong> was declined by the shelter/owner. Re-applying for the same pet is not allowed.
+              </p>
+            </div>
+          ) : hasActiveApp ? (
+            <div className="space-y-2">
               <Badge variant="warning" className="w-fit">
-                Application pending review
+                Application {existingApplication.status.replace("_", " ")}
               </Badge>
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full"
-                onClick={() => comingSoon("View application")}
+                className="w-full rounded-lg cursor-pointer"
+                asChild
               >
-                <ClipboardListIcon />
-                View application
+                <Link href={`/applications/${existingApplication.id}`}>
+                  <ClipboardListIcon className="size-4 mr-2" />
+                  View Application
+                </Link>
               </Button>
-            </>
-          ) : (
+            </div>
+          ) : isDraft ? (
             <Button
               size="lg"
-              className="w-full"
+              className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer font-medium shadow-none"
               asChild
             >
               <Link href={`/pets/${pet.id}/apply`}>
                 <HeartIcon />
-                Apply to adopt
+                Resume Draft Application
               </Link>
             </Button>
+          ) : (
+            <>
+              <Button
+                size="lg"
+                onClick={() => setShowCommitment(true)}
+                className="w-full rounded-lg bg-[#AE8F65] text-white border-transparent hover:bg-[#9A7D58] hover:text-white cursor-pointer font-medium shadow-none"
+              >
+                <HeartIcon />
+                Apply to adopt
+              </Button>
+
+              <AdoptionCommitmentDialog
+                open={showCommitment}
+                onOpenChange={setShowCommitment}
+                petId={pet.id}
+                petName={pet.name}
+              />
+            </>
           )
         ) : null}
 

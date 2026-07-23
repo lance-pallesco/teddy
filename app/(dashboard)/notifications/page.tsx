@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Bell,
   Bot,
@@ -45,6 +46,7 @@ function formatRelativeTime(dateInput: Date | string) {
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const router = useRouter()
 
   async function loadNotifications() {
     const res = await getNotificationsAction()
@@ -56,6 +58,18 @@ export default function NotificationsPage() {
   useEffect(() => {
     loadNotifications()
   }, [])
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (notification.isUnread) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notification.id ? { ...n, isUnread: false } : n))
+      )
+      markNotificationAsReadAction(notification.id)
+    }
+    if (notification.link) {
+      router.push(notification.link)
+    }
+  }
 
   const handleMarkAsRead = async (id: string) => {
     // Optimistic UI update
@@ -162,8 +176,10 @@ export default function NotificationsPage() {
         {list.map((notification) => (
           <div
             key={notification.id}
+            onClick={() => handleNotificationClick(notification)}
             className={cn(
               "flex gap-4 p-5 items-start hover:bg-muted/20 transition-colors relative group",
+              notification.link && "cursor-pointer",
               notification.isUnread && "bg-muted/10"
             )}
           >
@@ -204,8 +220,17 @@ export default function NotificationsPage() {
               {/* Action Link */}
               {notification.link && (
                 <div className="pt-2">
-                  <Button asChild variant="outline" size="sm" className="h-7 text-xs px-2.5">
-                    <Link href={notification.link}>View Details</Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2.5 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleNotificationClick(notification)
+                    }}
+                  >
+                    View Details
                   </Button>
                 </div>
               )}
@@ -217,9 +242,12 @@ export default function NotificationsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
+                  className="size-8 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 cursor-pointer"
                   title="Mark as read"
-                  onClick={() => handleMarkAsRead(notification.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleMarkAsRead(notification.id)
+                  }}
                 >
                   <Check className="size-4" />
                 </Button>
@@ -227,9 +255,12 @@ export default function NotificationsPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-8 rounded-lg hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400"
+                className="size-8 rounded-lg hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer"
                 title="Delete"
-                onClick={() => handleDelete(notification.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(notification.id)
+                }}
               >
                 <Trash2 className="size-4" />
               </Button>

@@ -7,6 +7,7 @@ import { RelatedPets } from "@/components/pets/related-pets"
 import { Button } from "@/components/ui/button"
 import { getCurrentUser } from "@/lib/auth/session"
 import { getPetById, getRelatedPets } from "@/lib/services/pet.service"
+import { checkExistingApplication } from "@/lib/services/application.service"
 import { SetBreadcrumbLabel } from "@/components/dashboard/breadcrumb-context"
 
 type PetDetailPageProps = {
@@ -21,10 +22,15 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
     notFound()
   }
 
-  const relatedPets = await getRelatedPets(
-    { id: pet.id, shelterId: pet.shelterId, species: pet.species },
-    4
-  )
+  const [relatedPets, existingApp] = await Promise.all([
+    getRelatedPets(
+      { id: pet.id, shelterId: pet.shelterId, species: pet.species },
+      4
+    ),
+    user && user.role === "ADOPTER"
+      ? checkExistingApplication(pet.id, user.id)
+      : Promise.resolve(null),
+  ])
 
   const viewer = user
     ? {
@@ -45,7 +51,11 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
           </Link>
         </Button>
 
-        <PetDetailContent pet={pet} viewer={viewer} />
+        <PetDetailContent
+          pet={pet}
+          viewer={viewer}
+          existingApplication={existingApp}
+        />
 
         <RelatedPets pets={relatedPets} />
       </div>

@@ -154,7 +154,7 @@ export function SheltersClient({ initialShelters }: SheltersClientProps) {
                         {shelter.name}
                       </h3>
                       <Badge
-                        variant={shelter.isActive ? "success" : "warning"}
+                        variant={shelter.isActive ? "success" : "danger"}
                         className="shrink-0 text-[10px]"
                       >
                         {shelter.isActive ? "Active" : "Inactive"}
@@ -202,16 +202,16 @@ export function SheltersClient({ initialShelters }: SheltersClientProps) {
                 </CardContent>
               </div>
 
-               <CardFooter className="px-5 pb-5 pt-0 flex flex-col gap-2 border-t pt-4">
+              <CardFooter className="px-5 pb-5 pt-0 flex flex-col gap-2 border-t pt-4">
                 <Button
                   asChild
                   size="sm"
                   variant="outline"
-                  className="w-full rounded-lg border-transparent text-[#AE8F65] bg-[#AE8F65]/10 hover:bg-[#AE8F65]/20 hover:text-[#AE8F65] font-medium shadow-none cursor-pointer text-xs h-8"
+                  className="w-full rounded-lg border-transparent text-white bg-[#AE8F65] hover:bg-[#AE8F65]/90 hover:text-white font-semibold shadow-none cursor-pointer text-xs h-8"
                 >
                   <Link href={`/shelters/${shelter.id}`} className="gap-1.5 justify-center w-full">
                     <EyeIcon className="size-3.5" />
-                    View
+                    View Details
                   </Link>
                 </Button>
                 <div className="grid grid-cols-2 gap-2 w-full">
@@ -219,7 +219,7 @@ export function SheltersClient({ initialShelters }: SheltersClientProps) {
                     asChild
                     size="sm"
                     variant="outline"
-                    className="rounded-lg border-border  hover:text-neutral-900 font-medium shadow-none cursor-pointer text-xs h-8 justify-center"
+                    className="rounded-lg border-transparent text-white bg-blue-400 hover:bg-blue-500 hover:text-white font-semibold shadow-none cursor-pointer text-xs h-8 justify-center"
                   >
                     <Link href={`/shelters/${shelter.id}/edit`} className="gap-1">
                       <PencilIcon className="size-3.5" />
@@ -230,7 +230,12 @@ export function SheltersClient({ initialShelters }: SheltersClientProps) {
                     shelterId={shelter.id}
                     isActive={shelter.isActive}
                     size="sm"
-                    className="rounded-lg shadow-none font-medium h-8 text-xs cursor-pointer bg-red-400 text-white border-transparent w-full justify-center"
+                    className={cn(
+                      "rounded-lg shadow-none font-semibold h-8 text-xs cursor-pointer w-full justify-center transition-colors duration-150",
+                      shelter.isActive
+                        ? "bg-red-400 text-white hover:bg-red-500 hover:text-white"
+                        : "bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white"
+                    )}
                   />
                 </div>
               </CardFooter>

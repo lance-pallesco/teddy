@@ -19,6 +19,7 @@ const tabs: { id: ApplicationTab; label: string }[] = [
   { id: "all", label: "All" },
   { id: "active", label: "Active" },
   { id: "completed", label: "Completed" },
+  { id: "draft", label: "Drafts" },
 ]
 
 export function ApplicationTabs({

@@ -14,11 +14,20 @@ export function ApplicationsToastHandler() {
     const name = searchParams.get("name")
     const key = `${error}-${name}`
 
-    if (error === "duplicate" && lastShownToastParam !== key) {
+    if (error === "rejected" && lastShownToastParam !== key) {
       lastShownToastParam = key
-      toast.error(`You have already submitted an application for ${name || "this pet"}.`)
+      toast.error(`Your application for ${name || "this pet"} was previously declined.`, {
+        description: "Re-applying for a pet after a declined application is not allowed.",
+      })
       
-      // Clean up the URL query parameters
+      const cleanUrl = window.location.pathname
+      window.history.replaceState({}, "", cleanUrl)
+    } else if (error === "duplicate" && lastShownToastParam !== key) {
+      lastShownToastParam = key
+      toast.info(`You already submitted an application for ${name || "this pet"}.`, {
+        description: "You can view and track its status in your applications list.",
+      })
+      
       const cleanUrl = window.location.pathname
       window.history.replaceState({}, "", cleanUrl)
     }
