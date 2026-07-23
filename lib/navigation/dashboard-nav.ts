@@ -39,7 +39,6 @@ export const dashboardNavigation: Record<DashboardRole, DashboardNavItem[]> = {
   ADOPTER: [
     { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
     { title: "Browse Pets", url: "/pets", icon: "PawPrint" },
-    { title: "Find My Match", url: "/match", icon: "MessageCircleHeart" },
     { title: "My Applications", url: "/applications", icon: "Folders"},
     { title: "Notifications", url: "/notifications", icon: "Bell" },
     { title: "Profile Settings", url: "/profile", icon: "Settings" },
