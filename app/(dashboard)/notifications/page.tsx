@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import {
   Bell,
@@ -124,7 +125,7 @@ export default function NotificationsPage() {
   const getIcon = (type: NotificationType) => {
     switch (type) {
       case "AI":
-        return <Bot className="size-5 text-purple-500" />
+        return <Image src="/logo.png" alt="TeddyAI" width={20} height={20} className="object-contain" />
       case "APPLICATION":
         return <FileText className="size-5 text-blue-500" />
       case "MEET_AND_GREET":
@@ -137,7 +138,7 @@ export default function NotificationsPage() {
   const getIconBg = (type: NotificationType) => {
     switch (type) {
       case "AI":
-        return "bg-purple-500/10 border-purple-500/20"
+        return "bg-[#AE8F65]/10 border-[#AE8F65]/25"
       case "APPLICATION":
         return "bg-blue-500/10 border-blue-500/20"
       case "MEET_AND_GREET":

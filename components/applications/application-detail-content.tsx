@@ -19,11 +19,13 @@ import {
   BriefcaseIcon,
   XCircleIcon,
   AlertCircle,
+  CheckCircleIcon,
 } from "lucide-react"
 import type { AdoptionStatus, ApplicationDocumentType, GovernmentIDType } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge"
 import { ApplicationTimeline } from "@/components/applications/application-timeline"
 import { ApplicationFormSections } from "@/components/applications/application-form-sections"
@@ -92,11 +94,13 @@ type ApplicationDetailData = {
       name: string
       city: string
       province: string
+      logo?: string | null
     } | null
     postedBy: {
       id: string
       firstName: string
       lastName: string
+      avatar?: string | null
     } | null
   }
   documents: {
@@ -301,11 +305,37 @@ export function ApplicationDetailContent({
                     <span><strong>Size:</strong> {pet.size.toLowerCase().replace("_", " ")}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 border-t pt-3 text-sm text-foreground/90">
+                <div className="flex items-center gap-3 border-t pt-3 text-sm text-foreground/90">
                   {pet.shelter ? (
-                    <Building2Icon className="size-4 shrink-0 text-primary" />
+                    <div className="relative size-9 shrink-0 overflow-hidden rounded-full border bg-muted flex items-center justify-center">
+                      {pet.shelter.logo ? (
+                        <Image
+                          src={pet.shelter.logo}
+                          alt={pet.shelter.name}
+                          fill
+                          className="object-cover"
+                          unoptimized={pet.shelter.logo.startsWith("/uploads/")}
+                        />
+                      ) : (
+                        <Building2Icon className="size-4 text-primary" />
+                      )}
+                    </div>
                   ) : (
-                    <User2Icon className="size-4 shrink-0 text-primary" />
+                    <div className="relative size-9 shrink-0 overflow-hidden rounded-full border bg-muted flex items-center justify-center">
+                      {pet.postedBy?.avatar ? (
+                        <Image
+                          src={pet.postedBy.avatar}
+                          alt={attributionLabel}
+                          fill
+                          className="object-cover"
+                          unoptimized={pet.postedBy.avatar.startsWith("/uploads/")}
+                        />
+                      ) : (
+                        <span className="text-xs font-bold text-muted-foreground">
+                          {pet.postedBy ? `${pet.postedBy.firstName.charAt(0)}${pet.postedBy.lastName.charAt(0)}`.toUpperCase() : <User2Icon className="size-4 text-primary" />}
+                        </span>
+                      )}
+                    </div>
                   )}
                   <div className="min-w-0">
                     <p className="truncate font-semibold">{attributionLabel}</p>
@@ -366,6 +396,35 @@ export function ApplicationDetailContent({
                 </CardContent>
               </Card>
             ) : null}
+
+            {/* Approved Application Reminder Card (on top of Actions card) */}
+            {application.status === "APPROVED" && (
+              <Card className="border-emerald-500/30 bg-emerald-500/10 shadow-xs">
+                <CardContent className="p-4 space-y-3 text-emerald-950 dark:text-emerald-200">
+                  <div className="flex items-start gap-3">
+                    <div className="size-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                      <CheckCircleIcon className="size-4" />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border-none">
+                          Application Approved!
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-emerald-900/90 dark:text-emerald-200 leading-relaxed">
+                        Your adoption request for <strong>{pet.name}</strong> has been approved! Please coordinate with the pet owner or shelter via chat regarding the meet-up location, shelter visit, or pickup details agreed upon in your conversation.
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl cursor-pointer shadow-xs">
+                    <Link href={`/applications/${application.id}/chat`}>
+                      <MessageCircleIcon className="size-4 mr-1.5" />
+                      Open Chat
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             <Card className="border-primary/15">

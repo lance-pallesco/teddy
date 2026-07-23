@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, Sparkles, PawPrint, MapPin, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, Sparkles, PawPrint, MapPin, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -25,24 +25,15 @@ export type MiniPet = {
 export function PetDiscoveryCard({ pets }: { pets: MiniPet[] }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Multiply items for seamless infinite marquee track when pets are present
-  const track = pets.length > 0
-    ? (pets.length < 4 ? [...pets, ...pets, ...pets, ...pets] : [...pets, ...pets])
+  // Construct 2 identical track halves for 100% seamless, continuous infinite marquee
+  const basePets = pets.length > 0
+    ? (pets.length < 4 ? [...pets, ...pets, ...pets] : pets)
     : []
+  const track = basePets.length > 0 ? [...basePets, ...basePets] : []
 
   // Dynamic marquee speed based on total item count
-  const animationDuration = Math.max(track.length * 6, 24)
-
-  const handleManualScroll = (direction: "left" | "right") => {
-    if (!scrollContainerRef.current) return
-    const scrollAmount = 360
-    scrollContainerRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    })
-  }
+  const animationDuration = Math.max(track.length * 5, 20)
 
   return (
     <>
@@ -65,30 +56,6 @@ export function PetDiscoveryCard({ pets }: { pets: MiniPet[] }) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
-              {pets.length > 0 && (
-                <div className="hidden sm:flex items-center gap-1 mr-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleManualScroll("left")}
-                    className="size-8 rounded-lg border-border text-muted-foreground hover:text-foreground cursor-pointer"
-                    title="Scroll left"
-                  >
-                    <ChevronLeft className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleManualScroll("right")}
-                    className="size-8 rounded-lg border-border text-muted-foreground hover:text-foreground cursor-pointer"
-                    title="Scroll right"
-                  >
-                    <ChevronRight className="size-4" />
-                  </Button>
-                </div>
-              )}
 
               <Button
                 asChild
@@ -116,13 +83,16 @@ export function PetDiscoveryCard({ pets }: { pets: MiniPet[] }) {
           {/* Cards Carousel Area */}
           {pets.length > 0 ? (
             <div
-              className="bg-slate-50/60 py-5 overflow-x-auto scrollbar-none"
-              ref={scrollContainerRef}
+              className="bg-slate-50/60 py-5 overflow-hidden w-full relative"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
+              {/* Subtle edge fade overlays for premium continuous visual transition */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-slate-50/90 to-transparent z-10" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-slate-50/90 to-transparent z-10" />
+
               <div
-                className="flex gap-4 px-5"
+                className="flex gap-4"
                 style={{
                   width: "max-content",
                   animation: `pet-carousel-scroll ${animationDuration}s linear infinite`,

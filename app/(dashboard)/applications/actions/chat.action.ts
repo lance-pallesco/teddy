@@ -488,28 +488,6 @@ export async function reviewDecisionAction(
   }
 }
 
-// 7. Save Review Notes
-export async function saveReviewNotesAction(
-  applicationId: string,
-  notes: string
-): Promise<ChatActionResponse> {
-  try {
-    await verifyReviewerAccess(applicationId)
-
-    await prisma.adoptionApplication.update({
-      where: { id: applicationId },
-      data: {
-        reviewNotes: notes,
-      },
-    })
-
-    return { success: true, data: null }
-  } catch (error: any) {
-    console.error("Error saving review notes:", error)
-    return { success: false, error: error.message || "Failed to save notes." }
-  }
-}
-
 // 8. Suggest a custom question from AI based on manual chat history
 export async function suggestQuestionAction(applicationId: string): Promise<ChatActionResponse> {
   try {
@@ -540,7 +518,8 @@ ${chatHistory}
     })
 
     const content = response.choices?.[0]?.message?.content?.trim() || "What are your main expectations during the first adjustment weeks with the pet?"
-    return { success: true, data: content }
+    const cleanContent = content.replace(/^["'\s]+|["'\s]+$/g, "")
+    return { success: true, data: cleanContent }
   } catch (error: any) {
     console.error("Error suggesting question:", error)
     return { success: false, error: error.message || "Failed to suggest question." }
