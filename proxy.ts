@@ -1,48 +1,50 @@
-import { NextResponse, type NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { jwtVerify } from "jose"
 
-import { AUTH_COOKIE_NAME, verifyAuthToken } from "@/lib/auth/jwt"
-import { canAccessDashboardPath } from "@/lib/auth/dashboard-access"
-import { isDashboardRole } from "@/lib/navigation/dashboard-nav"
+const AUTH_COOKIE_NAME = "teddy_session"
 
-const LOGIN_PATH = "/login"
-const UNAUTHORIZED_PATH = "/unauthorized"
+const guestRoutes = ["/login", "/signup"]
+const protectedRoutes = ["/dashboard", "/applications", "/pets"]
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value
 
-  if (!token) {
-    return NextResponse.redirect(new URL(LOGIN_PATH, request.url))
+  let isVerified = false
+  if (token) {
+    try {
+      const secretKey = process.env.JWT_SECRET ?? process.env.AUTH_SECRET ?? ""
+      if (secretKey) {
+        const secret = new TextEncoder().encode(secretKey)
+        await jwtVerify(token, secret)
+        isVerified = true
+      }
+    } catch {
+      isVerified = false
+    }
   }
 
-  try {
-    const payload = await verifyAuthToken(token)
-
-    if (!isDashboardRole(payload.role)) {
-      return NextResponse.redirect(new URL(LOGIN_PATH, request.url))
-    }
-
-    if (!canAccessDashboardPath(payload.role, pathname)) {
-      return NextResponse.redirect(new URL(UNAUTHORIZED_PATH, request.url))
-    }
-
-    return NextResponse.next()
-  } catch {
-    return NextResponse.redirect(new URL(LOGIN_PATH, request.url))
+  // 1. Logged-in user visiting guest routes (/login, /signup) -> redirect to /dashboard
+  if (guestRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`)) && isVerified) {
+    return NextResponse.redirect(new URL("/dashboard", request.url))
   }
+
+  // 2. Unauthenticated/expired user visiting protected routes -> redirect to /login
+  if (protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`)) && !isVerified) {
+    const loginUrl = new URL("/login", request.url)
+    const response = NextResponse.redirect(loginUrl)
+    if (token) {
+      response.cookies.delete(AUTH_COOKIE_NAME)
+    }
+    return response
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    "/dashboard",
-    "/profile",
-    "/unauthorized",
-    "/shelters/:path*",
-    "/shelter/:path*",
-    "/users/:path*",
-    "/pets/:path*",
-    "/applications/:path*",
-    "/analytics",
-    "/medical/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }

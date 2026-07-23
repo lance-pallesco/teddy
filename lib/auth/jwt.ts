@@ -2,7 +2,7 @@ import type { Role } from "@prisma/client"
 import { jwtVerify, SignJWT } from "jose"
 
 export const AUTH_COOKIE_NAME = "teddy_session"
-const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7
+const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 // 24 hours in seconds
 
 export type AuthTokenPayload = {
   userId: string
