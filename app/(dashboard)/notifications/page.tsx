@@ -15,6 +15,10 @@ import {
   Inbox,
   ArrowLeft,
   Check,
+  MessageSquareText,
+  FileSearch,
+  XCircle,
+  Sparkles,
 } from "lucide-react"
 import type { Notification, NotificationType } from "@prisma/client"
 
@@ -121,11 +125,25 @@ export default function NotificationsPage() {
     }
   }
 
+  const getIcon = (notification: Notification) => {
+    const titleLower = notification.title.toLowerCase()
 
-  const getIcon = (type: NotificationType) => {
-    switch (type) {
+    if (titleLower.includes("chat") || titleLower.includes("message") || titleLower.includes("discussion")) {
+      return <MessageSquareText className="size-5 text-emerald-500" />
+    }
+    if (titleLower.includes("under review") || titleLower.includes("review")) {
+      return <FileSearch className="size-5 text-amber-500" />
+    }
+    if (titleLower.includes("meet & greet") || titleLower.includes("scheduled") || titleLower.includes("approved")) {
+      return <Calendar className="size-5 text-indigo-500" />
+    }
+    if (titleLower.includes("rejected") || titleLower.includes("declined")) {
+      return <XCircle className="size-5 text-rose-500" />
+    }
+
+    switch (notification.type) {
       case "AI":
-        return <Image src="/logo.png" alt="TeddyAI" width={20} height={20} className="object-contain" />
+        return <Sparkles className="size-5 text-[#AE8F65]" />
       case "APPLICATION":
         return <FileText className="size-5 text-blue-500" />
       case "MEET_AND_GREET":
@@ -135,8 +153,23 @@ export default function NotificationsPage() {
     }
   }
 
-  const getIconBg = (type: NotificationType) => {
-    switch (type) {
+  const getIconBg = (notification: Notification) => {
+    const titleLower = notification.title.toLowerCase()
+
+    if (titleLower.includes("chat") || titleLower.includes("message") || titleLower.includes("discussion")) {
+      return "bg-emerald-500/10 border-emerald-500/20"
+    }
+    if (titleLower.includes("under review") || titleLower.includes("review")) {
+      return "bg-amber-500/10 border-amber-500/20"
+    }
+    if (titleLower.includes("meet & greet") || titleLower.includes("scheduled") || titleLower.includes("approved")) {
+      return "bg-indigo-500/10 border-indigo-500/20"
+    }
+    if (titleLower.includes("rejected") || titleLower.includes("declined")) {
+      return "bg-rose-500/10 border-rose-500/20"
+    }
+
+    switch (notification.type) {
       case "AI":
         return "bg-[#AE8F65]/10 border-[#AE8F65]/25"
       case "APPLICATION":
@@ -193,10 +226,10 @@ export default function NotificationsPage() {
             <div
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-xl border shadow-sm",
-                getIconBg(notification.type)
+                getIconBg(notification)
               )}
             >
-              {getIcon(notification.type)}
+              {getIcon(notification)}
             </div>
 
             {/* Content */}
