@@ -1,65 +1,94 @@
-import Image from "next/image";
+import { getCurrentUser } from "@/lib/auth/session"
+import { prisma } from "@/lib/prisma"
+import { LandingNavbar } from "@/components/landing/landing-navbar"
+import { LandingHero } from "@/components/landing/landing-hero"
+import { LandingPetCarousel } from "@/components/landing/landing-pet-carousel"
+import { LandingFeatures } from "@/components/landing/landing-features"
+import { LandingStats } from "@/components/landing/landing-stats"
+import { LandingFooter } from "@/components/landing/landing-footer"
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser()
+
+  // Fetch real available pets for landing page carousel showcase
+  let availablePets: any[] = []
+  try {
+    const petsData = await prisma.pet.findMany({
+      where: {
+        status: "AVAILABLE",
+      },
+      take: 8,
+      orderBy: { createdAt: "desc" },
+      include: {
+        petImages: {
+          orderBy: { isPrimary: "desc" },
+        },
+        shelter: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+            address: true,
+            city: true,
+            province: true,
+          },
+        },
+        postedBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            role: true,
+          },
+        },
+      },
+    })
+
+    availablePets = petsData.map((p) => ({
+      id: p.id,
+      name: p.name,
+      species: p.species,
+      breed: p.breed,
+      gender: p.gender,
+      size: p.size,
+      birthDate: p.birthDate ? p.birthDate.toISOString() : null,
+      status: p.status,
+      isVaccinated: p.isVaccinated,
+      isNeutered: p.isNeutered,
+      isHouseTrained: p.isHouseTrained,
+      goodWithKids: p.goodWithKids,
+      tags: p.tags,
+      petImages: p.petImages.map((img) => ({
+        url: img.url,
+        isPrimary: img.isPrimary,
+      })),
+      shelter: p.shelter,
+      postedBy: p.postedBy,
+    }))
+  } catch (err) {
+    // Fallback if DB fetch fails
+    availablePets = []
+  }
+
+  const currentUserData = user
+    ? {
+        id: user.id,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      }
+    : null
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen flex flex-col bg-[#FAF7F2] font-sans dark:bg-[#181715] selection:bg-[#AE8F65]/20 selection:text-[#8C6D43]">
+      <LandingNavbar currentUser={currentUserData} />
+      <main className="flex-1">
+        <LandingHero />
+        <LandingPetCarousel pets={availablePets} />
+        <LandingFeatures />
+        <LandingStats />
       </main>
+      <LandingFooter />
     </div>
-  );
+  )
 }
