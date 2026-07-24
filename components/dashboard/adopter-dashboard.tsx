@@ -38,21 +38,21 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
     take: 1,
   })
 
-  // Count total active applications
+  // Count total active in-progress applications
   const totalActiveCount = await prisma.adoptionApplication.count({
     where: {
       applicantId: userId,
       deletedAt: null,
-      status: { notIn: ["DRAFT", "REJECTED", "WITHDRAWN"] },
+      status: { notIn: ["DRAFT", "REJECTED", "WITHDRAWN", "APPROVED"] },
     },
   })
 
-  // Fetch only the latest active application for pipeline tracker
+  // Fetch only the latest active in-progress application for pipeline tracker
   const activeApplications = await prisma.adoptionApplication.findMany({
     where: {
       applicantId: userId,
       deletedAt: null,
-      status: { notIn: ["DRAFT", "REJECTED", "WITHDRAWN"] },
+      status: { notIn: ["DRAFT", "REJECTED", "WITHDRAWN", "APPROVED"] },
     },
     include: {
       pet: {
@@ -233,9 +233,7 @@ async function AdopterStatsGrid({ userId }: { userId: string }) {
                           className="absolute top-[26px] sm:top-[30px] left-[12.5%] h-0.5 transition-all duration-500 z-0"
                           style={{
                             width: `${(activeStep / 3) * 75}%`,
-                            background: activeStep === 3
-                              ? "#10b981"
-                              : "linear-gradient(to right, #10b981, #ae8f65)"
+                            background: "linear-gradient(to right, #10b981, #ae8f65)"
                           }}
                         />
                         {steps.map((step, idx) => {

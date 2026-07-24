@@ -18,11 +18,27 @@ export async function GET(
       where: { id: applicationId, deletedAt: null },
       include: {
         pet: {
-          select: {
-            id: true,
-            name: true,
-            shelterId: true,
-            postedById: true,
+          include: {
+            petImages: {
+              orderBy: { isPrimary: "desc" },
+            },
+            shelter: {
+              select: {
+                id: true,
+                name: true,
+                city: true,
+                province: true,
+                logo: true,
+              },
+            },
+            postedBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
           },
         },
       },
@@ -50,11 +66,29 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 403 })
     }
 
-    // Fetch messages
-    const messages = await prisma.chatMessage.findMany({
+    // Fetch messages with sender avatar
+    const rawMessages = await prisma.chatMessage.findMany({
       where: { applicationId },
+      include: {
+        sender: {
+          select: {
+            avatar: true,
+          },
+        },
+      },
       orderBy: { createdAt: "asc" },
     })
+
+    const messages = rawMessages.map((msg) => ({
+      id: msg.id,
+      senderId: msg.senderId,
+      senderName: msg.senderName,
+      senderRole: msg.senderRole,
+      content: msg.content,
+      isPinned: msg.isPinned,
+      createdAt: msg.createdAt,
+      senderAvatar: msg.sender?.avatar ?? null,
+    }))
 
     return NextResponse.json({
       success: true,

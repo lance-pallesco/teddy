@@ -19,13 +19,16 @@ import {
   BriefcaseIcon,
   XCircleIcon,
   AlertCircle,
+  CheckCircleIcon,
 } from "lucide-react"
 import type { AdoptionStatus, ApplicationDocumentType, GovernmentIDType } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge"
 import { ApplicationTimeline } from "@/components/applications/application-timeline"
+import { PetAppliedForCard } from "@/components/applications/pet-applied-for-card"
 import { ApplicationFormSections } from "@/components/applications/application-form-sections"
 import { PET_SPECIES_LABELS, PET_GENDER_LABELS } from "@/lib/constants/pet"
 import type { PetSpecies, PetGender } from "@prisma/client"
@@ -92,11 +95,13 @@ type ApplicationDetailData = {
       name: string
       city: string
       province: string
+      logo?: string | null
     } | null
     postedBy: {
       id: string
       firstName: string
       lastName: string
+      avatar?: string | null
     } | null
   }
   documents: {
@@ -266,56 +271,7 @@ export function ApplicationDetailContent({
           {/* Right column — Sidebar */}
           <div className="space-y-5 lg:sticky lg:top-6">
             {/* Pet Info Card */}
-            <Card className="overflow-hidden border-primary/15 bg-white">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Pet Applied For
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted">
-                  {primaryImage ? (
-                    <Image
-                      src={primaryImage}
-                      alt={pet.name}
-                      fill
-                      className="object-cover"
-                      sizes="380px"
-                      unoptimized={primaryImage.startsWith("/uploads/")}
-                      priority
-                    />
-                  ) : (
-                    <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
-                      <PawPrintIcon className="size-10 opacity-60" />
-                      <span className="text-xs">No photo</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-xl font-bold tracking-tight">{pet.name}</h3>
-                  <p className="text-sm font-medium text-foreground/80">
-                    {speciesLabel} • {breedLabel}
-                  </p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-muted-foreground">
-                    <span><strong>Gender:</strong> {genderLabel}</span>
-                    <span><strong>Size:</strong> {pet.size.toLowerCase().replace("_", " ")}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 border-t pt-3 text-sm text-foreground/90">
-                  {pet.shelter ? (
-                    <Building2Icon className="size-4 shrink-0 text-primary" />
-                  ) : (
-                    <User2Icon className="size-4 shrink-0 text-primary" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{attributionLabel}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {pet.shelter ? `${pet.shelter.city}, ${pet.shelter.province}` : "Individual Foster"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PetAppliedForCard pet={pet} />
 
             {/* Applicant Info Card (for reviewers) */}
             {isReviewer ? (
@@ -366,6 +322,35 @@ export function ApplicationDetailContent({
                 </CardContent>
               </Card>
             ) : null}
+
+            {/* Approved Application Reminder Card (on top of Actions card) */}
+            {application.status === "APPROVED" && (
+              <Card className="border-emerald-500/30 bg-emerald-500/10 shadow-xs">
+                <CardContent className="p-4 space-y-3 text-emerald-950 dark:text-emerald-200">
+                  <div className="flex items-start gap-3">
+                    <div className="size-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                      <CheckCircleIcon className="size-4" />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border-none">
+                          Application Approved!
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-emerald-900/90 dark:text-emerald-200 leading-relaxed">
+                        Your adoption request for <strong>{pet.name}</strong> has been approved! Please coordinate with the pet owner or shelter via chat regarding the meet-up location, shelter visit, or pickup details agreed upon in your conversation.
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl cursor-pointer shadow-xs">
+                    <Link href={`/applications/${application.id}/chat`}>
+                      <MessageCircleIcon className="size-4 mr-1.5" />
+                      Open Chat
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             <Card className="border-primary/15">

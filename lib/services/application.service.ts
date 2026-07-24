@@ -478,6 +478,7 @@ export async function getApplicationDetail(id: string) {
               id: true,
               firstName: true,
               lastName: true,
+              avatar: true,
             },
           },
         },

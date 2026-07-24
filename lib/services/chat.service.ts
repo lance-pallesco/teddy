@@ -3,10 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { aiClient } from "@/lib/ai/client"
 import { buildApplicationContext } from "@/lib/ai/context-builder"
 
-// System Prompt for question generation
 const INTERVIEW_QUESTIONS_SYSTEM_PROMPT = `
 You are TeddyAI, the pet adoption co-pilot for the pet adoption management system.
-Your task is to generate 8-12 tailored interview questions for a pet adoption application.
+Your task is to generate exactly 7 tailored interview questions for a pet adoption application.
 These questions will be asked to the applicant one at a time.
 They should be warm, conversational, and non-judgmental, but structured to probe the flags raised during the initial screening.
 
@@ -16,11 +15,11 @@ You will be provided with:
 3. The screening results, specifically the Red Flags (critical risks) and Semi Flags (concerns) raised by the initial screening.
 
 Guidelines:
-- Generate 8-12 questions.
+- Generate exactly 7 questions in total.
 - Order them by priority/importance.
 - For each flag (Red or Yellow/Semi-Flag), write exactly one custom question addressing it.
-- If there are fewer flags than 7, add other relevant follow-up questions based on their answers (e.g. household situation, experience details, scheduling compatibility) to make the total count between 8 and 11.
-- You MUST append this exact standard question as the very last question (making it the 9th to 12th question):
+- If there are fewer flags than 6, add other relevant follow-up questions based on their answers (e.g. household situation, experience details, scheduling compatibility) to make the total count exactly 6 before the final question.
+- You MUST append this exact standard question as the 7th and final question:
   "Is there anything about your application or your home that you feel we should know more about — something that might not have come through clearly in the form?"
 - Return the response in a JSON object containing a "questions" array of objects.
 
@@ -51,6 +50,7 @@ Guidelines:
 - If the adopter's response does not resolve the flag, or confirms the concern, keep it as "PENDING" or mark as "NOTED" with the explanation.
 - Return a short, warm transition/acknowledgment text that TeddyAI can say to the adopter before asking the next question.
 - The transition text should show understanding of their response (e.g. "That sounds like a wonderful setup...").
+- DO NOT include any question numbers, question counts (e.g. "Question 3/7" or "Question 4 of 7"), or mention remaining questions in the transition text. Keep the transition text strictly warm, empathetic, and natural.
 - Return the response in a JSON object matching this schema:
 {
   "transition": "Warm acknowledgment and brief transition text",
@@ -160,7 +160,7 @@ export class ChatService {
 
       const parsed = JSON.parse(cleanJsonString(content))
       if (Array.isArray(parsed.questions)) {
-        return parsed.questions
+        return parsed.questions.slice(0, 7)
       }
       return this.generateMockQuestions(context.pet.name, redFlags, semiFlags)
     } catch (error) {
@@ -261,7 +261,7 @@ export class ChatService {
       return JSON.parse(cleanJsonString(content))
     } catch (error) {
       console.warn("Distokens AI call failed for final summary. Falling back to mock.", error)
-      
+
       // Build a realistic fallback summary
       const resolutions = ([...redFlags, ...semiFlags] as any[]).map(flag => ({
         flag: flag?.title || "Flag",
@@ -309,7 +309,7 @@ export class ChatService {
       })
     })
 
-    // Add standard questions to fill to at least 8 questions
+    // Add standard questions to fill to 6 questions before final completion question
     const standardAdditions = [
       {
         question: `What first caught your eye about ${petName}, and why do you feel they would be the perfect fit for your home?`,
@@ -338,12 +338,16 @@ export class ChatService {
     ]
 
     for (const item of standardAdditions) {
-      if (questions.length < 8 && !questions.some(q => q.question === item.question)) {
+      if (questions.length < 6 && !questions.some(q => q.question === item.question)) {
         questions.push(item)
       }
     }
 
-    // Always append final question
+    if (questions.length > 6) {
+      questions.length = 6
+    }
+
+    // Always append final question (7th question)
     questions.push({
       question: `Is there anything about your application or your home that you feel we should know more about — something that might not have come through clearly in the form?`,
       reason: "Standard open-ended completion question.",

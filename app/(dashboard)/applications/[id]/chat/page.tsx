@@ -29,14 +29,37 @@ export default async function ChatPage({ params }: ChatPageProps) {
         },
       },
       pet: {
-        select: {
-          id: true,
-          name: true,
-          shelterId: true,
-          postedById: true,
+        include: {
+          petImages: {
+            orderBy: { isPrimary: "desc" },
+          },
+          shelter: {
+            select: {
+              id: true,
+              name: true,
+              city: true,
+              province: true,
+              logo: true,
+            },
+          },
+          postedBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            },
+          },
         },
       },
       chatMessages: {
+        include: {
+          sender: {
+            select: {
+              avatar: true,
+            },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -81,6 +104,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     content: msg.content,
     isPinned: msg.isPinned,
     createdAt: msg.createdAt,
+    senderAvatar: msg.sender?.avatar ?? null,
   }))
 
   const currentUserData = {
@@ -88,6 +112,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     role: user.role,
     firstName: user.firstName,
     lastName: user.lastName,
+    avatar: user.avatar,
   }
 
   return (

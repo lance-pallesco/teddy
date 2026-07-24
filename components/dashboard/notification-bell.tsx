@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Bell, Bot, FileText, Calendar, AlertCircle } from "lucide-react"
 import type { Notification, NotificationType } from "@prisma/client"
@@ -105,7 +106,7 @@ export function NotificationBell() {
   const getIcon = (type: NotificationType) => {
     switch (type) {
       case "AI":
-        return <Bot className="size-4 text-purple-500" />
+        return <Image src="/logo.png" alt="TeddyAI" width={16} height={16} className="object-contain" />
       case "APPLICATION":
         return <FileText className="size-4 text-blue-500" />
       case "MEET_AND_GREET":
@@ -118,7 +119,7 @@ export function NotificationBell() {
   const getIconBg = (type: NotificationType) => {
     switch (type) {
       case "AI":
-        return "bg-purple-500/10 border-purple-500/20"
+        return "bg-[#AE8F65]/10 border-[#AE8F65]/25"
       case "APPLICATION":
         return "bg-blue-500/10 border-blue-500/20"
       case "MEET_AND_GREET":

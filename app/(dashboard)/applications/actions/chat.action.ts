@@ -91,7 +91,7 @@ export async function startChatModeAction(
           applicationId,
           senderName: "System",
           senderRole: "SYSTEM",
-          content: `👋 Your application for ${app.pet.name} has progressed to the interview stage. TeddyAI will guide this conversation on behalf of the reviewer.\n\nYou can answer in any language you are comfortable with — English, Filipino, Cebuano, or any other. TeddyAI will understand.\n\nThe reviewer is observing this conversation and will make the final decision.\n\nThere are ${generatedQuestions.length} questions. Take your time with each answer.`,
+          content: `👋 Your application for ${app.pet.name} has progressed to the interview stage. TeddyAI will guide this conversation on behalf of the reviewer.\n\nYou can answer in any language you are comfortable with — English, Filipino, Cebuano, or any other. TeddyAI will understand.\n\nThe reviewer is observing this conversation and will make the final decision.\n\nTake your time with each answer.`,
         },
       })
 
@@ -232,7 +232,7 @@ export async function sendChatMessageAction(
           })
 
           // Post TeddyAI transition + next question
-          const botResponseContent = `${aiResult.transition}\n\nNext question (question ${nextIndex + 1} of ${chatQuestions.length}):\n\n${nextQuestion.question}`
+          const botResponseContent = `${aiResult.transition}\n\n${nextQuestion.question}`
           await prisma.chatMessage.create({
             data: {
               applicationId,
@@ -329,19 +329,8 @@ export async function interjectQuestionAction(
       },
     })
 
-    // Post it immediately in the chat from TeddyAI
-    const botResponseContent = `The reviewer has added a custom question to the queue:\n\n${content}`
-    const message = await prisma.chatMessage.create({
-      data: {
-        applicationId,
-        senderName: "TeddyAI",
-        senderRole: "AI",
-        content: botResponseContent,
-      },
-    })
-
     revalidatePath(`/applications/${applicationId}/chat`)
-    return { success: true, data: message }
+    return { success: true, data: null }
   } catch (error: any) {
     console.error("Error interjecting question:", error)
     return { success: false, error: error.message || "Failed to interject question." }
@@ -488,28 +477,6 @@ export async function reviewDecisionAction(
   }
 }
 
-// 7. Save Review Notes
-export async function saveReviewNotesAction(
-  applicationId: string,
-  notes: string
-): Promise<ChatActionResponse> {
-  try {
-    await verifyReviewerAccess(applicationId)
-
-    await prisma.adoptionApplication.update({
-      where: { id: applicationId },
-      data: {
-        reviewNotes: notes,
-      },
-    })
-
-    return { success: true, data: null }
-  } catch (error: any) {
-    console.error("Error saving review notes:", error)
-    return { success: false, error: error.message || "Failed to save notes." }
-  }
-}
-
 // 8. Suggest a custom question from AI based on manual chat history
 export async function suggestQuestionAction(applicationId: string): Promise<ChatActionResponse> {
   try {
@@ -540,7 +507,8 @@ ${chatHistory}
     })
 
     const content = response.choices?.[0]?.message?.content?.trim() || "What are your main expectations during the first adjustment weeks with the pet?"
-    return { success: true, data: content }
+    const cleanContent = content.replace(/^["'\s]+|["'\s]+$/g, "")
+    return { success: true, data: cleanContent }
   } catch (error: any) {
     console.error("Error suggesting question:", error)
     return { success: false, error: error.message || "Failed to suggest question." }
