@@ -99,7 +99,9 @@ export class AIService {
         data: { status: "UNDER_REVIEW" },
       })
 
-      // Trigger Notification: Application Under Review
+      // Trigger Notification: Individual Foster
+
+
       await notificationService.createNotification(
         application.applicantId,
         "Application Under Review",

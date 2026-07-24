@@ -58,7 +58,7 @@ export async function startChatModeAction(
     if (mode === "AI_ASSISTED") {
       // Generate AI questions based on application flags
       generatedQuestions = await chatService.generateInterviewQuestions(applicationId)
-      
+
       // Initialize flags with status "PENDING"
       generatedQuestions = generatedQuestions.map((q) => ({
         ...q,
@@ -216,70 +216,90 @@ export async function sendChatMessageAction(
           })
         }
 
-        const nextIndex = currentIndex + 1
+        if (aiResult.shouldAdvance) {
+          const nextIndex = currentIndex + 1
 
-        // Check if there are more questions
-        if (nextIndex < chatQuestions.length) {
-          const nextQuestion = chatQuestions[nextIndex]
+          // Check if there are more questions
+          if (nextIndex < chatQuestions.length) {
+            const nextQuestion = chatQuestions[nextIndex]
 
-          // Save state and index
+            // Save state and index
+            await prisma.adoptionApplication.update({
+              where: { id: applicationId },
+              data: {
+                chatQuestionIndex: nextIndex,
+                chatQuestions: updatedQuestions,
+              },
+            })
+
+            // Post TeddyAI transition + next question
+            const botResponseContent = `${aiResult.responseContent}\n\n${nextQuestion.question}`
+            await prisma.chatMessage.create({
+              data: {
+                applicationId,
+                senderName: "TeddyAI",
+                senderRole: "AI",
+                content: botResponseContent,
+              },
+            })
+          } else {
+            // Interview complete! Update chatStatus to AWAITING (locks out typing)
+            await prisma.adoptionApplication.update({
+              where: { id: applicationId },
+              data: {
+                chatStatus: "AWAITING",
+                chatQuestions: updatedQuestions,
+              },
+            })
+
+            // Post completion bot message
+            await prisma.chatMessage.create({
+              data: {
+                applicationId,
+                senderName: "System",
+                senderRole: "SYSTEM",
+                content: `Thank you so much for your thoughtful answers, ${user.firstName}. We've covered everything we needed to discuss.\n\nThe reviewer will now review our conversation and will be in touch with their decision shortly. You'll receive a notification as soon as they decide.\n\nWishing you and ${app.pet.name} all the best! 🐾`,
+              },
+            })
+
+            // Generate final Post-Interview AI Summary in background (save to JSON column)
+            const fullHistory = await prisma.chatMessage.findMany({
+              where: { applicationId },
+              orderBy: { createdAt: "asc" },
+            })
+            const historyFormatted = fullHistory.map((h) => ({
+              senderRole: h.senderRole,
+              content: h.content,
+            }))
+
+            const summary = await chatService.generatePostInterviewSummary(
+              applicationId,
+              historyFormatted
+            )
+
+            await prisma.adoptionApplication.update({
+              where: { id: applicationId },
+              data: {
+                aiPostInterviewSummary: summary,
+              },
+            })
+          }
+        } else {
+          // Clarification request, gibberish, or evasive answer -> DO NOT ADVANCE INDEX!
           await prisma.adoptionApplication.update({
             where: { id: applicationId },
             data: {
-              chatQuestionIndex: nextIndex,
               chatQuestions: updatedQuestions,
             },
           })
 
-          // Post TeddyAI transition + next question
-          const botResponseContent = `${aiResult.transition}\n\n${nextQuestion.question}`
+          // Post TeddyAI clarification/nudge response for the SAME current question
           await prisma.chatMessage.create({
             data: {
               applicationId,
               senderName: "TeddyAI",
               senderRole: "AI",
-              content: botResponseContent,
-            },
-          })
-        } else {
-          // Interview complete! Update chatStatus to AWAITING (locks out typing)
-          await prisma.adoptionApplication.update({
-            where: { id: applicationId },
-            data: {
-              chatStatus: "AWAITING",
-              chatQuestions: updatedQuestions,
-            },
-          })
-
-          // Post completion bot message
-          await prisma.chatMessage.create({
-            data: {
-              applicationId,
-              senderName: "System",
-              senderRole: "SYSTEM",
-              content: `Thank you so much for your thoughtful answers, ${user.firstName}. We've covered everything we needed to discuss.\n\nThe reviewer will now review our conversation and will be in touch with their decision shortly. You'll receive a notification as soon as they decide.\n\nWishing you and ${app.pet.name} all the best! 🐾`,
-            },
-          })
-
-          // Generate final Post-Interview AI Summary in background (save to JSON column)
-          const fullHistory = await prisma.chatMessage.findMany({
-            where: { applicationId },
-            orderBy: { createdAt: "asc" },
-          })
-          const historyFormatted = fullHistory.map((h) => ({
-            senderRole: h.senderRole,
-            content: h.content,
-          }))
-
-          const summary = await chatService.generatePostInterviewSummary(
-            applicationId,
-            historyFormatted
-          )
-
-          await prisma.adoptionApplication.update({
-            where: { id: applicationId },
-            data: {
-              aiPostInterviewSummary: summary,
+              content: aiResult.responseContent,
             },
           })
         }

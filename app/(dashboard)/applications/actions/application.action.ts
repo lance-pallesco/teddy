@@ -77,15 +77,12 @@ export async function getOrCreateDraftAction(petId: string) {
   }
 }
 
-/**
- * Saves draft content for a specific wizard step.
- */
-export async function saveApplicationStepAction(rawInput: unknown) {
-  // 1. Enforce Role
-  const user = await requireRole(["ADOPTER"])
 
-  // 2. Validate input
+export async function saveApplicationStepAction(rawInput: unknown) {
+
+  const user = await requireRole(["ADOPTER"])
   const parsed = SaveDraftStepSchema.safeParse(rawInput)
+
   if (!parsed.success) {
     return { success: false, error: "Invalid form input." }
   }
@@ -123,14 +120,9 @@ export async function saveApplicationStepAction(rawInput: unknown) {
   }
 }
 
-/**
- * Uploads application document (ID or Proof of Address) via Server Action FormData.
- */
 export async function uploadApplicationDocumentAction(formData: FormData) {
-  // 1. Enforce Role
-  const user = await requireRole(["ADOPTER"])
 
-  // 2. Extract and validate parameters
+  const user = await requireRole(["ADOPTER"])
   const file = formData.get("file")
   const applicationId = formData.get("applicationId") as string
   const type = formData.get("type") as ApplicationDocumentType
@@ -144,7 +136,6 @@ export async function uploadApplicationDocumentAction(formData: FormData) {
     return { success: false, error: "No file provided." }
   }
 
-  // 3. Validate application status & ownership
   const app = await prisma.adoptionApplication.findUnique({
     where: { id: applicationId },
     select: { applicantId: true, status: true, petId: true },
@@ -154,7 +145,6 @@ export async function uploadApplicationDocumentAction(formData: FormData) {
     return { success: false, error: "Unauthorized or application is not a draft." }
   }
 
-  // 4. Validate file type & size (max 5MB, accepted: JPG, PNG, PDF)
   const allowedTypes = ["image/jpeg", "image/png", "application/pdf"]
   if (!allowedTypes.includes(file.type)) {
     return { success: false, error: "Invalid file type. Only JPG, PNG, and PDF are allowed." }
@@ -165,7 +155,6 @@ export async function uploadApplicationDocumentAction(formData: FormData) {
     return { success: false, error: "File size exceeds the 5MB limit." }
   }
 
-  // 5. Save file to disk
   try {
     const ext = file.type === "application/pdf" ? ".pdf" : file.type === "image/png" ? ".png" : ".jpg"
     const filename = `${randomUUID()}${ext}`
@@ -177,7 +166,6 @@ export async function uploadApplicationDocumentAction(formData: FormData) {
 
     const url = `/uploads/documents/${filename}`
 
-    // 6. DB write
     const document = await prisma.applicationDocument.create({
       data: {
         applicationId,
@@ -196,14 +184,9 @@ export async function uploadApplicationDocumentAction(formData: FormData) {
   }
 }
 
-/**
- * Uploads a base64 digital signature to disk and stores it as a SIGNATURE document record.
- */
 export async function uploadSignatureAction(formData: FormData) {
-  // 1. Enforce Role
   const user = await requireRole(["ADOPTER"])
 
-  // 2. Validate parameters
   const applicationId = formData.get("applicationId") as string
   const signatureBase64 = formData.get("signatureBase64") as string
 
@@ -211,7 +194,6 @@ export async function uploadSignatureAction(formData: FormData) {
     return { success: false, error: "Missing required parameters." }
   }
 
-  // 3. Ownership and status verification
   const app = await prisma.adoptionApplication.findUnique({
     where: { id: applicationId },
     select: { applicantId: true, status: true, petId: true },
@@ -222,7 +204,6 @@ export async function uploadSignatureAction(formData: FormData) {
   }
 
   try {
-    // 4. Save file to disk
     const base64Data = signatureBase64.replace(/^data:image\/\w+;base64,/, "")
     const buffer = Buffer.from(base64Data, "base64")
     const filename = `${randomUUID()}.png`

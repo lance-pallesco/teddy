@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Bell, Bot, FileText, Calendar, AlertCircle } from "lucide-react"
+import { Bell, Bot, FileText, Calendar, AlertCircle, MessageSquareText, FileSearch, XCircle, Sparkles } from "lucide-react"
 import type { Notification, NotificationType } from "@prisma/client"
 import { toast } from "sonner"
 
@@ -103,10 +103,25 @@ export function NotificationBell() {
     await markAllNotificationsAsReadAction()
   }
 
-  const getIcon = (type: NotificationType) => {
-    switch (type) {
+  const getIcon = (notification: Notification) => {
+    const titleLower = notification.title.toLowerCase()
+
+    if (titleLower.includes("chat") || titleLower.includes("message") || titleLower.includes("discussion")) {
+      return <MessageSquareText className="size-4 text-emerald-500" />
+    }
+    if (titleLower.includes("under review") || titleLower.includes("review")) {
+      return <FileSearch className="size-4 text-amber-500" />
+    }
+    if (titleLower.includes("meet & greet") || titleLower.includes("scheduled") || titleLower.includes("approved")) {
+      return <Calendar className="size-4 text-indigo-500" />
+    }
+    if (titleLower.includes("rejected") || titleLower.includes("declined")) {
+      return <XCircle className="size-4 text-rose-500" />
+    }
+
+    switch (notification.type) {
       case "AI":
-        return <Image src="/logo.png" alt="TeddyAI" width={16} height={16} className="object-contain" />
+        return <Sparkles className="size-4 text-[#AE8F65]" />
       case "APPLICATION":
         return <FileText className="size-4 text-blue-500" />
       case "MEET_AND_GREET":
@@ -116,8 +131,23 @@ export function NotificationBell() {
     }
   }
 
-  const getIconBg = (type: NotificationType) => {
-    switch (type) {
+  const getIconBg = (notification: Notification) => {
+    const titleLower = notification.title.toLowerCase()
+
+    if (titleLower.includes("chat") || titleLower.includes("message") || titleLower.includes("discussion")) {
+      return "bg-emerald-500/10 border-emerald-500/20"
+    }
+    if (titleLower.includes("under review") || titleLower.includes("review")) {
+      return "bg-amber-500/10 border-amber-500/20"
+    }
+    if (titleLower.includes("meet & greet") || titleLower.includes("scheduled") || titleLower.includes("approved")) {
+      return "bg-indigo-500/10 border-indigo-500/20"
+    }
+    if (titleLower.includes("rejected") || titleLower.includes("declined")) {
+      return "bg-rose-500/10 border-rose-500/20"
+    }
+
+    switch (notification.type) {
       case "AI":
         return "bg-[#AE8F65]/10 border-[#AE8F65]/25"
       case "APPLICATION":
@@ -193,10 +223,10 @@ export function NotificationBell() {
                 <div
                   className={cn(
                     "flex size-8 shrink-0 items-center justify-center rounded-lg border",
-                    getIconBg(notification.type)
+                    getIconBg(notification)
                   )}
                 >
-                  {getIcon(notification.type)}
+                  {getIcon(notification)}
                 </div>
 
                 {/* Details */}

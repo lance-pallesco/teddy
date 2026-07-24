@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -292,8 +292,72 @@ export function ApplicationChatRoom({
   const isReviewerBlockedDuringAi = isAiAssisted && !isInterviewCompleted && !isAdopter
   const isTypingUnlocked = isChatActive && isApplicationActive && !isReviewerBlockedDuringAi
 
-  // Extract flag updates for live resolution
-  const screeningFlags = chatQuestions.filter(q => q.flag !== null)
+  // Extract flag updates for live resolution (supports both AI-assisted and Manual chat modes)
+  const screeningFlags = useMemo(() => {
+    // 1. Active interview questions with flags (AI-assisted mode)
+    if (Array.isArray(chatQuestions) && chatQuestions.length > 0) {
+      const activeFlags = chatQuestions.filter((q) => q.flag !== null)
+      if (activeFlags.length > 0) return activeFlags
+    }
+
+    const flagsFromAi: any[] = []
+
+    // 2. Critical Red Flags from AI Insight
+    const redFlags = Array.isArray(app.aiInsight?.redFlags) ? app.aiInsight.redFlags : []
+    redFlags.forEach((item: any) => {
+      flagsFromAi.push({
+        flag: item.title || item.flag || item.category || "Red Flag Concern",
+        resolutionNotes: item.reason || item.explanation || item.recommendation || "Critical concern to verify during interview",
+        status: item.status || "PENDING",
+        severity: "HIGH",
+      })
+    })
+
+    // 3. Semi / Moderate Flags from AI Insight
+    const semiFlags = Array.isArray(app.aiInsight?.semiFlags) ? app.aiInsight.semiFlags : []
+    semiFlags.forEach((item: any) => {
+      flagsFromAi.push({
+        flag: item.title || item.flag || item.category || "Semi Flag Concern",
+        resolutionNotes: item.reason || item.explanation || item.recommendation || "Moderate concern to verify during interview",
+        status: item.status || "PENDING",
+        severity: "SEMI",
+      })
+    })
+
+    // 4. Fallback: Parse basic form flags if AI insight was not generated
+    if (flagsFromAi.length === 0) {
+      const env = app.livingEnvironment || {}
+      const exp = app.petExperience || {}
+      const life = app.householdLifestyle || {}
+
+      if (env.landlordAllowsPets === "NO") {
+        flagsFromAi.push({
+          flag: "Landlord Pet Policy Restriction",
+          resolutionNotes: "Applicant selected that landlord does not allow pets.",
+          status: "PENDING",
+          severity: "HIGH",
+        })
+      }
+      if (life.petAloneTime === "MORE_THAN_8_HOURS") {
+        flagsFromAi.push({
+          flag: "Extended Pet Alone Time",
+          resolutionNotes: "Pet will be alone for more than 8 hours daily.",
+          status: "PENDING",
+          severity: "SEMI",
+        })
+      }
+      if (exp.hasPetExperience === false) {
+        flagsFromAi.push({
+          flag: "First-time Pet Owner",
+          resolutionNotes: "Applicant has no prior pet ownership experience.",
+          status: "PENDING",
+          severity: "SEMI",
+        })
+      }
+    }
+
+    return flagsFromAi
+  }, [chatQuestions, app.aiInsight, app.livingEnvironment, app.petExperience, app.householdLifestyle])
 
   return (
     <div className="flex flex-col w-full h-[calc(100vh-4.5rem)] border rounded-xl overflow-hidden bg-background">
@@ -456,30 +520,51 @@ export function ApplicationChatRoom({
                         </Card>
                       )}
 
-                      {/* Section 3: Live Flag Checklist */}
-                      {isAiAssisted && screeningFlags.length > 0 && !postSummary && (
+                      {/* Section 3: Live Flag Checklist (Both Red Flags and Semi Flags) */}
+                      {screeningFlags.length > 0 && !postSummary && (
                         <Card className="border-border/60 shadow-xs">
                           <CardHeader className="p-4 pb-2 border-b">
-                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                              Live Screening Flags
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                              <span>{isAiAssisted ? "Live Screening Flags" : "Screening Flags to Consider"}</span>
+                              <Badge variant="outline" className="text-[9px] uppercase font-bold text-muted-foreground">
+                                {screeningFlags.length} {screeningFlags.length === 1 ? "Flag" : "Flags"}
+                              </Badge>
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="p-4 space-y-2">
-                            {screeningFlags.map((flag: any, idx: number) => {
-                              const status = flag.status || "PENDING"
+                          <CardContent className="p-4 space-y-3">
+                            {screeningFlags.map((flagItem: any, idx: number) => {
+                              const status = flagItem.status || "PENDING"
+                              const flagText = flagItem.flag || flagItem.title || flagItem.category || flagItem.concern
+                              const notes = flagItem.resolutionNotes || flagItem.reason || flagItem.explanation || flagItem.recommendation || "Awaiting evaluation during interview..."
+                              const isRed = flagItem.severity === "HIGH" || flagItem.severity === "RED"
+
                               return (
-                                <div key={idx} className="flex gap-2 items-start border-b pb-2 last:border-0 last:pb-0">
+                                <div key={idx} className="flex gap-2.5 items-start border-b pb-3 last:border-0 last:pb-0">
                                   {status === "RESOLVED" ? (
                                     <CheckCircle className="size-4 text-emerald-500 shrink-0 mt-0.5" />
                                   ) : status === "PARTIALLY_RESOLVED" ? (
                                     <AlertTriangle className="size-4 text-amber-500 shrink-0 mt-0.5" />
+                                  ) : isRed ? (
+                                    <AlertOctagon className="size-4 text-rose-600 shrink-0 mt-0.5" />
                                   ) : (
-                                    <AlertOctagon className="size-4 text-rose-500 shrink-0 mt-0.5" />
+                                    <AlertTriangle className="size-4 text-amber-600 shrink-0 mt-0.5" />
                                   )}
-                                  <div className="space-y-0.5">
-                                    <span className="font-semibold text-xs text-foreground block leading-tight">{flag.flag}</span>
+                                  <div className="space-y-1 min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-semibold text-xs text-foreground block leading-tight">{flagText}</span>
+                                      {flagItem.severity && (
+                                        <Badge
+                                          className={`text-[8px] px-1.5 py-0 font-bold border-none uppercase tracking-wider ${isRed
+                                              ? "bg-rose-500/15 text-rose-700 dark:text-rose-400"
+                                              : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                                            }`}
+                                        >
+                                          {isRed ? "Red Flag" : "Semi Flag"}
+                                        </Badge>
+                                      )}
+                                    </div>
                                     <span className="text-[10px] text-muted-foreground block leading-normal">
-                                      {flag.resolutionNotes || "Awaiting AI evaluation..."}
+                                      {notes}
                                     </span>
                                   </div>
                                 </div>
@@ -692,11 +777,10 @@ export function ApplicationChatRoom({
                       <span>{new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                     <div
-                      className={`w-fit max-w-full p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-xs ${
-                        isRightAligned
-                          ? "bg-[#09090B] dark:bg-zinc-900 text-white rounded-tr-xs"
-                          : "bg-card border border-border/70 text-foreground rounded-tl-xs"
-                      }`}
+                      className={`w-fit max-w-full p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-xs ${isRightAligned
+                        ? "bg-[#09090B] dark:bg-zinc-900 text-white rounded-tr-xs"
+                        : "bg-card border border-border/70 text-foreground rounded-tl-xs"
+                        }`}
                     >
                       {message.content}
                     </div>

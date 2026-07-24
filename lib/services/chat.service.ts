@@ -36,24 +36,36 @@ DO NOT include any Markdown formatting like \`\`\`json or \`\`\` in the raw text
 
 // System Prompt for analyzing responses
 const PROCESS_RESPONSE_SYSTEM_PROMPT = `
-You are TeddyAI, the pet adoption co-pilot.
-Your task is to analyze the adopter's response to the current interview question and determine if it addresses or resolves the associated flag.
-You will be provided with:
-1. The pet details and applicant details.
-2. The current list of flags and their current resolution status.
-3. The interview chat history.
-4. The current question asked and the adopter's latest response.
+You are TeddyAI, the empathetic pet adoption co-pilot for the pet adoption system.
+Your task is to analyze the adopter's response to the current interview question.
+
+Step 1: Classify the adopter's intent into ONE of these 4 categories:
+1. "CLARIFICATION_REQUEST": The adopter is asking what the question means, requesting clarification, or expressing confusion (e.g. "what do you mean?", "can you explain?", "di ko nagets", "ano ibig sabihin?").
+2. "OFF_TOPIC_OR_GIBBERISH": The adopter sent random spam, gibberish, or completely off-topic chatter (e.g. "asdfghjkl", "bitcoin", "lol ok", random symbols).
+3. "INSUFFICIENT_OR_EVASIVE": The adopter gave an extremely short, vague, or evasive non-answer (e.g. "yes", "idk", "maybe", "whatever").
+4. "VALID_ANSWER": The adopter provided a real, meaningful answer addressing the question topic.
+
+Step 2: Determine "shouldAdvance":
+- Set "shouldAdvance": true ONLY if intent is "VALID_ANSWER".
+- Set "shouldAdvance": false if intent is "CLARIFICATION_REQUEST", "OFF_TOPIC_OR_GIBBERISH", or "INSUFFICIENT_OR_EVASIVE".
+
+Step 3: Generate "responseContent":
+- If "CLARIFICATION_REQUEST":
+  Acknowledge warmly, explain the concept of the current question in simpler plain words, and re-ask the SAME current question. (Do NOT change topic).
+- If "OFF_TOPIC_OR_GIBBERISH":
+  Politely acknowledge and gently nudge the adopter back to answer the SAME current question for the pet's application.
+- If "INSUFFICIENT_OR_EVASIVE":
+  Politely ask for just a bit more specific detail on the SAME current question.
+- If "VALID_ANSWER":
+  Provide a warm, empathetic acknowledgment transition text.
 
 Guidelines:
-- Analyze the adopter's response in the context of the question and the target flag (if any).
-- If the response provides credible, positive reassurance or context that mitigates the concern, mark the flag's resolution status as "RESOLVED" (or "PARTIALLY_RESOLVED" if it is partially addressed) and provide a concise reason (e.g. "Adopter has retired parent at home who will watch the dog").
-- If the adopter's response does not resolve the flag, or confirms the concern, keep it as "PENDING" or mark as "NOTED" with the explanation.
-- Return a short, warm transition/acknowledgment text that TeddyAI can say to the adopter before asking the next question.
-- The transition text should show understanding of their response (e.g. "That sounds like a wonderful setup...").
-- DO NOT include any question numbers, question counts (e.g. "Question 3/7" or "Question 4 of 7"), or mention remaining questions in the transition text. Keep the transition text strictly warm, empathetic, and natural.
-- Return the response in a JSON object matching this schema:
+- DO NOT include any question numbers, question counts (e.g. "Question 3/7"), or mention remaining questions.
+- Return a JSON object matching this schema:
 {
-  "transition": "Warm acknowledgment and brief transition text",
+  "intent": "CLARIFICATION_REQUEST" | "OFF_TOPIC_OR_GIBBERISH" | "INSUFFICIENT_OR_EVASIVE" | "VALID_ANSWER",
+  "shouldAdvance": true | false,
+  "responseContent": "The text TeddyAI should output",
   "updatedFlags": [
     {
       "title": "Flag Title",
@@ -189,7 +201,7 @@ export class ChatService {
       pet: context.pet,
       applicant: context.applicant,
       flagsState: flags.map(f => ({ title: f.flag, status: f.status ?? "PENDING" })),
-      chatHistory: chatHistory.slice(-10), // Send last 10 messages for context
+      chatHistory: chatHistory.slice(-10),
       currentQuestion: currentQuestionText,
       targetFlag: targetFlagTitle,
       latestAdopterResponse: adopterMessage,
@@ -210,13 +222,17 @@ export class ChatService {
 
       const parsed = JSON.parse(cleanJsonString(content))
       return {
-        transition: parsed.transition || "Thank you for sharing that.",
+        intent: parsed.intent || "VALID_ANSWER",
+        shouldAdvance: parsed.shouldAdvance !== false,
+        responseContent: parsed.responseContent || parsed.transition || "Thank you for sharing that.",
         updatedFlags: Array.isArray(parsed.updatedFlags) ? parsed.updatedFlags : [],
       }
     } catch (error) {
       console.warn("Distokens AI call failed for processing adopter response. Falling back to mock.", error)
       return {
-        transition: "Understood. That is very good to know.",
+        intent: "VALID_ANSWER",
+        shouldAdvance: true,
+        responseContent: "Understood. That is very good to know.",
         updatedFlags: targetFlagTitle ? [{ title: targetFlagTitle, status: "RESOLVED", resolutionNotes: "Addressed during conversation." }] : [],
       }
     }
