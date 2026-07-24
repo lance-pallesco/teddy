@@ -20,6 +20,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const application = await prisma.adoptionApplication.findUnique({
     where: { id, deletedAt: null },
     include: {
+      aiInsight: true,
       applicant: {
         select: {
           id: true,

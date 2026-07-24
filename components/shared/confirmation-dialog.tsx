@@ -1,7 +1,7 @@
 "use client"
 
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
-import { AlertTriangleIcon, InfoIcon, ShieldAlertIcon, CheckCircle2Icon } from "lucide-react"
+import { AlertTriangleIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon } from "lucide-react"
 import { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -29,14 +29,13 @@ export function ConfirmationDialog({
   variant = "destructive",
   isLoading = false,
 }: ConfirmationDialogProps) {
-  
-  // Icon selector based on variant
+
   const getIcon = () => {
     switch (variant) {
       case "destructive":
         return <AlertTriangleIcon className="size-6 text-red-600" />
       case "warning":
-        return <ShieldAlertIcon className="size-6 text-amber-600" />
+        return <AlertCircleIcon className="size-6 text-yellow-600" />
       case "success":
         return <CheckCircle2Icon className="size-6 text-emerald-600" />
       case "info":
@@ -45,13 +44,12 @@ export function ConfirmationDialog({
     }
   }
 
-  // Circular background color for the icon
   const getIconBg = () => {
     switch (variant) {
       case "destructive":
         return "bg-red-50 dark:bg-red-950/20"
       case "warning":
-        return "bg-amber-50 dark:bg-amber-950/20"
+        return "bg-yellow-50 dark:bg-yellow-950/20"
       case "success":
         return "bg-emerald-50 dark:bg-emerald-950/20"
       case "info":
@@ -60,13 +58,12 @@ export function ConfirmationDialog({
     }
   }
 
-  // Button background colors
   const getConfirmButtonClasses = () => {
     switch (variant) {
       case "destructive":
         return "bg-red-600 text-white border-transparent hover:bg-red-700 font-semibold shadow-none cursor-pointer"
       case "warning":
-        return "bg-amber-600 text-white border-transparent hover:bg-amber-700 font-semibold shadow-none cursor-pointer"
+        return "bg-yellow-600 text-white border-transparent hover:bg-yellow-700 font-semibold shadow-none cursor-pointer"
       case "success":
         return "bg-emerald-600 text-white border-transparent hover:bg-emerald-700 font-semibold shadow-none cursor-pointer"
       case "info":
@@ -79,12 +76,12 @@ export function ConfirmationDialog({
     <AlertDialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogPrimitive.Portal>
         {/* Overlay */}
-        <AlertDialogPrimitive.Overlay 
+        <AlertDialogPrimitive.Overlay
           className="fixed inset-0 z-50 bg-gray-500/75 backdrop-blur-xs transition-opacity duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0"
         />
-        
+
         {/* Content Box */}
-        <AlertDialogPrimitive.Content 
+        <AlertDialogPrimitive.Content
           className="fixed top-[50%] left-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-xl border bg-white text-gray-900 shadow-xl outline-none duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]"
         >
           {/* Main Card Area */}
@@ -103,8 +100,10 @@ export function ConfirmationDialog({
                 <AlertDialogPrimitive.Title className="text-base font-semibold leading-6 text-gray-900">
                   {title}
                 </AlertDialogPrimitive.Title>
-                <AlertDialogPrimitive.Description className="mt-2 text-sm text-gray-500 leading-normal ">
-                  {description}
+                <AlertDialogPrimitive.Description asChild>
+                  <div className="mt-2 text-sm text-gray-500 leading-normal">
+                    {description}
+                  </div>
                 </AlertDialogPrimitive.Description>
               </div>
             </div>
@@ -125,7 +124,7 @@ export function ConfirmationDialog({
                 {isLoading ? "Please wait..." : confirmText}
               </Button>
             </AlertDialogPrimitive.Action>
-            
+
             <AlertDialogPrimitive.Cancel asChild>
               <Button
                 type="button"

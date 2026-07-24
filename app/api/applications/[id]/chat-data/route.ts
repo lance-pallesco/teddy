@@ -17,6 +17,7 @@ export async function GET(
     const application = await prisma.adoptionApplication.findUnique({
       where: { id: applicationId, deletedAt: null },
       include: {
+        aiInsight: true,
         pet: {
           include: {
             petImages: {

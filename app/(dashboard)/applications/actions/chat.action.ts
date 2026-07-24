@@ -58,7 +58,7 @@ export async function startChatModeAction(
     if (mode === "AI_ASSISTED") {
       // Generate AI questions based on application flags
       generatedQuestions = await chatService.generateInterviewQuestions(applicationId)
-      
+
       // Initialize flags with status "PENDING"
       generatedQuestions = generatedQuestions.map((q) => ({
         ...q,

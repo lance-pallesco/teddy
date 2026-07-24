@@ -191,7 +191,7 @@ export async function getAdopterStats(userId: string) {
 
   return {
     applications: appBreakdown,
-    interviewsScheduled: appBreakdown.UNDER_REVIEW > 0 ? 1 : 0, 
+    interviewsScheduled: appBreakdown.UNDER_REVIEW > 0 ? 1 : 0,
   }
 }
 
