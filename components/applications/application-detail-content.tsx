@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge"
 import { ApplicationTimeline } from "@/components/applications/application-timeline"
+import { PetAppliedForCard } from "@/components/applications/pet-applied-for-card"
 import { ApplicationFormSections } from "@/components/applications/application-form-sections"
 import { PET_SPECIES_LABELS, PET_GENDER_LABELS } from "@/lib/constants/pet"
 import type { PetSpecies, PetGender } from "@prisma/client"
@@ -270,82 +271,7 @@ export function ApplicationDetailContent({
           {/* Right column — Sidebar */}
           <div className="space-y-5 lg:sticky lg:top-6">
             {/* Pet Info Card */}
-            <Card className="overflow-hidden border-primary/15 bg-white">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Pet Applied For
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted">
-                  {primaryImage ? (
-                    <Image
-                      src={primaryImage}
-                      alt={pet.name}
-                      fill
-                      className="object-cover"
-                      sizes="380px"
-                      unoptimized={primaryImage.startsWith("/uploads/")}
-                      priority
-                    />
-                  ) : (
-                    <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
-                      <PawPrintIcon className="size-10 opacity-60" />
-                      <span className="text-xs">No photo</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-xl font-bold tracking-tight">{pet.name}</h3>
-                  <p className="text-sm font-medium text-foreground/80">
-                    {speciesLabel} • {breedLabel}
-                  </p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-muted-foreground">
-                    <span><strong>Gender:</strong> {genderLabel}</span>
-                    <span><strong>Size:</strong> {pet.size.toLowerCase().replace("_", " ")}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 border-t pt-3 text-sm text-foreground/90">
-                  {pet.shelter ? (
-                    <div className="relative size-9 shrink-0 overflow-hidden rounded-full border bg-muted flex items-center justify-center">
-                      {pet.shelter.logo ? (
-                        <Image
-                          src={pet.shelter.logo}
-                          alt={pet.shelter.name}
-                          fill
-                          className="object-cover"
-                          unoptimized={pet.shelter.logo.startsWith("/uploads/")}
-                        />
-                      ) : (
-                        <Building2Icon className="size-4 text-primary" />
-                      )}
-                    </div>
-                  ) : (
-                    <div className="relative size-9 shrink-0 overflow-hidden rounded-full border bg-muted flex items-center justify-center">
-                      {pet.postedBy?.avatar ? (
-                        <Image
-                          src={pet.postedBy.avatar}
-                          alt={attributionLabel}
-                          fill
-                          className="object-cover"
-                          unoptimized={pet.postedBy.avatar.startsWith("/uploads/")}
-                        />
-                      ) : (
-                        <span className="text-xs font-bold text-muted-foreground">
-                          {pet.postedBy ? `${pet.postedBy.firstName.charAt(0)}${pet.postedBy.lastName.charAt(0)}`.toUpperCase() : <User2Icon className="size-4 text-primary" />}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{attributionLabel}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {pet.shelter ? `${pet.shelter.city}, ${pet.shelter.province}` : "Individual Foster"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PetAppliedForCard pet={pet} />
 
             {/* Applicant Info Card (for reviewers) */}
             {isReviewer ? (

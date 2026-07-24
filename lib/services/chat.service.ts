@@ -50,6 +50,7 @@ Guidelines:
 - If the adopter's response does not resolve the flag, or confirms the concern, keep it as "PENDING" or mark as "NOTED" with the explanation.
 - Return a short, warm transition/acknowledgment text that TeddyAI can say to the adopter before asking the next question.
 - The transition text should show understanding of their response (e.g. "That sounds like a wonderful setup...").
+- DO NOT include any question numbers, question counts (e.g. "Question 3/7" or "Question 4 of 7"), or mention remaining questions in the transition text. Keep the transition text strictly warm, empathetic, and natural.
 - Return the response in a JSON object matching this schema:
 {
   "transition": "Warm acknowledgment and brief transition text",

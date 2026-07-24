@@ -18,11 +18,27 @@ export async function GET(
       where: { id: applicationId, deletedAt: null },
       include: {
         pet: {
-          select: {
-            id: true,
-            name: true,
-            shelterId: true,
-            postedById: true,
+          include: {
+            petImages: {
+              orderBy: { isPrimary: "desc" },
+            },
+            shelter: {
+              select: {
+                id: true,
+                name: true,
+                city: true,
+                province: true,
+                logo: true,
+              },
+            },
+            postedBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
           },
         },
       },
